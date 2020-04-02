@@ -52,7 +52,7 @@ class Parser:
     def p_program(self, p):
         """ program : global_declaration_list
         """
-        p[0] = p[1]
+        p[0] = ('PROGRAM', p[1])
 
     def p_global_declaration_list(self, p):
         """ global_declaration_list : global_declaration
@@ -78,7 +78,7 @@ class Parser:
         """ declaration_list : declaration
                              | declaration_list declaration
         """
-        pass
+        pass 
 
     def p_declaration_list_opt(self, p):
         """ declaration_list_opt : declaration_list
@@ -103,22 +103,23 @@ class Parser:
 
     def p_declarator(self, p):
         """ declarator : pointer_opt direct_declarator
-                       | direct_declarator
         """
         pass
 
     def p_pointer_opt(self, p):
-        """ pointer_opt : pointer
-                        | empty
-        """
+        '''
+            pointer_opt : TIMES pointer
+                        | TIMES empty           
+        '''
         pass
+
 
     def p_pointer(self, p):
-        """ pointer : TIMES pointer
-                    |  TIMES empty
+        '''
+            pointer : pointer_opt  
+        '''
+        pass 
 
-        """
-        pass
 
     def p_direct_declarator(self, p):
         """ direct_declarator : identifier
@@ -380,7 +381,7 @@ class Parser:
     def p_empty(self, p):
         """ empty :
         """
-        pass
+        p[0] = None
 
     def p_error(self, p):
         if p:
@@ -394,3 +395,14 @@ class Parser:
     def find_column(self, token):
         line_start = self._input.rfind('\n', 0, token.lexpos) + 1
         return (token.lexpos - line_start) + 1
+
+
+    precedence = (
+        ('left', 'OR', 'AND'),
+        ('left','EQ', 'NE', 'GT', 'GE', 'LT', 'LE'),
+        ('left', 'PLUSPLUS', 'MINUSMINUS'),
+        ('left', 'PLUS', 'MINUS'),
+        ('left', 'TIMES', 'DIVIDE', 'MOD')
+
+    )
+
