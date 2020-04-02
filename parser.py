@@ -70,7 +70,8 @@ class Parser:
         p[0] = p[1]
 
     def p_function_definition(self, p):
-        """ function_definition : type_specifier_opt declarator declaration_list_opt compound_statement
+        """ function_definition : type_specifier declarator declaration_list_opt compound_statement
+                                | declarator declaration_list_opt compound_statement
         """
         p[0] = ('FUNC_DEF', p[1], p[2], p[3], p[4])
 
@@ -86,11 +87,6 @@ class Parser:
         """
         pass
 
-    def p_type_specifier_opt(self, p):
-        """ type_specifier_opt : type_specifier
-                               | empty
-        """
-        pass
 
     def p_type_specifier(self, p):
         """ type_specifier : VOID
