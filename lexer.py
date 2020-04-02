@@ -83,6 +83,9 @@ class Lexer:
 
         raise StopIteration
 
+    def reset(self):
+        self._lexer = lex.lex(module=self._module, debug=self._debug)
+
     def input(self, input=None):
         if input:
             self._input = input

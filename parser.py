@@ -42,6 +42,7 @@ class Parser:
 
     def execute(self):
         if self._parser and self._input:
+            self._lexer.reset()
             self._parser.parse(self._input)
 
     def parse(self, input):
