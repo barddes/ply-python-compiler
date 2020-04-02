@@ -107,16 +107,14 @@ class Parser:
         pass
 
     def p_pointer_opt(self, p):
-        '''
-            pointer_opt : TIMES pointer
+        ''' pointer_opt : TIMES pointer
                         | TIMES empty           
         '''
         pass
 
 
     def p_pointer(self, p):
-        '''
-            pointer : pointer_opt  
+        ''' pointer : pointer_opt  
         '''
         pass 
 
@@ -398,6 +396,7 @@ class Parser:
 
 
     precedence = (
+        ('left', 'EQUALS'),
         ('left', 'OR', 'AND'),
         ('left','EQ', 'NE', 'GT', 'GE', 'LT', 'LE'),
         ('left', 'PLUSPLUS', 'MINUSMINUS'),
