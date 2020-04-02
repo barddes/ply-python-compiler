@@ -22,6 +22,7 @@ class Lexer:
         'break': 'BREAK',
         'assert': 'ASSERT',
         'print': 'PRINT',
+        'return': 'RETURN',
         'read': 'READ'
     }
 
@@ -153,5 +154,13 @@ class Lexer:
         t.lexer.skip(1)
 
     def t_error(self, t):
-        print("Illegal character '%s'" % t.value[0])
+        print("Illegal character '%s' at line %d column %d" % (t.value[0], t.lineno, self.find_column(t)))
         t.lexer.skip(1)
+
+    # Compute column.
+    #     input is the input text string
+    #     token is a token instance
+    def find_column(self, token):
+        line_start = self._input.rfind('\n', 0, token.lexpos) + 1
+        return (token.lexpos - line_start) + 1
+

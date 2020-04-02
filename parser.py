@@ -1,9 +1,11 @@
 import ply.yacc as yacc
 
+from lexer import Lexer
+
 
 class Parser:
-    def __init__(self, lexer, module=None, input=None, debug=None):
-        self._lexer = lexer
+    def __init__(self, lexer=None, module=None, input=None, debug=None):
+        self._lexer = lexer if lexer else Lexer()
         self.tokens = self._lexer.tokens
         self._module = module if module else self
         self._input = input
@@ -66,7 +68,6 @@ class Parser:
         """
         p[0] = p[1]
 
-    # <function_definition> ::= {<type_specifier>}? <declarator> {<declaration>}* <compound_statement>
     def p_function_definition(self, p):
         """ function_definition : type_specifier_opt declarator declaration_list_opt compound_statement
         """
@@ -90,10 +91,6 @@ class Parser:
         """
         pass
 
-    # <type_specifier> ::= void
-    #                    | char
-    #                    | int
-    #                    | float
     def p_type_specifier(self, p):
         """ type_specifier : VOID
                            | CHAR
@@ -102,7 +99,7 @@ class Parser:
         """
         pass
 
-    # <declarator> ::= {<pointer>}? <direct_declarator>
+
     def p_declarator(self, p):
         """ declarator : pointer_opt direct_declarator
                        | direct_declarator
@@ -115,8 +112,6 @@ class Parser:
         """
         pass
 
-    # [Yuji] fiz dessa maneira para evitar recursão infinita com o de cima
-    # <pointer> ::= * {<pointer>}?
     def p_pointer(self, p):
         """ pointer : TIMES pointer
                     |  TIMES empty
@@ -124,11 +119,6 @@ class Parser:
         """
         pass
 
-    # <direct_declarator> ::= <identifier>
-    #                       | ( <declarator> )
-    #                       | <direct_declarator> [ {<constant_expression>}? ]
-    #                       | <direct_declarator> ( <parameter_list> )
-    #                       | <direct_declarator> ( {<identifier>}* )
     def p_direct_declarator(self, p):
         """ direct_declarator : identifier
                               | LPAREN declarator RPAREN
@@ -161,26 +151,11 @@ class Parser:
         """
         pass
 
-    # <constant_expression> ::= <binary_expression>
     def p_constant_expression(self, p):
         """ constant_expression : binary_expression
         """
         pass
 
-    # <binary_expression> ::= <cast_expression>
-    #                       | <binary_expression>  *   <binary_expression>
-    #                       | <binary_expression>  /   <binary_expression>
-    #                       | <binary_expression>  %   <binary_expression>
-    #                       | <binary_expression>  +   <binary_expression>
-    #                       | <binary_expression>  -   <binary_expression>
-    #                       | <binary_expression>  <   <binary_expression>
-    #                       | <binary_expression>  <=  <binary_expression>
-    #                       | <binary_expression>  >   <binary_expression>
-    #                       | <binary_expression>  >=  <binary_expression>
-    #                       | <binary_expression>  ==  <binary_expression>
-    #                       | <binary_expression>  !=  <binary_expression>
-    #                       | <binary_expression>  &&  <binary_expression>
-    #                       | <binary_expression>  ||  <binary_expression>
     def p_binary_expression(self, p):
         """ binary_expression : cast_expression
                               | binary_expression TIMES binary_expression
@@ -199,18 +174,12 @@ class Parser:
         """
         pass
 
-    # <cast_expression> ::= <unary_expression>
-    #                     | ( <type_specifier> ) <cast_expression>
     def p_cast_expression(self, p):
         """ cast_expression : unary_expression
                             | LPAREN type_specifier RPAREN cast_expression
         """
         pass
 
-    # <unary_expression> ::= <postfix_expression>
-    #                      | ++ <unary_expression>
-    #                      | -- <unary_expression>
-    #                      | <unary_operator> <cast_expression>
     def p_unary_expression(self, p):
         """ unary_expression : postfix_expression
                              | PLUSPLUS unary_expression
@@ -219,11 +188,6 @@ class Parser:
         """
         pass
 
-    # <postfix_expression> ::= <primary_expression>
-    #                        | <postfix_expression> [ <expression> ]
-    #                        | <postfix_expression> ( {<argument_expression>}? )
-    #                        | <postfix_expression> ++
-    #                        | <postfix_expression> --
     def p_postfix_expression(self, p):
         """ postfix_expression : primary_expression
                                | postfix_expression LBRACKET expression RBRACKET
@@ -240,11 +204,6 @@ class Parser:
         """
         pass
 
-    # [Yuji] Esse string deveria ser o que? O SCONST?
-    # <primary_expression> ::= <identifier>
-    #                        | <constant>
-    #                        | <string>
-    #                        | ( <expression> )
     def p_primary_expression(self, p):
         """ primary_expression : identifier
                                | constant
@@ -253,9 +212,6 @@ class Parser:
         """
         pass
 
-    # <constant> ::= <integer_constant>
-    #              | <character_constant>
-    #              | <floating_constant>
     def p_constant(self, p):
         """ constant : INT_CONST
                      | CHAR_CONST
@@ -263,36 +219,24 @@ class Parser:
         """
         pass
 
-    # <expression> ::= <assignment_expression>
-    #                | <expression> , <assignment_expression>
     def p_expression(self, p):
         """ expression : assignment_expression
                        | expression COMMA assignment_expression
         """
         pass
 
-    # <argument_expression> ::= <assignment_expression>
-    #                         | <argument_expression> , <assignment_expression>
     def p_argument_expression(self, p):
         """ argument_expression : assignment_expression
                                 | argument_expression COMMA assignment_expression
         """
         pass
 
-    # <assignment_expression> ::= <binary_expression>
-    #                           | <unary_expression> <assignment_operator> <assignment_expression>
     def p_assignment_expression(self, p):
         """ assignment_expression : binary_expression
                                   | unary_expression assignment_operator assignment_expression
         """
         pass
 
-    # <assignment_operator> ::= =
-    #                         | *=
-    #                         | /=
-    #                         | %=
-    #                         | +=
-    #                         | -=
     def p_assignment_operator(self, p):
         """ assignment_operator : EQUALS
                                 | TIMESEQUALS
@@ -303,11 +247,6 @@ class Parser:
         """
         pass
 
-    # <unary_operator> ::= &
-    #                    | *
-    #                    | +
-    #                    | -
-    #                    | !
     def p_unary_operator(self, p):
         """ unary_operator : ADDRESS
                            | TIMES
@@ -317,21 +256,17 @@ class Parser:
         """
         pass
 
-    # <parameter_list> ::= <parameter_declaration>
-    #                    | <parameter_list> , <parameter_declaration>
     def p_parameter_list(self, p):
         """ parameter_list : parameter_declaration
                            | parameter_list COMMA parameter_declaration
         """
         pass
 
-    # <parameter_declaration> ::= <type_specifier> <declarator>
     def p_parameter_declaration(self, p):
         """ parameter_declaration : type_specifier declarator
         """
         pass
 
-    # <declaration> ::=  <type_specifier> {<init_declarator_list>}? ;
     def p_declaration(self, p):
         """ declaration : type_specifier init_declarator_list_opt SEMI
         """
@@ -343,25 +278,18 @@ class Parser:
         """
         pass
 
-    # <init_declarator_list> ::= <init_declarator>
-    #                          | <init_declarator_list> , <init_declarator>
     def p_init_declarator_list(self, p):
         """ init_declarator_list : init_declarator
                                  | init_declarator_list COMMA init_declarator
         """
         pass
 
-    # <init_declarator> ::= <declarator>
-    #                     | <declarator> = <initializer>
     def p_init_declarator(self, p):
         """ init_declarator : declarator
                             | declarator EQUALS initializer
         """
         pass
 
-    # <initializer> ::= <assignment_expression>
-    #                 | { <initializer_list> }
-    #                 | { <initializer_list> , }
     def p_initializer(self, p):
         """ initializer : assignment_expression
                         | LBRACE initializer_list RBRACE
@@ -369,15 +297,12 @@ class Parser:
         """
         pass
 
-    # <initializer_list> ::= <initializer>
-    #                      | <initializer_list> , <initializer>
     def p_initializer_list(self, p):
         """ initializer_list : initializer
                              | initializer_list COMMA initializer
         """
         pass
 
-    # <compound_statement> ::= { {<declaration>}* {<statement>}* }
     def p_compound_statement(self, p):
         """ compound_statement : LBRACE declaration_list_opt statement_list_opt RBRACE
         """
@@ -395,14 +320,6 @@ class Parser:
         """
         pass
 
-    # <statement> ::= <expression_statement>
-    #               | <compound_statement>
-    #               | <selection_statement>
-    #               | <iteration_statement>
-    #               | <jump_statement>
-    #               | <assert_statement>
-    #               | <print_statement>
-    #               | <read_statement>
     def p_statement(self, p):
         """ statement : expression_statement
                       | compound_statement
@@ -415,7 +332,6 @@ class Parser:
         """
         pass
 
-    # <expression_statement> ::= {<expression>}? ;
     def p_expression_statement(self, p):
         """ expression_statement : expression_opt SEMI
         """
@@ -427,49 +343,39 @@ class Parser:
         """
         pass
 
-    # <selection_statement> ::= if ( <expression> ) <statement>
-    #                         | if ( <expression> ) <statement> else <statement>
     def p_selection_statement(self, p):
         """ selection_statement : IF LPAREN expression RPAREN statement
                                 | IF LPAREN expression RPAREN statement ELSE statement
         """
         pass
 
-    # <iteration_statement> ::= while ( <expression> ) <statement>
-    #                         | for ( {<expression>}? ; {<expression>}? ; {<expression>}? ) <statement>
     def p_iteration_statement(self, p):
         """ iteration_statement : WHILE LPAREN expression RPAREN statement
                                 | FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement
         """
         pass
 
-    # <jump_statement> ::= break ;
-    #                    | return {<expression>}? ;
     def p_jump_statement(self, p):
         """ jump_statement : BREAK SEMI
                            | RETURN expression_opt SEMI
         """
         pass
 
-    # <assert_statement> ::= assert <expression> ;
     def p_assert_statement(self, p):
         """ assert_statement : ASSERT expression SEMI
         """
         pass
 
-    # <print_statement> ::= print ( {<expression>}? ) ;
     def p_print_statement(self, p):
         """ print_statement : PRINT LPAREN expression_opt RPAREN SEMI
         """
         pass
 
-    # <read_statement> ::= read ( <argument_expression> );
     def p_read_statement(self, p):
         """ read_statement : READ LPAREN argument_expression RPAREN SEMI
         """
         pass
 
-    # empty
     def p_empty(self, p):
         """ empty :
         """
@@ -477,6 +383,13 @@ class Parser:
 
     def p_error(self, p):
         if p:
-            print("Syntax error! Token %s: '%s' at line %d" % (p.type, p.value, p.lineno))
+            print("Syntax error! Token %s: '%s' at line %d column %d" % (p.type, p.value, p.lineno, self.find_column(p)))
         else:
             print("Syntax error at EOF!")
+
+    # Compute column.
+    #     input is the input text string
+    #     token is a token instance
+    def find_column(self, token):
+        line_start = self._input.rfind('\n', 0, token.lexpos) + 1
+        return (token.lexpos - line_start) + 1
