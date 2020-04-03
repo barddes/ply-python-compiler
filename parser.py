@@ -344,12 +344,16 @@ class Parser:
                                 | IF LPAREN expression RPAREN statement ELSE statement
         """
         pass
-
+    
+    #Adicionei a terceira regra, esta diferente do enunciado do prof, acho que ele está errado.
     def p_iteration_statement(self, p):
         """ iteration_statement : WHILE LPAREN expression RPAREN statement
                                 | FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement
+                                | FOR LPAREN declaration SEMI expression_opt SEMI expression_opt RPAREN statement
         """
         pass
+
+
 
     def p_jump_statement(self, p):
         """ jump_statement : BREAK SEMI
@@ -361,6 +365,8 @@ class Parser:
         """ assert_statement : ASSERT expression SEMI
         """
         pass
+
+
 
     def p_print_statement(self, p):
         """ print_statement : PRINT LPAREN expression_opt RPAREN SEMI
