@@ -15,6 +15,7 @@ class Parser:
         if self._input:
             self.execute()
 
+
     def input(self, input=None):
         if input:
             self._input = input
@@ -22,6 +23,7 @@ class Parser:
             return self
         else:
             return self._input
+
 
     def module(self, module=None):
         if module:
@@ -32,6 +34,7 @@ class Parser:
         else:
             return self._input
 
+
     def debug(self, debug=None):
         if debug:
             self._debug = debug
@@ -40,19 +43,23 @@ class Parser:
         else:
             return self._debug
 
+
     def execute(self):
         if self._parser and self._input:
             self._lexer.reset()
             self._parser.parse(self._input)
 
+
     def parse(self, input):
         self._input = input
         self.execute()
+
 
     def p_program(self, p):
         """ program : global_declaration_list
         """
         p[0] = ('PROGRAM', p[1])
+
 
     def p_global_declaration_list(self, p):
         """ global_declaration_list : global_declaration
@@ -63,29 +70,44 @@ class Parser:
         else:
             p[0] = p[1] + [p[2]]
 
+
     def p_global_declaration(self, p):
         """ global_declaration : function_definition
                                | declaration
         """
-        p[0] = p[1]
+        p[0] = ('GLOBAL_DEC', p[1])
+
 
     def p_function_definition(self, p):
         """ function_definition : type_specifier declarator declaration_list_opt compound_statement
                                 | declarator declaration_list_opt compound_statement
         """
-        p[0] = ('FUNC_DEF', p[1], p[2], p[3], p[4])
+        # [Yuji] não confio na corretude disso
+        if len(p) == 5:
+            p[0] = ('FUNC_DEF', p[1], p[2], p[3], p[4])
+        elif len(p) == 6:
+            p[0] = ('FUNC_DEF', p[1], p[2], p[3])
+
 
     def p_declaration_list(self, p):
         """ declaration_list : declaration
                              | declaration_list declaration
         """
-        pass 
+        if len(p) == 2:
+            p[0] = p[1]
+        elif len(p) == 3:
+            p[0] = p[1] + [p[2]]
+
 
     def p_declaration_list_opt(self, p):
         """ declaration_list_opt : declaration_list
                                  | empty
         """
-        pass
+        if len(p) == 2:
+            p[0] = p[1]
+        elif len(p) == 1:
+            p[0] = p[1]
+        
 
 
     def p_type_specifier(self, p):
@@ -94,25 +116,24 @@ class Parser:
                            | INT
                            | FLOAT
         """
-        pass
-
+        p[0] = ('TYPE', p[1])
 
     def p_declarator(self, p):
         """ declarator : pointer_opt direct_declarator
         """
-        pass
+        p[0] = ('DECLARATOR', p[1] , p[2])
 
     def p_pointer_opt(self, p):
         ''' pointer_opt : TIMES pointer
                         | TIMES empty           
         '''
-        pass
+        p[0] = ('POINTER', p[2])
 
 
     def p_pointer(self, p):
         ''' pointer : pointer_opt  
         '''
-        pass 
+        p[0] = p[1]
 
 
     def p_direct_declarator(self, p):
@@ -122,35 +143,46 @@ class Parser:
                               | direct_declarator LPAREN parameter_list RPAREN
                               | direct_declarator LPAREN identifier_list_opt RPAREN
         """
-        pass
+        if len(p) == 2:
+            p[0] = p[1]
+        if len(p) == 4:
+            p[0] = p[2]
+        elif len(p) == 5:
+            p[0] = (p[1], p[3])
 
+     
     def p_identifier(self, p):
         """ identifier : ID
         """
-        pass
+        p[0] = ('ID', p[1])
 
     def p_constant_expression_opt(self, p):
         """ constant_expression_opt : constant_expression
                                     | empty
         """
-        pass
+        p[0] = p[1]
+    
 
     def p_identifier_list(self, p):
         """ identifier_list : identifier
                             | identifier_list identifier
         """
-        pass
+        if len(p) == 2:
+            p[0] = p[1]
+        elif len(p) == 3:
+            p[0] = p[1] + [p[2]]
+        
 
     def p_identifier_list_opt(self, p):
         """ identifier_list_opt : identifier_list
                                 | empty
         """
-        pass
+        p[0] = p[1]
 
     def p_constant_expression(self, p):
         """ constant_expression : binary_expression
         """
-        pass
+        p[0] = p[1]
 
     def p_binary_expression(self, p):
         """ binary_expression : cast_expression
@@ -168,13 +200,20 @@ class Parser:
                               | binary_expression AND binary_expression
                               | binary_expression OR binary_expression
         """
-        pass
+        if len(p) == 2:
+            p[0] = p[1]
+        elif len(p) == 3:
+            p[0] = (p[2], p[1], p[3])
 
     def p_cast_expression(self, p):
         """ cast_expression : unary_expression
                             | LPAREN type_specifier RPAREN cast_expression
         """
-        pass
+        if len(p) == 2: 
+            p[0] = ('CAST_EXP', p[1])
+        elif len(p) == 5:
+            p[0] = ('CAST_EXP', p[2], p[4])
+            
 
     def p_unary_expression(self, p):
         """ unary_expression : postfix_expression
@@ -182,7 +221,10 @@ class Parser:
                              | MINUSMINUS unary_expression
                              | unary_operator cast_expression
         """
-        pass
+        if len(p) == 2: 
+            p[0] = p[1]
+        elif len(p) == 3:
+            p[0] = (p[1], p[2])
 
     def p_postfix_expression(self, p):
         """ postfix_expression : primary_expression
@@ -191,14 +233,18 @@ class Parser:
                                | postfix_expression PLUSPLUS
                                | postfix_expression MINUSMINUS
         """
-
-        pass
+        if len(p) == 2: 
+            p[0] = p[1]
+        elif len(p) == 5:
+            p[0] = (p[1], p[3])
+        elif len(p) == 3:
+            p[0] = (p[2], p[1])
 
     def p_argument_expression_opt(self, p):
         """ argument_expression_opt : argument_expression
                                     | empty
         """
-        pass
+        p[0] = p[1]
 
     def p_primary_expression(self, p):
         """ primary_expression : identifier
@@ -206,8 +252,9 @@ class Parser:
                                | SCONST
                                | LPAREN expression RPAREN
         """
-        pass
+        
 
+        
     def p_constant(self, p):
         """ constant : INT_CONST
                      | CHAR_CONST
