@@ -137,13 +137,16 @@ class Parser:
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = ('DECLARATOR', p[1], p[2])
+            p[0] = PtrDecl(p[1], p[2])
 
     def p_pointer_opt(self, p):
         """ pointer_opt : TIMES pointer
                         | TIMES empty
         """
-        p[0] = ('POINTER', p[2])
+        if p[2]:
+            p[0] = ('*', p[2][1] + 1)
+        else:
+            p[0] = ('*', 1)
 
     def p_pointer(self, p):
         """ pointer : pointer_opt
@@ -168,7 +171,7 @@ class Parser:
     def p_identifier(self, p):
         """ identifier : ID
         """
-        p[0] = Id(p[1])
+        p[0] = Id(name=p[1])
 
     def p_constant_expression_opt(self, p):
         """ constant_expression_opt : constant_expression
@@ -263,7 +266,10 @@ class Parser:
                                | constant
                                | LPAREN expression RPAREN
         """
-        p[0] = ('TEM QUE FAZER AINDA', 123, 321)
+        if len(p) == 2:
+            p[0] = p[1]
+        else:
+            p[0] = p[2]
 
     # Ok
     def p_constant(self, p):
@@ -355,22 +361,28 @@ class Parser:
                             | declarator EQUALS initializer
         """
         if len(p) == 2:
-            p[0] = ('INIT_DECL', p[1], None)
+            p[0] = VarDecl(p[1])
         else:
-            p[0] = ('INIT_DECL', p[1], p[2])
+            p[0] = VarDecl(p[1], p[3])
 
     def p_initializer(self, p):
         """ initializer : assignment_expression
                         | LBRACE initializer_list RBRACE
                         | LBRACE initializer_list COMMA RBRACE
         """
-        p[0] = ('TEM QUE FAZER AINDA', 123, 321)
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[2]
 
     def p_initializer_list(self, p):
         """ initializer_list : initializer
                              | initializer_list COMMA initializer
         """
-        p[0] = ('TEM QUE FAZER AINDA', 123, 321)
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[1] + [p[3]]
 
     # Ok
     def p_compound_statement(self, p):
@@ -427,10 +439,12 @@ class Parser:
     def p_iteration_statement(self, p):
         """ iteration_statement : WHILE LPAREN expression RPAREN statement
                                 | FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement
-                                | FOR LPAREN declaration SEMI expression_opt SEMI expression_opt RPAREN statement
+                                | FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement
         """
         if len(p) == 6:
             p[0] = While(expr=p[2], statement=p[5])
+        elif len(p) == 9:
+            p[0] = For(p1=p[3], p2=p[4], p3=p[6], statement=p[8])
         else:
             p[0] = For(p1=p[3], p2=p[5], p3=p[7], statement=p[9])
 

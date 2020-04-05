@@ -38,7 +38,16 @@ class NodeVisitor(object):
         """ Visit a node.
         """
 
-        return self.generic_visit(node, depth)
+        if self._method_cache is None:
+            self._method_cache = {}
+
+        visitor = self._method_cache.get(node.__class__.__name__, None)
+        if visitor is None:
+            method = 'visit_' + node.__class__.__name__
+            visitor = getattr(self, method, self.generic_visit)
+            self._method_cache[node.__class__.__name__] = visitor
+
+        return visitor(node, depth)
 
     def generic_visit(self, node, depth):
         """ Called if no explicit visitor function exists for a
@@ -47,7 +56,8 @@ class NodeVisitor(object):
         tabs = "".join(['\t' for _ in range(depth)])
 
         try:
-            print(tabs + str(node))
+            if type(node) not in (tuple, list):
+                print(tabs + str(node))
             for c in node:
                 self.visit(c, depth + 1)
         except Exception as _:
