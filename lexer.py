@@ -57,7 +57,7 @@ class Lexer:
     t_RBRACKET = r'\]'
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
-    t_SCONST = r'"[^"]*"'
+    t_SCONST = r'"[^\n"]*"'
     t_COMMA = r','
     t_EXMARK = r'!'
     t_ignore = ' \t'
@@ -82,6 +82,9 @@ class Lexer:
             return token
 
         raise StopIteration
+
+    def ply_lexer(self):
+        return self._lexer
 
     def reset(self):
         self._lexer = lex.lex(module=self._module, debug=self._debug)
@@ -146,7 +149,7 @@ class Lexer:
         t.lexer.lineno += len(t.value)
 
     def t_unfinishedstring(self, t):
-        r""""[^\n"]*"""
+        r'"[^"]*?\n'
         print(str(t.lexer.lineno) + ": Unterminated string")
         t.lexer.lineno += 1
         t.lexer.skip(1)

@@ -14,7 +14,7 @@ for tok in lexer:
 print()
 
 # Build the parser
-parser = Parser(debug=False)
+parser = Parser(lexer=lexer, debug=False)
 result = parser.parse(source)
 print(result)
 
