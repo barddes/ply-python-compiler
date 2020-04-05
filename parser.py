@@ -1,6 +1,8 @@
 import ply.yacc as yacc
 
 from lexer import Lexer
+from node_visitor import NodeVisitor
+from objects import *
 
 
 class Parser:
@@ -58,13 +60,16 @@ class Parser:
         self._input = input
         self.execute()
 
+    # Ok
     def p_program(self, p):
         """ program : global_declaration_list
         """
-        p[0] = ('PROGRAM', p[1])
+        p[0] = Program(p[1])
 
-        # self.print_object(p[0], 0)
+        node_visitor = NodeVisitor()
+        node_visitor.visit(p[0])
 
+    # Ok
     def p_global_declaration_list(self, p):
         """ global_declaration_list : global_declaration
                                     | global_declaration_list global_declaration
@@ -78,7 +83,7 @@ class Parser:
         """ global_declaration : function_definition
                                | declaration
         """
-        p[0] = ('GLOBAL_DEC', p[1])
+        p[0] = GlobalDecl()
 
     def p_function_definition(self, p):
         """ function_definition : type_specifier declarator declaration_list_opt compound_statement
