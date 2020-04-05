@@ -22,7 +22,6 @@ class Lexer:
         'break': 'BREAK',
         'assert': 'ASSERT',
         'print': 'PRINT',
-        'return': 'RETURN',
         'read': 'READ'
     }
 
