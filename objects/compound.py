@@ -1,7 +1,7 @@
 from objects.node import Node
 
 
-class BinaryOp(Node):
+class Compound(Node):
     __slots__ = ('op', 'lvalue', 'rvalue', 'coord')
 
     def __init__(self, op, left, right, coord=None):
