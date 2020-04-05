@@ -34,29 +34,21 @@ class NodeVisitor(object):
 
     _method_cache = None
 
-    def visit(self, node):
+    def visit(self, node, depth):
         """ Visit a node.
         """
 
-        if self._method_cache is None:
-            self._method_cache = {}
+        return self.generic_visit(node, depth)
 
-        visitor = self._method_cache.get(node.__class__.__name__, None)
-        if visitor is None:
-            method = 'visit_' + node.__class__.__name__
-            visitor = getattr(self, method, self.generic_visit)
-            self._method_cache[node.__class__.__name__] = visitor
-
-        return visitor(node)
-
-    def generic_visit(self, node):
+    def generic_visit(self, node, depth):
         """ Called if no explicit visitor function exists for a
             node. Implements preorder visiting of the node.
         """
-        print("FALTA IMPLEMENTAR " + node.__class__.__name__)
-        for c in node:
-            self.visit(c)
+        tabs = "".join(['\t' for _ in range(depth)])
 
-    def visit_Program(self, node):
-        for i in node.children():
-            self.visit(i)
+        try:
+            print(tabs + str(node))
+            for c in node:
+                self.visit(c, depth + 1)
+        except Exception as _:
+            print(tabs + "FALTA IMPLEMENTAR " + node.__class__.__name__)
