@@ -479,11 +479,10 @@ class Parser:
 
     def print_tuple(self, tuple, depth):
         identation = self.identation_str(depth)
-        p0 = tuple[0]
 
-        print(identation + '( ' + p0)
-        for e in tuple:
-            if e == p0:
+        print(identation + '( ' + tuple[0])
+        for i, e in enumerate(tuple):
+            if i == 0:
                 continue
             self.print_object(e, depth + 1)
         print(identation + ')')
@@ -492,7 +491,7 @@ class Parser:
         if not depth:
             depth = 0
         str = ''
-        for i in range(depth):
+        for _ in range(depth):
             str += '\t'
         return str
 
