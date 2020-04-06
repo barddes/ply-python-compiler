@@ -471,3 +471,98 @@ class While(Node):
         return self.expr, self.statement
 
     attr_names = ('expr', 'statement')
+
+
+#Yuji fez, revisar!
+class BinaryOP(Node):
+    __slots__ = ('op', 'expr1', 'expr2')
+
+    def __init__(self, op, expr1, expr2, coord=None):
+        self.op = op
+        self.expr1 = expr1
+        self.expr2 = expr2
+        self.coord = coord
+
+    def __iter__(self):
+        return iter([self.op, self.expr1, self.expr2])
+
+    def __next__(self):
+        yield self.op
+        yield self.expr1
+        yield self.expr2
+        raise StopIteration
+
+    def __str__(self):
+        return "BinaryOP: %s" % self.op
+
+    attr_names = ('op', 'expr1', 'expr2')
+
+
+#Yuji fez, revisar!
+class UnaryOP(Node):
+    __slots__ = ('op', 'expr1')
+
+    def __init__(self, op, expr1, expr2, coord=None):
+        self.op = op
+        self.expr1 = expr1
+        self.coord = coord
+
+    def __iter__(self):
+        return iter([self.op, self.expr1, self.expr2])
+
+    def __next__(self):
+        yield self.op
+        yield self.expr1
+        raise StopIteration
+
+    def __str__(self):
+        return "UnaryOP: %s" % self.op
+
+    attr_names = ('op', 'expr1')
+
+#Yuji fez, revisar!
+class UnaryOP_postfix(Node):
+    __slots__ = ('op', 'expr1')
+
+    def __init__(self, op, expr1, expr2, coord=None):
+        self.op = op
+        self.expr1 = expr1
+        self.coord = coord
+
+    def __iter__(self):
+        return iter([self.op, self.expr1, self.expr2])
+
+    def __next__(self):
+        yield self.op
+        yield self.expr1
+        raise StopIteration
+
+    def __str__(self):
+        return "UnaryOP: p%s" % self.op
+
+    attr_names = ('op', 'expr1')
+
+
+
+
+#Yuji fez, revisar! Talvez tenha errado no __iter__ e no __next__
+class Assignment(Node):
+    __slots__ = ('op')
+
+    def __init__(self, op, coord=None):
+        self.op = op
+
+
+    def __iter__(self):
+        return iter([])
+
+    def __next__(self):
+        raise StopIteration
+
+    def __str__(self):
+        return "Assignment: %s" % self.op
+
+    attr_names = ('op')
+
+
+

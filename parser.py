@@ -218,7 +218,7 @@ class Parser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3:
-            p[0] = (p[2], p[1], p[3])
+            p[0] = BinaryOP(p[2], p[1], p[3])
 
     # Ok
     def p_cast_expression(self, p):
@@ -230,6 +230,8 @@ class Parser:
         elif len(p) == 5:
             p[0] = Cast(type=p[2], expr=p[4])
 
+    #Yuji fez, verificar! Aqui acho que pode estar errado no unary_operator (4º caso), não sei 
+    #vai puxar o operador corretamente.
     def p_unary_expression(self, p):
         """ unary_expression : postfix_expression
                              | PLUSPLUS unary_expression
@@ -239,8 +241,10 @@ class Parser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3:
-            p[0] = (p[1], p[2])
+            p[0] = UnaryOP(p[1], p[2])
 
+
+    #Yuji fez, verificar!
     def p_postfix_expression(self, p):
         """ postfix_expression : primary_expression
                                | postfix_expression LBRACKET expression RBRACKET
@@ -253,7 +257,7 @@ class Parser:
         elif len(p) == 5:
             p[0] = (p[1], p[3])
         elif len(p) == 3:
-            p[0] = (p[2], p[1])
+            p[0] = UnaryOP_postfix(p[2], p[1])
 
     def p_argument_expression_opt(self, p):
         """ argument_expression_opt : argument_expression
@@ -315,7 +319,7 @@ class Parser:
                                 | PLUSEQUALS
                                 | MINUSEQUALS
         """
-        p[0] = p[1]
+        p[0] = Assignment(p[1])
 
     def p_unary_operator(self, p):
         """ unary_operator : ADDRESS
@@ -324,7 +328,7 @@ class Parser:
                            | MINUS
                            | EXMARK
         """
-        p[0] = p[1]
+        p[0] = Assignment(p[1])
 
     def p_parameter_list(self, p):
         """ parameter_list : parameter_declaration
