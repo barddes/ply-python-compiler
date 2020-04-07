@@ -484,13 +484,12 @@ class BinaryOP(Node):
         self.coord = coord
 
     def __iter__(self):
-        return iter([self.op, self.expr1, self.expr2])
-
-    def __next__(self):
-        yield self.op
-        yield self.expr1
-        yield self.expr2
-        raise StopIteration
+        if self.op is not None:
+            yield self.op
+        if self.expr1 is not None:
+            yield self.expr1
+        if self.expr2 is not None:
+            yield self.expr2    
 
     def __str__(self):
         return "BinaryOP: %s" % self.op
@@ -508,12 +507,10 @@ class UnaryOP(Node):
         self.coord = coord
 
     def __iter__(self):
-        return iter([self.op, self.expr1, self.expr2])
-
-    def __next__(self):
-        yield self.op
-        yield self.expr1
-        raise StopIteration
+        if self.op is not None:
+            yield self.op
+        if self.expr1 is not None:
+            yield self.expr1
 
     def __str__(self):
         return "UnaryOP: %s" % self.op
@@ -530,18 +527,15 @@ class UnaryOP_postfix(Node):
         self.coord = coord
 
     def __iter__(self):
-        return iter([self.op, self.expr1, self.expr2])
-
-    def __next__(self):
-        yield self.op
-        yield self.expr1
-        raise StopIteration
+        if self.op is not None:
+            yield self.op
+        if self.expr1 is not None:
+            yield self.expr1
 
     def __str__(self):
         return "UnaryOP: p%s" % self.op
 
     attr_names = ('op', 'expr1')
-
 
 
 
@@ -552,12 +546,9 @@ class Assignment(Node):
     def __init__(self, op, coord=None):
         self.op = op
 
-
+    #não possui filhos
     def __iter__(self):
         return iter([])
-
-    def __next__(self):
-        raise StopIteration
 
     def __str__(self):
         return "Assignment: %s" % self.op
