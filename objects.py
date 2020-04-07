@@ -20,31 +20,45 @@ class Node(object):
     def __str__(self):
         return self.__class__.__name__ + ":"
 
-
+#Yuji fez, revisar!
 class ArrayDecl(Node):
-    __slots__ = ('values', 'coord')
+    __slots__ = ('dir_dec', 'const_exp', 'coord')
 
-    def __init__(self, values, coord=None):
-        self.values = values
+    def __init__(self, dir_dec, const_exp, coord=None):
+        self.dir_dec = dir_dec
+        self.const_exp = const_exp
         self.coord = coord
 
-    def children(self):
-        return self.values
+    def __iter__(self):
+        if self.dir_dec is not None:
+            yield self.dir_dec
+        if self.const_exp is not None:
+            yield self.const_exp
 
-    attr_names = ('values',)
+    def __str__(self):
+        return "ArrayDecl:"
+
+    attr_names = ('dir_dec', 'const_exp')
 
 
 class ArrayRef(Node):
-    __slots__ = ('values', 'coord')
+    __slots__ = ('post_expr', 'expr', 'coord')
 
-    def __init__(self, values, coord=None):
-        self.values = values
+    def __init__(self, post_expr, expr, coord=None):
+        self.post_expr = post_expr
+        self.expr = expr
         self.coord = coord
 
-    def children(self):
-        return self.values
+    def __iter__(self):
+        if self.post_expr is not None:
+            yield self.post_expr
+        if self.expr is not None:
+            yield self.expr
 
-    attr_names = ('values',)
+    def __str__(self):
+        return "ArrayRef:"
+
+    attr_names = ('post_expr', 'expr')
 
 
 class Assert(Node):
@@ -72,18 +86,6 @@ class Assignment(Node):
 
     attr_names = ('values',)
 
-
-class BinaryOp(Node):
-    __slots__ = ('values', 'coord')
-
-    def __init__(self, values, coord=None):
-        self.values = values
-        self.coord = coord
-
-    def children(self):
-        return self.values
-
-    attr_names = ('values',)
 
 
 class Break(Node):
@@ -252,8 +254,19 @@ class FuncDef(Node):
         self.decl_list = decl_list
         self.compound = compound
 
-    def children(self):
-        return []
+    #[Yuji] fiz essa parte
+    def __iter__(self):
+        if self.type is not None:
+            yield self.type
+        if self.decl is not None:
+            yield self.decl
+        if self.decl_list is not None:
+            yield self.decl_list
+        if self.compound is not None:
+            yield self.compound
+    #[Yuji] fiz essa parte
+    def __str__(self):
+        return "FuncDef:"
 
     attr_names = ('type', 'decl', 'decl_list', 'compound')
 
@@ -427,18 +440,6 @@ class Type(Node):
     attr_names = ('name',)
 
 
-class Unary(Node):
-    __slots__ = ('values', 'coord')
-
-    def __init__(self, values, coord=None):
-        self.values = values
-        self.coord = coord
-
-    def children(self):
-        return self.values
-
-    attr_names = ('values',)
-
 
 class VarDecl(Node):
     __slots__ = ('decl', 'initial', 'coord')
@@ -474,8 +475,8 @@ class While(Node):
 
 
 #Yuji fez, revisar!
-class BinaryOP(Node):
-    __slots__ = ('op', 'expr1', 'expr2')
+class BinaryOp(Node):
+    __slots__ = ('op', 'expr1', 'expr2', 'coord')
 
     def __init__(self, op, expr1, expr2, coord=None):
         self.op = op
@@ -498,10 +499,10 @@ class BinaryOP(Node):
 
 
 #Yuji fez, revisar!
-class UnaryOP(Node):
-    __slots__ = ('op', 'expr1')
+class UnaryOp(Node):
+    __slots__ = ('op', 'expr1', 'coord')
 
-    def __init__(self, op, expr1, expr2, coord=None):
+    def __init__(self, op, expr1, coord=None):
         self.op = op
         self.expr1 = expr1
         self.coord = coord
@@ -518,10 +519,10 @@ class UnaryOP(Node):
     attr_names = ('op', 'expr1')
 
 #Yuji fez, revisar!
-class UnaryOP_postfix(Node):
-    __slots__ = ('op', 'expr1')
+class UnaryOp_postfix(Node):
+    __slots__ = ('op', 'expr1', 'coord')
 
-    def __init__(self, op, expr1, expr2, coord=None):
+    def __init__(self, op, expr1, coord=None):
         self.op = op
         self.expr1 = expr1
         self.coord = coord
@@ -541,7 +542,7 @@ class UnaryOP_postfix(Node):
 
 #Yuji fez, revisar! Talvez tenha errado no __iter__ e no __next__
 class Assignment(Node):
-    __slots__ = ('op')
+    __slots__ = ('op', 'coord')
 
     def __init__(self, op, coord=None):
         self.op = op
@@ -554,6 +555,7 @@ class Assignment(Node):
         return "Assignment: %s" % self.op
 
     attr_names = ('op')
+
 
 
 

@@ -162,8 +162,11 @@ class Parser:
         """
         if len(p) == 2:
             p[0] = p[1]
-        if len(p) == 4:
+        elif len(p) == 4:
             p[0] = p[2]
+        #[Yuji] Fiz isso aqui, mas não sei se está certo
+        elif p[2] == '[':
+            p[0] = ArrayDecl(p[1], p[3])
         elif len(p) == 5:
             p[0] = (p[1], p[3])
 
@@ -218,7 +221,7 @@ class Parser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3:
-            p[0] = BinaryOP(p[2], p[1], p[3])
+            p[0] = BinaryOp(p[2], p[1], p[3])
 
     # Ok
     def p_cast_expression(self, p):
@@ -241,7 +244,7 @@ class Parser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3:
-            p[0] = UnaryOP(p[1], p[2])
+            p[0] = UnaryOp(p[1], p[2])
 
 
     #Yuji fez, verificar!
@@ -254,10 +257,13 @@ class Parser:
         """
         if len(p) == 2:
             p[0] = p[1]
+        #[Yuji] eu que arrumei essa parte para ArrayRef
+        elif p[2] == '[': 
+            p[0] = ArrayRef(p[1], p[4])
         elif len(p) == 5:
             p[0] = (p[1], p[3])
         elif len(p) == 3:
-            p[0] = UnaryOP_postfix(p[2], p[1])
+            p[0] = UnaryOp_postfix(p[2], p[1])
 
     def p_argument_expression_opt(self, p):
         """ argument_expression_opt : argument_expression
