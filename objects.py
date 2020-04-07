@@ -122,6 +122,16 @@ class Compound(Node):
     def children(self):
         return (self.decl_list, self.stmt_list)
 
+    #[Yuji] Adicionei isso, mas deu pau, pq?
+    # def __iter__(self):
+    #     if self.decl_list is not None:
+    #         yield self.decl_list
+    #     if self.stmt_list is not None:
+    #         yield self.stmt_list
+    # #[Yuji] Adicionei isso, mas deu pau, pq?
+    # def __str__(self):
+    #     return "Compound:"
+
     attr_names = ('decl_list', 'stmt_list')
 
 
@@ -189,18 +199,27 @@ class EmptyStatement(Node):
 
     attr_names = ('values',)
 
-
+#Yuji fez, revisar!
 class ExprList(Node):
-    __slots__ = ('values', 'coord')
+    __slots__ = ('expr1', 'expr2', 'coord')
 
-    def __init__(self, values, coord=None):
-        self.values = values
+    def __init__(self, expr1, expr2, coord=None):
+        self.expr1 = expr1
+        self.expr2 = expr2
         self.coord = coord
 
-    def children(self):
-        return self.values
+    def __iter__(self):
+        if self.expr1 is not None:
+            yield self.expr1
+        if self.expr2 is not None:
+            yield self.expr2
 
-    attr_names = ('values',)
+    def __str__(self):
+        return "ExprList:" 
+
+    attr_names = ('expr1', 'expr2')
+
+    
 
 
 class For(Node):
@@ -220,30 +239,43 @@ class For(Node):
 
 
 class FuncCall(Node):
-    __slots__ = ('values', 'coord')
+    __slots__ = ('expr1', 'expr2', 'coord')
 
-    def __init__(self, values, coord=None):
-        self.values = values
+    def __init__(self, expr1, expr2, coord=None):
+        self.expr1 = expr1
+        self.expr1 = expr2
         self.coord = coord
 
-    def children(self):
-        return self.values
+    def __iter__(self):
+        if self.expr1 is not None:
+            yield self.expr1
+        if self.expr2 is not None:
+            yield self.expr2
 
-    attr_names = ('values',)
+    def __str__(self):
+        return "FuncCall:"
+
+    attr_names = ('expr1', 'expr2')
 
 
 class FuncDecl(Node):
-    __slots__ = ('values', 'coord')
+    __slots__ = ('expr1', 'expr2', 'coord')
 
-    def __init__(self, values, coord=None):
-        self.values = values
+    def __init__(self, expr1, expr2, coord=None):
+        self.expr1 = expr1
+        self.expr1 = expr2
         self.coord = coord
 
-    def children(self):
-        return self.values
+    def __iter__(self):
+        if self.expr1 is not None:
+            yield self.expr1
+        if self.expr2 is not None:
+            yield self.expr2
 
-    attr_names = ('values',)
+    def __str__(self):
+        return "FuncCall:"
 
+    attr_names = ('expr1', 'expr2')
 
 class FuncDef(Node):
     __slots__ = ('type', 'decl', 'decl_list', 'compound', 'coord')

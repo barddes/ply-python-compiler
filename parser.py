@@ -167,8 +167,9 @@ class Parser:
         #[Yuji] Fiz isso aqui, mas não sei se está certo
         elif p[2] == '[':
             p[0] = ArrayDecl(p[1], p[3])
+        #[Yuji] Fiz essa parte, revisar
         elif len(p) == 5:
-            p[0] = (p[1], p[3])
+            p[0] = FuncDecl(p[1], p[3])
 
     # Ok
     def p_identifier(self, p):
@@ -259,9 +260,9 @@ class Parser:
             p[0] = p[1]
         #[Yuji] eu que arrumei essa parte para ArrayRef
         elif p[2] == '[': 
-            p[0] = ArrayRef(p[1], p[4])
-        elif len(p) == 5:
-            p[0] = (p[1], p[3])
+            p[0] = ArrayRef(p[1], p[3])
+        elif p[2] == '(': 
+            p[0] = FuncCall(p[1], p[3])
         elif len(p) == 3:
             p[0] = UnaryOp_postfix(p[2], p[1])
 
@@ -296,8 +297,10 @@ class Parser:
         """
         if len(p) == 2:
             p[0] = ('EXPR', None, p[1])
+        #Yuji fez essa parte, revisar 
+        #Esse e p_argument_expression são Expr_List
         else:
-            p[0] = ('EXPR', p[1], p[3])
+            p[0] = ExprList(p[1], p[3])
 
     def p_argument_expression(self, p):
         """ argument_expression : assignment_expression
@@ -305,8 +308,10 @@ class Parser:
         """
         if len(p) == 2:
             p[0] = ('ARG_EXPR', None, p[1])
+        #Yuji fez essa parte, revisar
+        #Esse e p_expression são Expr_List
         else:
-            p[0] = ('ARG_EXPR', p[1], p[3])
+            p[0] = ExprList(p[1], p[3])
 
     def p_assignment_expression(self, p):
         """ assignment_expression : binary_expression
@@ -398,7 +403,7 @@ class Parser:
     def p_compound_statement(self, p):
         """ compound_statement : LBRACE declaration_list_opt statement_list_opt RBRACE
         """
-        p[0] = Compound(decl_list=p[2], stmt_list=p[3])
+        p[0] = Compound(p[2], p[3])
 
     def p_statement_list(self, p):
         """ statement_list : statement

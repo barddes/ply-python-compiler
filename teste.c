@@ -1,14 +1,13 @@
-//Até esse alerta erro...de Falta implementar Func Def
-// int main() {
-//     int i;
-// }
 
-int v[] = {1, 2, 3, 4};
-int main(){
-    for (int i = 1; i <= 4; i++)
-        print(v[i]);
-    return;
-}
+int main(){}
+
+
+// int v[] = {1, 2, 3, 4};
+// int main(){
+//     for (int i = 1; i <= 4; i++)
+//         print(v[i]);
+//     return;
+// }
 
 //
 //int main () {
@@ -72,7 +71,7 @@ int main(){
 //
 //// Example 6:
 //
-//int main() {
+// int main() {
 //    int h, b;
 //    float area;
 //    read(h);
@@ -84,4 +83,4 @@ int main(){
 //    area = (h*b)/(float)2;
 //    print("The area of the triangle is: ", area);
 //    return 0;
-//}
+// }
