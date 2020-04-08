@@ -1,14 +1,14 @@
 
 int main(){}
 
-
+//
 // int v[] = {1, 2, 3, 4};
 // int main(){
 //     for (int i = 1; i <= 4; i++)
 //         print(v[i]);
 //     return;
 // }
-
+//
 //
 //int main () {
 //    int v[] = {1, 2, 3, 4, 5};
@@ -19,7 +19,7 @@ int main(){}
 //}
 //
 //// Example 2:
-
+//
 //int main () {
 //    float f = 1.0;
 //    char s[] = "xpto";

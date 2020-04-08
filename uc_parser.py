@@ -1,11 +1,18 @@
 import ply.yacc as yacc
 
-from lexer import Lexer
 from node_visitor import NodeVisitor
 from objects import *
+from uc_lexer import UCLexer
+from functools import partial as bind
 
 
-class Parser:
+class UCParser:
+    """ A parser for the uC language. After building it, parse the input
+        with parse()
+    """
+
+    tokens = ()
+
     precedence = (
         ('left', 'EQUALS'),
         ('left', 'OR', 'AND'),
@@ -15,50 +22,55 @@ class Parser:
         ('left', 'TIMES', 'DIVIDE', 'MOD')
     )
 
-    def __init__(self, lexer=None, module=None, input=None, debug=None):
-        self._lexer = lexer if lexer else Lexer()
-        self.tokens = self._lexer.tokens
-        self._module = module if module else self
-        self._input = input
-        self._debug = debug
-        self._parser = yacc.yacc(module=self._module, debug=self._debug, outputdir='out')
+    def __init__(self, error_func=None):
+        """ Create a new Parser.
+        """
+        self.error_func = error_func if error_func else self.error
+        self.filename = ''
+        self.parser = None
+        self.lexer = None
 
-        if self._input:
-            self.execute()
+        self.last_generated_tree = None
 
-    def input(self, input=None):
-        if input:
-            self._input = input
-            self.execute()
-            return self
+    def build(self, **kwargs):
+        """ Builds the parser from the specification.
+
+            This method exists separately, because
+            lexer's build method also exists separately
+        """
+        self.lexer = UCLexer(error_func=bind(self.error, lexer=True)).build()
+        self.tokens = self.lexer.tokens
+        self.parser = yacc.yacc(module=self, **kwargs)
+        return self
+
+    def error(self, msg, lineno=None, colno=None, p=None, lexer=False):
+        if lineno and colno:
+            print('%s Error: [%d,%d] %s' % ('Lexer' if lexer else 'Parser', lineno, colno, msg))
         else:
-            return self._input
+            print('%s Error: %s' % ('Lexer' if lexer else 'Parser', msg))
 
-    def module(self, module=None):
-        if module:
-            self._module = module
-            self._parser = yacc.yacc(module=self._module, debug=self._debug)
-            self.execute()
-            return self
-        else:
-            return self._input
+        if p:
+            stack_state_str = ' '.join([symbol.type for symbol in self.parser.symstack][1:])
+            print('Parser State:{} {} . {}'
+                  .format(self.parser.state,
+                          stack_state_str,
+                          p))
 
-    def debug(self, debug=None):
-        if debug:
-            self._debug = debug
-            self.execute()
-            return self
-        else:
-            return self._debug
+    def input(self, **kwargs):
+        return self.parse(**kwargs)
 
-    def execute(self):
-        if self._parser and self._input:
-            self._lexer.reset()
-            self._parser.parse(self._input, debug=self._debug, lexer=self._lexer.ply_lexer())
+    def parse(self, source, **kwargs):
+        self.build()
+        self.lexer.scan(source)
+        self.parser.parse(source, lexer=self.lexer.lexer, **kwargs)
+        return self.last_generated_tree
 
-    def parse(self, input):
-        self._input = input
-        self.execute()
+    def _token_coord(self, p, token_idx):
+        last_cr = p.lexer.lexer.lexdata.rfind('\n', 0, p.lexpos(token_idx))
+        if last_cr < 0:
+            last_cr = -1
+        column = (p.lexpos(token_idx) - last_cr)
+        return Coord(p.lineno(token_idx), column)
 
     # Ok
     def p_program(self, p):
@@ -66,8 +78,7 @@ class Parser:
         """
         p[0] = Program(decl_list=p[1])
 
-        node_visitor = NodeVisitor()
-        node_visitor.visit(p[0], 0)
+        self.last_generated_tree = p[0]
 
     # Ok
     def p_global_declaration_list(self, p):
@@ -164,10 +175,10 @@ class Parser:
             p[0] = p[1]
         elif len(p) == 4:
             p[0] = p[2]
-        #[Yuji] Fiz isso aqui, mas não sei se está certo
+        # [Yuji] Fiz isso aqui, mas não sei se está certo
         elif p[2] == '[':
             p[0] = ArrayDecl(p[1], p[3])
-        #[Yuji] Fiz essa parte, revisar
+        # [Yuji] Fiz essa parte, revisar
         elif len(p) == 5:
             p[0] = FuncDecl(p[1], p[3])
 
@@ -234,8 +245,8 @@ class Parser:
         elif len(p) == 5:
             p[0] = Cast(type=p[2], expr=p[4])
 
-    #Yuji fez, verificar! Aqui acho que pode estar errado no unary_operator (4º caso), não sei 
-    #vai puxar o operador corretamente.
+    # Yuji fez, verificar! Aqui acho que pode estar errado no unary_operator (4º caso), não sei
+    # vai puxar o operador corretamente.
     def p_unary_expression(self, p):
         """ unary_expression : postfix_expression
                              | PLUSPLUS unary_expression
@@ -247,8 +258,7 @@ class Parser:
         elif len(p) == 3:
             p[0] = UnaryOp(p[1], p[2])
 
-
-    #Yuji fez, verificar!
+    # Yuji fez, verificar!
     def p_postfix_expression(self, p):
         """ postfix_expression : primary_expression
                                | postfix_expression LBRACKET expression RBRACKET
@@ -258,10 +268,10 @@ class Parser:
         """
         if len(p) == 2:
             p[0] = p[1]
-        #[Yuji] eu que arrumei essa parte para ArrayRef
-        elif p[2] == '[': 
+        # [Yuji] eu que arrumei essa parte para ArrayRef
+        elif p[2] == '[':
             p[0] = ArrayRef(p[1], p[3])
-        elif p[2] == '(': 
+        elif p[2] == '(':
             p[0] = FuncCall(p[1], p[3])
         elif len(p) == 3:
             p[0] = UnaryOp_postfix(p[2], p[1])
@@ -287,7 +297,7 @@ class Parser:
         """ constant : INT_CONST
                      | CHAR_CONST
                      | FLOAT_CONST
-                     | SCONST
+                     | STR_CONST
         """
         p[0] = Constant(type=type(p[1]).__name__, value=p[1])
 
@@ -297,8 +307,8 @@ class Parser:
         """
         if len(p) == 2:
             p[0] = ('EXPR', None, p[1])
-        #Yuji fez essa parte, revisar 
-        #Esse e p_argument_expression são Expr_List
+        # Yuji fez essa parte, revisar
+        # Esse e p_argument_expression são Expr_List
         else:
             p[0] = ExprList(p[1], p[3])
 
@@ -308,8 +318,8 @@ class Parser:
         """
         if len(p) == 2:
             p[0] = ('ARG_EXPR', None, p[1])
-        #Yuji fez essa parte, revisar
-        #Esse e p_expression são Expr_List
+        # Yuji fez essa parte, revisar
+        # Esse e p_expression são Expr_List
         else:
             p[0] = ExprList(p[1], p[3])
 
@@ -409,13 +419,16 @@ class Parser:
         """ statement_list : statement
                            | statement_list statement
         """
-        p[0] = ('TEM QUE FAZER AINDA', 123, 321)
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[1] + [p[2]]
 
     def p_statement_list_opt(self, p):
         """ statement_list_opt : statement_list
                                | empty
         """
-        p[0] = ('TEM QUE FAZER AINDA', 123, 321)
+        p[0] = p[1]
 
     def p_statement(self, p):
         """ statement : expression_statement
@@ -427,18 +440,18 @@ class Parser:
                       | print_statement
                       | read_statement
         """
-        p[0] = ('TEM QUE FAZER AINDA', 123, 321)
+        p[0] = p[1]
 
     def p_expression_statement(self, p):
         """ expression_statement : expression_opt SEMI
         """
-        p[0] = ('TEM QUE FAZER AINDA', 123, 321)
+        p[0] = p[1]
 
     def p_expression_opt(self, p):
         """ expression_opt : expression
                            | empty
         """
-        p[0] = ('TEM QUE FAZER AINDA', 123, 321)
+        p[0] = p[1]
 
     # Ok
     def p_selection_statement(self, p):
@@ -494,63 +507,18 @@ class Parser:
     def p_empty(self, p):
         """ empty :
         """
-        p[0] = None
+        p[0] = EmptyStatement()
 
     def p_error(self, p):
-        # get formatted representation of stack
-        stack_state_str = ' '.join([symbol.type for symbol in self._parser.symstack][1:])
+        self.error('Unvalid token!', p.lineno, self.find_tok_column(p))
 
-        print('Syntax error in input! Parser State:{} {} . {}'
-              .format(self._parser.state,
-                      stack_state_str,
-                      p))
+    def find_tok_column(self, token):
+        """ Find the column of the token in its line.
+        """
+        last_cr = self.lexer.lexdata.rfind('\n', 0, token.lexpos)
+        return token.lexpos - last_cr
 
-        if p:
-            print(
-                "Syntax error! Token %s: '%s' at line %d column %d" % (p.type, p.value, p.lineno, self.find_column(p)))
-        else:
-            print("Syntax error at EOF!")
 
-    # Compute column.
-    #     input is the input text string
-    #     token is a token instance
-    def find_column(self, token):
-        line_start = self._input.rfind('\n', 0, token.lexpos) + 1
-        return (token.lexpos - line_start) + 1
-
-    def print_object(self, o, depth):
-        if type(o) == tuple:
-            self.print_tuple(o, depth)
-        elif type(o) == list:
-            self.print_list(o, depth)
-        else:
-            self.print_generic(o, depth)
-
-    def print_list(self, l, depth):
-        identation = self.identation_str(depth)
-
-        print(identation + '[')
-        for e in l:
-            self.print_object(e, depth + 1)
-        print(identation + ']')
-
-    def print_tuple(self, tuple, depth):
-        identation = self.identation_str(depth)
-
-        print(identation + '( ' + tuple[0])
-        for i, e in enumerate(tuple):
-            if i == 0:
-                continue
-            self.print_object(e, depth + 1)
-        print(identation + ')')
-
-    def identation_str(self, depth):
-        if not depth:
-            depth = 0
-        str = ''
-        for _ in range(depth):
-            str += '\t'
-        return str
-
-    def print_generic(self, obj, depth):
-        print(self.identation_str(depth) + str(obj))
+if __name__ == '__main__':
+    m = UCParser()
+    m.parse(source=open('teste.c').read())

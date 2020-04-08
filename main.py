@@ -1,5 +1,5 @@
 from lexer import Lexer
-from parser import Parser
+from uc_parser import UCParser
 
 # Create lexer
 lexer = Lexer()
@@ -14,7 +14,7 @@ for tok in lexer:
 print()
 
 # Build the parser
-parser = Parser(lexer=lexer, debug=False)
+parser = UCParser(lexer=lexer, debug=False)
 result = parser.parse(source)
 print(result)
 
