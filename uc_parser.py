@@ -60,7 +60,6 @@ class UCParser:
         return self.parse(**kwargs)
 
     def parse(self, source, **kwargs):
-        self.build()
         self.lexer.scan(source)
         self.parser.parse(source, lexer=self.lexer.lexer, **kwargs)
         return self.last_generated_tree
