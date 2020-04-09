@@ -85,9 +85,9 @@ class UCParser:
                                     | global_declaration_list global_declaration
         """
         if len(p) == 2:
-            p[0] = [p[1]]
+            p[0] = DeclList([p[1]])
         else:
-            p[0] = p[1] + [p[2]]
+            p[0] = p[1] + DeclList([p[2]])
 
     # Ok
     def p_global_declaration(self, p):
@@ -114,7 +114,7 @@ class UCParser:
         if len(p) == 2:
             p[0] = DeclList([p[1]])
         else:
-            p[0] = DeclList(p[1].children() + [p[2]])
+            p[0] = p[1] + DeclList([p[2]])
 
     # Ok
     def p_declaration_list_opt(self, p):
@@ -174,10 +174,8 @@ class UCParser:
             p[0] = p[1]
         elif len(p) == 4:
             p[0] = p[2]
-        # [Yuji] Fiz isso aqui, mas não sei se está certo
         elif p[2] == '[':
             p[0] = ArrayDecl(p[1], p[3])
-        # [Yuji] Fiz essa parte, revisar
         elif len(p) == 5:
             p[0] = FuncDecl(p[1], p[3])
 
@@ -267,13 +265,12 @@ class UCParser:
         """
         if len(p) == 2:
             p[0] = p[1]
-        # [Yuji] eu que arrumei essa parte para ArrayRef
+        elif len(p) == 3:
+            p[0] = UnaryOp(p[2], p[1])
         elif p[2] == '[':
             p[0] = ArrayRef(p[1], p[3])
         elif p[2] == '(':
             p[0] = FuncCall(p[1], p[3])
-        elif len(p) == 3:
-            p[0] = UnaryOp_postfix(p[2], p[1])
 
     def p_argument_expression_opt(self, p):
         """ argument_expression_opt : argument_expression
@@ -305,9 +302,7 @@ class UCParser:
                        | expression COMMA assignment_expression
         """
         if len(p) == 2:
-            p[0] = ('EXPR', None, p[1])
-        # Yuji fez essa parte, revisar
-        # Esse e p_argument_expression são Expr_List
+            p[0] = p[1]
         else:
             p[0] = ExprList(p[1], p[3])
 
@@ -316,9 +311,7 @@ class UCParser:
                                 | argument_expression COMMA assignment_expression
         """
         if len(p) == 2:
-            p[0] = ('ARG_EXPR', None, p[1])
-        # Yuji fez essa parte, revisar
-        # Esse e p_expression são Expr_List
+            p[0] = p[1]
         else:
             p[0] = ExprList(p[1], p[3])
 
@@ -329,7 +322,7 @@ class UCParser:
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = ('ASSIGN_EXPR', p[2], p[1], p[3])
+            p[0] = AssignExpr(p[2], p[1], p[3])
 
     def p_assignment_operator(self, p):
         """ assignment_operator : EQUALS
@@ -362,7 +355,7 @@ class UCParser:
     def p_parameter_declaration(self, p):
         """ parameter_declaration : type_specifier declarator
         """
-        p[0] = ('PARAM_DECL', p[1], p[2])
+        p[0] = ParamDecl(p[1], p[2])
 
     def p_init_declarator_list_opt(self, p):
         """ init_declarator_list_opt : init_declarator_list
@@ -376,9 +369,9 @@ class UCParser:
         """
 
         if len(p) == 2:
-            p[0] = [p[1]]
+            p[0] = DeclList([p[1]])
         else:
-            p[0] = p[1] + [p[2]]
+            p[0] = p[1] + DeclList([p[2]])
 
     def p_init_declarator(self, p):
         """ init_declarator : declarator
@@ -404,9 +397,9 @@ class UCParser:
                              | initializer_list COMMA initializer
         """
         if len(p) == 2:
-            p[0] = [p[1]]
+            p[0] = p[1]
         else:
-            p[0] = p[1] + [p[3]]
+            p[0] = p[1] + p[3]
 
     # Ok
     def p_compound_statement(self, p):

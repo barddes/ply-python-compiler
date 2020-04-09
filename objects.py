@@ -38,7 +38,7 @@ class Node(object):
         result = self.__class__.__name__ + '('
         indent = ''
         separator = ''
-        for name in self.__slots__[:-2]:
+        for name in self.__slots__[:-1]:
             result += separator
             result += indent
             result += name + '=' + (
@@ -95,14 +95,54 @@ class ArrayDecl(Node):
 
     def children(self):
         if self.dir_dec is not None:
-            yield self.dir_dec
+            yield 'dir_dec', self.dir_dec
         if self.const_exp is not None:
-            yield self.const_exp
+            yield 'const_exp', self.const_exp
 
     def __str__(self):
         return "ArrayDecl:"
 
     attr_names = ('dir_dec', 'const_exp')
+
+
+class AssignExpr(Node):
+    __slots__ = ('op', 'expr1', 'expr2', 'coord')
+
+    def __init__(self, op, expr1, expr2, coord=None):
+        self.op = op
+        self.expr1 = expr1
+        self.expr2 = expr2
+        self.coord = coord
+
+    def children(self):
+        if self.op:
+            yield 'op', self.op
+        if self.expr1:
+            yield 'expr1', self.expr1
+        if self.expr2:
+            yield 'expr2', self.expr2
+
+    attr_names = ('op', 'expr1', 'expr2')
+
+
+class ParamDecl(Node):
+    __slots__ = ('type', 'decl', 'coord')
+
+    def __init__(self, type, decl, coord=None):
+        self.type = type
+        self.decl = decl
+        self.coord = coord
+
+    def children(self):
+        if self.type:
+            yield 'type', self.type
+        if self.decl:
+            yield 'decl', self.decl
+
+    def __str__(self):
+        return "ParamDecl:"
+
+    attr_names = ('decl',)
 
 
 class ArrayRef(Node):
@@ -115,9 +155,9 @@ class ArrayRef(Node):
 
     def children(self):
         if self.post_expr is not None:
-            yield self.post_expr
+            yield 'post_expr', self.post_expr
         if self.expr is not None:
-            yield self.expr
+            yield 'expr', self.expr
 
     def __str__(self):
         return "ArrayRef:"
@@ -134,7 +174,7 @@ class Assert(Node):
 
     def children(self):
         if self.expr:
-            yield self.expr
+            yield 'expr', self.expr
 
     attr_names = ('expr',)
 
@@ -158,9 +198,9 @@ class Cast(Node):
 
     def children(self):
         if self.type:
-            yield self.type
+            yield 'type', self.type
         if self.expr:
-            yield self.expr
+            yield 'expr', self.expr
 
     attr_names = ('type', 'expr')
 
@@ -177,7 +217,8 @@ class Compound(Node):
         if self.decl_list:
             yield 'decl_list', self.decl_list
         if self.stmt_list:
-            yield 'stmt_list', self.stmt_list
+            for i, s in enumerate(self.stmt_list):
+                yield 'stmt_list[%d]' % i, s
 
     def __str__(self):
         return "Compound:"
@@ -194,7 +235,7 @@ class Constant(Node):
         self.coord = coord
 
     def children(self):
-        pass
+        return []
 
     def __str__(self):
         return "Constant: %s, %s" % (self.type, self.value)
@@ -209,10 +250,12 @@ class DeclList(Node):
         self.list = list
         self.coord = coord
 
+    def __add__(self, other):
+        return DeclList(self.list + other.list)
+
     def children(self):
-        if self.list:
-            return self.list
-        return []
+        for i, d in enumerate(self.list):
+            yield 'list[%d]' % i, d
 
     attr_names = ('list',)
 
@@ -227,9 +270,9 @@ class Decl(Node):
 
     def children(self):
         if self.type:
-            yield self.type
+            yield 'type', self.type
         if self.declarations:
-            yield self.declarations
+            yield 'declarations', self.declarations
 
     attr_names = ('type', 'declarations')
 
@@ -255,10 +298,10 @@ class ExprList(Node):
         self.coord = coord
 
     def children(self):
-        if self.expr1 is not None:
-            yield self.expr1
-        if self.expr2 is not None:
-            yield self.expr2
+        if self.expr1:
+            yield 'expr1', self.expr1
+        if self.expr2:
+            yield 'expr2', self.expr2
 
     def __str__(self):
         return "ExprList:"
@@ -278,13 +321,13 @@ class For(Node):
 
     def children(self):
         if self.p1:
-            yield self.p1
+            yield 'p1', self.p1
         if self.p2:
-            yield self.p2
+            yield 'p2', self.p2
         if self.p3:
-            yield self.p3
+            yield 'p3', self.p3
         if self.statement:
-            yield self.statement
+            yield 'statement', self.statement
 
     attr_names = ('p1', 'p2', 'p3', 'statement')
 
@@ -299,9 +342,9 @@ class FuncCall(Node):
 
     def children(self):
         if self.expr1:
-            yield self.expr1
+            yield 'expr1', self.expr1
         if self.expr2:
-            yield self.expr2
+            yield 'expr2', self.expr2
 
     def __str__(self):
         return "FuncCall:"
@@ -345,7 +388,6 @@ class FuncDef(Node):
         if self.decl:
             yield 'decl', self.decl
         if self.decl_list:
-            # for i, d in enumerate(self.decl_list):
             yield 'decl_list', self.decl_list
         if self.compound:
             yield 'compound', self.compound
@@ -381,11 +423,11 @@ class If(Node):
 
     def children(self):
         if self.expr:
-            yield self.expr
+            yield 'expr', self.expr
         if self.then:
-            yield self.then
+            yield 'then', self.then
         if self.elze:
-            yield self.elze
+            yield 'elze', self.elze
 
     attr_names = ('expr', 'then', 'else')
 
@@ -415,7 +457,7 @@ class InitList(Node):
 
     def children(self):
         if self.values:
-            yield self.values
+            yield 'values', self.values
 
     attr_names = ('values',)
 
@@ -428,7 +470,8 @@ class ParamList(Node):
         self.coord = coord
 
     def children(self):
-        return self.values
+        if self.values:
+            yield 'values', self.values
 
     attr_names = ('values',)
 
@@ -441,7 +484,8 @@ class Print(Node):
         self.coord = coord
 
     def children(self):
-        return self.expr
+        if self.expr:
+            yield 'expr', self.expr
 
     attr_names = ('expr',)
 
@@ -454,8 +498,7 @@ class Program(Node):
         self.coord = coord
 
     def children(self):
-        for i, d in enumerate(self.decl_list):
-            yield ('decl_list[%d]' % i, d)
+        yield 'decl_list', self.decl_list
 
     attr_names = ('decl_list',)
 
@@ -468,7 +511,7 @@ class PtrDecl(Node):
         self.coord = coord
 
     def children(self):
-        return self.values
+        return 'values', self.values
 
     attr_names = ('values',)
 
@@ -481,7 +524,7 @@ class Read(Node):
         self.coord = coord
 
     def children(self):
-        return self.expr
+        return 'expr', self.expr
 
     attr_names = ('expr',)
 
@@ -494,7 +537,7 @@ class Return(Node):
         self.coord = coord
 
     def children(self):
-        return self.value
+        yield 'value', self.value
 
     attr_names = ('value',)
 
@@ -524,12 +567,11 @@ class VarDecl(Node):
         self.coord = coord
 
     def children(self):
-        return iter([self.decl, self.initial])
-
-    def __next__(self):
-        yield self.decl
-        yield self.initial
-        raise StopIteration
+        if self.decl:
+            yield 'decl', self.decl
+        if self.initial:
+            for i, j in enumerate(self.initial):
+                yield 'initial[%d]' % i, j
 
     attr_names = ('decl', 'initial',)
 
@@ -543,12 +585,14 @@ class While(Node):
         self.coord = coord
 
     def children(self):
-        return self.expr, self.statement
+        if self.expr:
+            yield 'decl', self.expr
+        if self.statement:
+            yield 'statement', self.statement
 
     attr_names = ('expr', 'statement')
 
 
-# Yuji fez, revisar!
 class BinaryOp(Node):
     __slots__ = ('op', 'expr1', 'expr2', 'coord')
 
@@ -559,12 +603,12 @@ class BinaryOp(Node):
         self.coord = coord
 
     def children(self):
-        if self.op is not None:
-            yield self.op
-        if self.expr1 is not None:
-            yield self.expr1
-        if self.expr2 is not None:
-            yield self.expr2
+        if self.op:
+            yield 'op', self.op
+        if self.expr1:
+            yield 'expr1', self.expr1
+        if self.expr2:
+            yield 'expr2', self.expr2
 
     def __str__(self):
         return "BinaryOP: %s" % self.op
@@ -572,7 +616,6 @@ class BinaryOp(Node):
     attr_names = ('op', 'expr1', 'expr2')
 
 
-# Yuji fez, revisar!
 class UnaryOp(Node):
     __slots__ = ('op', 'expr1', 'coord')
 
@@ -582,10 +625,10 @@ class UnaryOp(Node):
         self.coord = coord
 
     def children(self):
-        if self.op is not None:
-            yield self.op
-        if self.expr1 is not None:
-            yield self.expr1
+        if self.op:
+            yield 'op', self.op
+        if self.expr1:
+            yield 'expr1', self.expr1
 
     def __str__(self):
         return "UnaryOP: %s" % self.op
@@ -593,7 +636,6 @@ class UnaryOp(Node):
     attr_names = ('op', 'expr1')
 
 
-# Yuji fez, revisar!
 class UnaryOp_postfix(Node):
     __slots__ = ('op', 'expr1', 'coord')
 
@@ -603,10 +645,10 @@ class UnaryOp_postfix(Node):
         self.coord = coord
 
     def children(self):
-        if self.op is not None:
-            yield self.op
-        if self.expr1 is not None:
-            yield self.expr1
+        if self.op:
+            yield 'op', self.op
+        if self.expr1:
+            yield 'expr1', self.expr1
 
     def __str__(self):
         return "UnaryOP: p%s" % self.op
@@ -614,16 +656,15 @@ class UnaryOp_postfix(Node):
     attr_names = ('op', 'expr1')
 
 
-# Yuji fez, revisar! Talvez tenha errado no children(self):
 class Assignment(Node):
     __slots__ = ('op', 'coord')
 
     def __init__(self, op, coord=None):
         self.op = op
+        self.coord = coord
 
-    # não possui filhos
     def children(self):
-        return iter([])
+        return []
 
     def __str__(self):
         return "Assignment: %s" % self.op
