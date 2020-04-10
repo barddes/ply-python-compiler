@@ -1,3 +1,4 @@
+import copy
 import sys
 
 
@@ -72,7 +73,7 @@ class Node(object):
 
         lead = ' ' * offset
         if nodenames and _my_node_name is not None:
-            buf.write(lead + self.__class__.__name__ + ' <' + _my_node_name + '>: ')
+            buf.write(lead + self.__class__.__name__ + ' <' + _my_node_name + '>:')
         else:
             buf.write(lead + self.__class__.__name__ + ': ')
 
@@ -203,6 +204,9 @@ class Constant(Node):
     __slots__ = ('type', 'value', 'coord')
 
     def __init__(self, type, value, coord=None):
+        if type == 'str':
+            type = 'string'
+            value = '"' + value + '"'
         self.type = type
         self.value = value
         self.coord = coord
@@ -284,6 +288,9 @@ class ExprList(Node):
         self.expr2 = expr2
         self.coord = coord
 
+        if not self.coord:
+            self.coord = self.expr1.coord
+
     def children(self):
         if self.expr1:
             yield 'expr1', self.expr1
@@ -297,11 +304,15 @@ class For(Node):
     __slots__ = ('p1', 'p2', 'p3', 'statement', 'coord')
 
     def __init__(self, p1, p2, p3, statement, coord=None):
-        self.p1 = DeclList(p1, coord=coord)
+        self.p1 = p1
         self.p2 = p2
         self.p3 = p3
         self.statement = statement
         self.coord = coord
+
+        if type(self.statement) == Compound:
+            self.statement.coord = copy.deepcopy(self.coord)
+            self.statement.coord.column = 1
 
     def children(self):
         if self.p1:
@@ -323,6 +334,9 @@ class FuncCall(Node):
         self.expr1 = expr1
         self.expr2 = expr2
         self.coord = coord
+
+        if not self.coord:
+            self.coord = self.expr1.coord
 
     def children(self):
         if self.expr1:
@@ -378,6 +392,7 @@ class FuncDef(Node):
 
         if self.type:
             self.compound.coord = self.type.coord
+            self.compound.coord.column = 1
 
         if self.type and self.decl:
             self.decl.set_type(type)
@@ -411,13 +426,22 @@ class GlobalDecl(Node):
 
 
 class If(Node):
-    __slots__ = ('expr', 'then', 'elze', 'coord')
+    __slots__ = ('expr', 'then', 'elze', 'coord', 'coord_else')
 
-    def __init__(self, expr, then, elze, coord=None):
+    def __init__(self, expr, then, elze, coord=None, coord_else=None):
         self.expr = expr
         self.then = then
         self.elze = elze
         self.coord = coord
+        self.coord_else = coord_else
+
+        if type(self.then) == Compound:
+            self.then.coord = copy.deepcopy(self.coord)
+            self.then.coord.column = 1
+
+        if type(self.elze) == Compound:
+            self.elze.coord = copy.deepcopy(self.coord_else)
+            self.elze.coord.column = 1
 
     def children(self):
         if self.expr:
@@ -593,6 +617,10 @@ class While(Node):
         self.statement = statement
         self.coord = coord
 
+        if type(self.statement) == Compound:
+            self.statement.coord = copy.deepcopy(self.coord)
+            self.statement.coord.column = 1
+
     def children(self):
         if self.expr:
             yield 'decl', self.expr
@@ -651,6 +679,9 @@ class Assignment(Node):
         self.name = name
         self.func_call = func_call
         self.coord = coord
+
+        if not self.coord:
+            self.coord = self.name.coord
 
     def children(self):
         if self.name:

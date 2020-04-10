@@ -1,6 +1,15 @@
-int v[] = {1, 2, 3, 4};
-int main(){
-    for (int i = 1; i <= 4; i++)
-        print(v[i]);
-    return;
+int main() {
+    int i, n, t1 = 0, t2 = 1, nextTerm;
+    print("Enter the number of terms: ");
+    read(n);
+    print("Fibonacci Series: ");
+
+    for (i = 1; i <= n; ++i) {
+        print(t1, " ");
+        nextTerm = t1 + t2;
+        t1 = t2;
+        t2 = nextTerm;
+    }
+
+    return 0;
 }

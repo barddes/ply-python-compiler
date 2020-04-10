@@ -340,7 +340,7 @@ class UCParser:
         if len(p) == 2:
             p[0] = ParamList([p[1]])
         else:
-            p[0] = p[1] + ParamList([p[2]])
+            p[0] = p[1] + ParamList([p[3]])
 
     def p_parameter_declaration(self, p):
         """ parameter_declaration : type_specifier declarator
@@ -440,9 +440,9 @@ class UCParser:
                                 | IF LPAREN expression RPAREN statement ELSE statement
         """
         if len(p) == 6:
-            p[0] = If(expr=p[3], then=p[5], elze=None)
+            p[0] = If(expr=p[3], then=p[5], elze=None, coord=self._token_coord(p, 1))
         else:
-            p[0] = If(expr=p[3], then=p[5], elze=p[7])
+            p[0] = If(expr=p[3], then=p[5], elze=p[7], coord=self._token_coord(p, 1), coord_else=self._token_coord(p, 6))
 
     def p_iteration_statement(self, p):
         """ iteration_statement : WHILE LPAREN expression RPAREN statement
@@ -452,7 +452,7 @@ class UCParser:
         if len(p) == 6:
             p[0] = While(expr=p[2], statement=p[5])
         elif len(p) == 9:
-            p[0] = For(p1=p[3], p2=p[4], p3=p[6], statement=p[8], coord=self._token_coord(p, 1))
+            p[0] = For(p1=DeclList(p[3], coord=self._token_coord(p, 1)), p2=p[4], p3=p[6], statement=p[8], coord=self._token_coord(p, 1))
         else:
             p[0] = For(p1=p[3], p2=p[5], p3=p[7], statement=p[9], coord=self._token_coord(p, 1))
 
@@ -468,7 +468,7 @@ class UCParser:
     def p_assert_statement(self, p):
         """ assert_statement : ASSERT expression SEMI
         """
-        p[0] = Assert(expr=p[2])
+        p[0] = Assert(expr=p[2], coord=self._token_coord(p, 1))
 
     def p_print_statement(self, p):
         """ print_statement : PRINT LPAREN expression_opt RPAREN SEMI
@@ -478,7 +478,7 @@ class UCParser:
     def p_read_statement(self, p):
         """ read_statement : READ LPAREN argument_expression RPAREN SEMI
         """
-        p[0] = Read(expr=p[3])
+        p[0] = Read(expr=p[3], coord=self._token_coord(p, 1))
 
     def p_empty(self, p):
         """ empty :
