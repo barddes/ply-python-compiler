@@ -7,7 +7,7 @@
 # to read and write to, and invokes the different stages of
 # the compiler proper.
 # ============================================================
-import re
+
 import sys
 from contextlib import contextmanager
 from uc_parser import UCParser
@@ -70,7 +70,7 @@ def error(lineno, message, filename=None):
     if not filename:
         errmsg = "{}: {}".format(lineno, message)
     else:
-        errmsg = "{}:{}: {}".format(filename, lineno, message)
+        errmsg = "{}:{}: {}".format(filename,lineno,message)
     for subscriber in _subscribers:
         subscriber(errmsg)
     _num_errors += 1
@@ -117,8 +117,8 @@ class Compiler:
             or running at susy machine,
             prints out the abstract syntax tree.
         """
-        self.parser = UCParser().build(outputdir='out')
-        self.ast = self.parser.parse(self.code, debug=debug)
+        self.parser = UCParser()
+        self.ast = self.parser.parse(self.code, '', debug)
         if susy:
             self.ast.show(showcoord=True)
         elif ast_file is not None:
@@ -131,7 +131,7 @@ class Compiler:
     def compile(self, code, susy, ast_file, debug):
         """ Compiles the given code string """
         self.code = code
-        with subscribe_errors(lambda msg: sys.stderr.write(msg + "\n")):
+        with subscribe_errors(lambda msg: sys.stderr.write(msg+"\n")):
             self._do_compile(susy, ast_file, debug)
             if errors_reported():
                 sys.stderr.write("{} error(s) encountered.".format(errors_reported()))
@@ -148,7 +148,6 @@ def run_compiler():
     emit_ast = True
     susy = False
     debug = False
-    outputdir = '.'
 
     params = sys.argv[1:]
     files = sys.argv[1:]
@@ -161,20 +160,13 @@ def run_compiler():
                 susy = True
             elif param == '-debug':
                 debug = True
-            elif param.startswith('--output-dir='):
-                outputdir = param.replace('--output-dir=', '')
             else:
                 print("Unknown option: %s" % param)
                 sys.exit(1)
             files.remove(param)
 
-    if outputdir[-1] != '/':
-        outputdir += '/'
-
     for file in files:
-        if file[-2:] == '.c':
-            source_filename = file
-        elif file[-3:] == '.uc':
+        if file[-3:] == '.uc':
             source_filename = file
         else:
             source_filename = file + '.uc'
@@ -182,9 +174,9 @@ def run_compiler():
         open_files = []
         ast_file = None
         if emit_ast and not susy:
-            ast_filename = re.sub(r'.*/([^/]*$)', r'\1', source_filename[:-3]) + '.ast'
-            print("Outputting the AST to %s." % (outputdir + ast_filename))
-            ast_file = open(outputdir + ast_filename, 'w')
+            ast_filename = source_filename[:-3] + '.ast'
+            print("Outputting the AST to %s." % ast_filename)
+            ast_file = open(ast_filename, 'w')
             open_files.append(ast_file)
 
         source = open(source_filename, 'r')

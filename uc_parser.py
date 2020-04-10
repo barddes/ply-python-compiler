@@ -32,16 +32,9 @@ class UCParser:
 
         self.last_generated_tree = None
 
-    def build(self, **kwargs):
-        """ Builds the parser from the specification.
-
-            This method exists separately, because
-            lexer's build method also exists separately
-        """
         self.lexer = UCLexer(error_func=bind(self.error, lexer=True)).build()
         self.tokens = self.lexer.tokens
-        self.parser = yacc.yacc(module=self, **kwargs)
-        return self
+        self.parser = yacc.yacc(module=self)
 
     def error(self, msg, lineno=None, colno=None, p=None, lexer=False):
         if lineno and colno:
@@ -56,12 +49,9 @@ class UCParser:
                           stack_state_str,
                           p))
 
-    def input(self, **kwargs):
-        return self.parse(**kwargs)
-
-    def parse(self, source, **kwargs):
+    def parse(self, source, _, debug):
         # self.lexer.scan(source)
-        self.parser.parse(source, lexer=self.lexer.lexer, **kwargs)
+        self.parser.parse(source, lexer=self.lexer.lexer, debug=debug)
         return self.last_generated_tree
 
     def _token_coord(self, p, token_idx):
