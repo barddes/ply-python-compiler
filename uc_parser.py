@@ -71,7 +71,6 @@ class UCParser:
         column = (p.lexpos(token_idx) - last_cr)
         return Coord(p.lineno(token_idx), column)
 
-    # Ok
     def p_program(self, p):
         """ program : global_declaration_list
         """
@@ -79,7 +78,6 @@ class UCParser:
 
         self.last_generated_tree = p[0]
 
-    # Ok
     def p_global_declaration_list(self, p):
         """ global_declaration_list : global_declaration
                                     | global_declaration_list global_declaration
@@ -89,14 +87,16 @@ class UCParser:
         else:
             p[0] = p[1] + DeclList([p[2]])
 
-    # Ok
-    def p_global_declaration(self, p):
-        """ global_declaration : function_definition
-                               | declaration
+    def p_global_declaration_0(self, p):
+        """ global_declaration : declaration
         """
         p[0] = GlobalDecl(p[1])
 
-    # Ok
+    def p_global_declaration_1(self, p):
+        """ global_declaration : function_definition
+        """
+        p[0] = p[1]
+
     def p_function_definition(self, p):
         """ function_definition : type_specifier declarator declaration_list_opt compound_statement
                                 | declarator declaration_list_opt compound_statement
@@ -104,9 +104,8 @@ class UCParser:
         if len(p) == 5:
             p[0] = FuncDef(p[1], p[2], p[3], p[4])
         else:
-            p[0] = FuncDef(Type('void'), p[1], p[2], p[3])
+            p[0] = FuncDef(Type(['void']), p[1], p[2], p[3])
 
-    # Ok
     def p_declaration_list(self, p):
         """ declaration_list : declaration
                              | declaration_list declaration
@@ -116,7 +115,6 @@ class UCParser:
         else:
             p[0] = p[1] + DeclList([p[2]])
 
-    # Ok
     def p_declaration_list_opt(self, p):
         """ declaration_list_opt : declaration_list
                                  | empty
@@ -126,19 +124,23 @@ class UCParser:
         else:
             p[0] = None
 
-    # Ok
     def p_type_specifier(self, p):
         """ type_specifier : VOID
                            | CHAR
                            | INT
                            | FLOAT
         """
-        p[0] = Type(p[1])
+        p[0] = Type([p[1]], coord=self._token_coord(p, 1))
 
     def p_declaration(self, p):
         """ declaration : type_specifier init_declarator_list_opt SEMI
         """
-        p[0] = Decl(p[1], p[2])
+
+        if p[2] and type(p[2]) is not EmptyStatement:
+            for decl in p[2].list:
+                decl.set_type(p[1])
+
+        p[0] = p[2]
 
     def p_declarator(self, p):
         """ declarator : direct_declarator
@@ -171,7 +173,7 @@ class UCParser:
                               | direct_declarator LPAREN identifier_list_opt RPAREN
         """
         if len(p) == 2:
-            p[0] = p[1]
+            p[0] = VarDecl(p[1])
         elif len(p) == 4:
             p[0] = p[2]
         elif p[2] == '[':
@@ -179,7 +181,6 @@ class UCParser:
         elif len(p) == 5:
             p[0] = FuncDecl(p[1], p[3])
 
-    # Ok
     def p_identifier(self, p):
         """ identifier : ID
         """
@@ -232,7 +233,6 @@ class UCParser:
         elif len(p) == 3:
             p[0] = BinaryOp(p[2], p[1], p[3])
 
-    # Ok
     def p_cast_expression(self, p):
         """ cast_expression : unary_expression
                             | LPAREN type_specifier RPAREN cast_expression
@@ -255,7 +255,6 @@ class UCParser:
         elif len(p) == 3:
             p[0] = UnaryOp(p[1], p[2])
 
-    # Yuji fez, verificar!
     def p_postfix_expression(self, p):
         """ postfix_expression : primary_expression
                                | postfix_expression LBRACKET expression RBRACKET
@@ -288,14 +287,13 @@ class UCParser:
         else:
             p[0] = p[2]
 
-    # Ok
     def p_constant(self, p):
         """ constant : INT_CONST
                      | CHAR_CONST
                      | FLOAT_CONST
                      | STR_CONST
         """
-        p[0] = Constant(type=type(p[1]).__name__, value=p[1])
+        p[0] = Constant(type=type(p[1]).__name__, value=p[1], coord=self._token_coord(p, 1))
 
     def p_expression(self, p):
         """ expression : assignment_expression
@@ -378,9 +376,9 @@ class UCParser:
                             | declarator EQUALS initializer
         """
         if len(p) == 2:
-            p[0] = VarDecl(p[1])
+            p[0] = Decl(p[1], EmptyStatement())
         else:
-            p[0] = VarDecl(p[1], p[3])
+            p[0] = Decl(p[1], p[3])
 
     def p_initializer(self, p):
         """ initializer : assignment_expression
@@ -388,7 +386,7 @@ class UCParser:
                         | LBRACE initializer_list COMMA RBRACE
         """
         if len(p) == 2:
-            p[0] = [p[1]]
+            p[0] = p[1]
         else:
             p[0] = p[2]
 
@@ -397,11 +395,10 @@ class UCParser:
                              | initializer_list COMMA initializer
         """
         if len(p) == 2:
-            p[0] = p[1]
+            p[0] = InitList([p[1]])
         else:
-            p[0] = p[1] + p[3]
+            p[0] = p[1] + InitList([p[3]])
 
-    # Ok
     def p_compound_statement(self, p):
         """ compound_statement : LBRACE declaration_list_opt statement_list_opt RBRACE
         """
@@ -445,7 +442,6 @@ class UCParser:
         """
         p[0] = p[1]
 
-    # Ok
     def p_selection_statement(self, p):
         """ selection_statement : IF LPAREN expression RPAREN statement
                                 | IF LPAREN expression RPAREN statement ELSE statement
@@ -455,7 +451,6 @@ class UCParser:
         else:
             p[0] = If(expr=p[3], then=p[5], elze=p[7])
 
-    # Ok
     def p_iteration_statement(self, p):
         """ iteration_statement : WHILE LPAREN expression RPAREN statement
                                 | FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement
@@ -468,7 +463,6 @@ class UCParser:
         else:
             p[0] = For(p1=p[3], p2=p[5], p3=p[7], statement=p[9])
 
-    # Ok
     def p_jump_statement(self, p):
         """ jump_statement : BREAK SEMI
                            | RETURN expression_opt SEMI
@@ -478,19 +472,16 @@ class UCParser:
         else:
             p[0] = Return(value=p[2])
 
-    # Ok
     def p_assert_statement(self, p):
         """ assert_statement : ASSERT expression SEMI
         """
         p[0] = Assert(expr=p[2])
 
-    # Ok
     def p_print_statement(self, p):
         """ print_statement : PRINT LPAREN expression_opt RPAREN SEMI
         """
         p[0] = Print(expr=p[3])
 
-    # Ok
     def p_read_statement(self, p):
         """ read_statement : READ LPAREN argument_expression RPAREN SEMI
         """

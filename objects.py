@@ -88,20 +88,30 @@ class Node(object):
 
 
 class ArrayDecl(Node):
-    __slots__ = ('dir_dec', 'const_exp', 'coord')
+    __slots__ = ('dir_dec', 'const_exp', 'type', 'name', 'coord')
 
-    def __init__(self, dir_dec, const_exp, coord=None):
+    def __init__(self, dir_dec, const_exp, type=None, name=None, coord=None):
         self.dir_dec = dir_dec
         self.const_exp = const_exp
+        self.type = type
+        self.name = name
         self.coord = coord
 
+        if self.dir_dec:
+            self.name = self.dir_dec.name
+
+    def set_type(self, t):
+        self.type = t
+        if self.dir_dec and type(self.dir_dec) is not EmptyStatement:
+            self.dir_dec.set_type(t)
+
     def children(self):
-        if self.dir_dec is not None:
+        if self.dir_dec and type(self.dir_dec) is not EmptyStatement:
             yield 'dir_dec', self.dir_dec
-        if self.const_exp is not None:
+        if self.const_exp and type(self.const_exp) is not EmptyStatement:
             yield 'const_exp', self.const_exp
 
-    attr_names = ('dir_dec', 'const_exp')
+    attr_names = ()
 
 
 class ParamDecl(Node):
@@ -135,7 +145,7 @@ class ArrayRef(Node):
         if self.expr is not None:
             yield 'expr', self.expr
 
-    attr_names = ('post_expr', 'expr')
+    attr_names = ()
 
 
 class Assert(Node):
@@ -149,7 +159,7 @@ class Assert(Node):
         if self.expr:
             yield 'expr', self.expr
 
-    attr_names = ('expr',)
+    attr_names = ()
 
 
 class Break(Node):
@@ -175,7 +185,7 @@ class Cast(Node):
         if self.expr:
             yield 'expr', self.expr
 
-    attr_names = ('type', 'expr')
+    attr_names = ()
 
 
 class Compound(Node):
@@ -193,7 +203,7 @@ class Compound(Node):
             for i, s in enumerate(self.stmt_list):
                 yield 'stmt_list[%d]' % i, s
 
-    attr_names = ('decl_list', 'stmt_list')
+    attr_names = ()
 
 
 class Constant(Node):
@@ -207,7 +217,7 @@ class Constant(Node):
     def children(self):
         return []
 
-    attr_names = ('type', 'value',)
+    attr_names = ('type', 'value')
 
 
 class DeclList(Node):
@@ -225,24 +235,34 @@ class DeclList(Node):
             for i, d in enumerate(self.list):
                 yield 'list[%d]' % i, d
 
-    attr_names = ('list',)
+    attr_names = ()
 
 
 class Decl(Node):
-    __slots__ = ('type', 'declarations', 'coord')
+    __slots__ = ('decl', 'init', 'name', 'type', 'coord')
 
-    def __init__(self, type, declarations, coord=None):
+    def __init__(self, decl, init, name=None, type=None, coord=None):
+        self.decl = decl
+        self.init = init
+        self.name = name
         self.type = type
-        self.declarations = declarations
         self.coord = coord
 
-    def children(self):
-        if self.type:
-            yield 'type', self.type
-        if self.declarations:
-            yield 'declarations', self.declarations
+        if self.decl:
+            self.name = self.decl.name
 
-    attr_names = ()
+    def set_type(self, t):
+        self.type = t
+        if self.decl:
+            self.decl.set_type(t)
+
+    def children(self):
+        if self.decl:
+            yield 'decl', self.decl
+        if self.init:
+            yield 'init', self.init
+
+    attr_names = ('name',)
 
 
 class EmptyStatement(Node):
@@ -271,7 +291,7 @@ class ExprList(Node):
         if self.expr2:
             yield 'expr2', self.expr2
 
-    attr_names = ('expr1', 'expr2')
+    attr_names = ()
 
 
 class For(Node):
@@ -294,7 +314,7 @@ class For(Node):
         if self.statement:
             yield 'statement', self.statement
 
-    attr_names = ('p1', 'p2', 'p3', 'statement')
+    attr_names = ()
 
 
 class FuncCall(Node):
@@ -311,28 +331,32 @@ class FuncCall(Node):
         if self.expr2:
             yield 'expr2', self.expr2
 
-    attr_names = ('expr1', 'expr2')
+    attr_names = ()
 
 
 class FuncDecl(Node):
-    __slots__ = ('expr1', 'expr2', 'coord')
+    __slots__ = ('expr1', 'expr2', 'type', 'coord')
 
-    def __init__(self, expr1, expr2, coord=None):
+    def __init__(self, expr1, expr2, type=None, coord=None):
         self.expr1 = expr1
         self.expr2 = expr2
+        self.type = type
         self.coord = coord
+
+    def set_type(self, t):
+        self.type = t
 
     def children(self):
         if self.expr1:
             yield 'expr1', self.expr1
         if self.expr2:
             if type(self.expr2) == list:
-                for i,e in enumerate(self.expr2):
+                for i, e in enumerate(self.expr2):
                     yield 'expr2[%d]' % i, e
             else:
                 yield 'expr2', self.expr2
 
-    attr_names = ('expr1', 'expr2')
+    attr_names = ()
 
 
 class FuncDef(Node):
@@ -389,7 +413,7 @@ class If(Node):
         if self.elze:
             yield 'elze', self.elze
 
-    attr_names = ('expr', 'then', 'else')
+    attr_names = ()
 
 
 class Id(Node):
@@ -406,17 +430,21 @@ class Id(Node):
 
 
 class InitList(Node):
-    __slots__ = ('values', 'coord')
+    __slots__ = ('list', 'coord')
 
-    def __init__(self, values, coord=None):
-        self.values = values
+    def __init__(self, list, coord=None):
+        self.list = list
         self.coord = coord
 
-    def children(self):
-        if self.values:
-            yield 'values', self.values
+    def __add__(self, other):
+        return InitList(self.list + other.list)
 
-    attr_names = ('values',)
+    def children(self):
+        if self.list:
+            for i, e in enumerate(self.list):
+                yield 'list[%d]' % i, e
+
+    attr_names = ()
 
 
 class ParamList(Node):
@@ -430,7 +458,7 @@ class ParamList(Node):
         if self.values:
             yield 'values', self.values
 
-    attr_names = ('values',)
+    attr_names = ()
 
 
 class Print(Node):
@@ -444,7 +472,7 @@ class Print(Node):
         if self.expr:
             yield 'expr', self.expr
 
-    attr_names = ('expr',)
+    attr_names = ()
 
 
 class Program(Node):
@@ -462,17 +490,21 @@ class Program(Node):
 
 
 class PtrDecl(Node):
-    __slots__ = ('value', 'coord')
+    __slots__ = ('value', 'type', 'coord')
 
-    def __init__(self, value, coord=None):
+    def __init__(self, value, type=None, coord=None):
         self.value = value
+        self.type = type
         self.coord = coord
+
+    def set_type(self, t):
+        self.type = t
 
     def children(self):
         if self.value:
             yield 'value', self.value
 
-    attr_names = ('value',)
+    attr_names = ()
 
 
 class Read(Node):
@@ -486,7 +518,7 @@ class Read(Node):
         if self.expr:
             yield 'expr', self.expr
 
-    attr_names = ('expr',)
+    attr_names = ()
 
 
 class Return(Node):
@@ -500,38 +532,38 @@ class Return(Node):
         if self.value:
             yield 'value', self.value
 
-    attr_names = ('value',)
+    attr_names = ()
 
 
 class Type(Node):
-    __slots__ = ('name', 'coord')
+    __slots__ = ('names', 'coord')
 
-    def __init__(self, name, coord=None):
-        self.name = name
+    def __init__(self, names, coord=None):
+        self.names = names
         self.coord = coord
 
     def children(self):
         return []
 
-    attr_names = ('name',)
+    attr_names = ('names',)
 
 
 class VarDecl(Node):
-    __slots__ = ('decl', 'initial', 'coord')
+    __slots__ = ('name', 'type', 'coord')
 
-    def __init__(self, decl, initial=None, coord=None):
-        self.decl = decl
-        self.initial = initial
+    def __init__(self, name, type=None, coord=None):
+        self.name = name
+        self.type = type
         self.coord = coord
 
-    def children(self):
-        if self.decl:
-            yield 'decl', self.decl
-        if self.initial:
-            for i, j in enumerate(self.initial):
-                yield 'initial[%d]' % i, j
+    def set_type(self, t):
+        self.type = t
 
-    attr_names = ('decl', 'initial',)
+    def children(self):
+        if self.type:
+            yield 'type', self.type
+
+    attr_names = ()
 
 
 class While(Node):
@@ -548,7 +580,7 @@ class While(Node):
         if self.statement:
             yield 'statement', self.statement
 
-    attr_names = ('expr', 'statement')
+    attr_names = ()
 
 
 class BinaryOp(Node):
@@ -568,7 +600,7 @@ class BinaryOp(Node):
         if self.expr2:
             yield 'expr2', self.expr2
 
-    attr_names = ('op', 'expr1', 'expr2')
+    attr_names = ('op',)
 
 
 class UnaryOp(Node):
@@ -585,7 +617,7 @@ class UnaryOp(Node):
         if self.expr1:
             yield 'expr1', self.expr1
 
-    attr_names = ('op', 'expr1')
+    attr_names = ('op',)
 
 
 class Assignment(Node):
