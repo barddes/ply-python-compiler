@@ -65,7 +65,7 @@ class UCParser:
         return self.last_generated_tree
 
     def _token_coord(self, p, token_idx):
-        last_cr = p.lexer.lexer.lexdata.rfind('\n', 0, p.lexpos(token_idx))
+        last_cr = p.lexer.lexdata.rfind('\n', 0, p.lexpos(token_idx))
         if last_cr < 0:
             last_cr = -1
         column = (p.lexpos(token_idx) - last_cr)
@@ -75,7 +75,7 @@ class UCParser:
     def p_program(self, p):
         """ program : global_declaration_list
         """
-        p[0] = Program(decl_list=p[1])
+        p[0] = Program(decl_list=p[1], coord=self._token_coord(p, 1))
 
         self.last_generated_tree = p[0]
 
@@ -153,7 +153,7 @@ class UCParser:
         """ pointer_opt : TIMES pointer
                         | TIMES empty
         """
-        if p[2]:
+        if type(p[2]) is not EmptyStatement:
             p[0] = ('*', p[2][1] + 1)
         else:
             p[0] = ('*', 1)
@@ -322,7 +322,7 @@ class UCParser:
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = AssignExpr(p[2], p[1], p[3])
+            p[0] = BinaryOp(p[2], p[1], p[3])
 
     def p_assignment_operator(self, p):
         """ assignment_operator : EQUALS
