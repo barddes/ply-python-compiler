@@ -83,9 +83,9 @@ class UCParser:
                                     | global_declaration_list global_declaration
         """
         if len(p) == 2:
-            p[0] = DeclList([p[1]])
+            p[0] = [p[1]]
         else:
-            p[0] = p[1] + DeclList([p[2]])
+            p[0] = p[1] + [p[2]]
 
     def p_global_declaration_0(self, p):
         """ global_declaration : declaration
@@ -111,9 +111,9 @@ class UCParser:
                              | declaration_list declaration
         """
         if len(p) == 2:
-            p[0] = DeclList([p[1]])
+            p[0] = [p[1]]
         else:
-            p[0] = p[1] + DeclList([p[2]])
+            p[0] = p[1] + [p[2]]
 
     def p_declaration_list_opt(self, p):
         """ declaration_list_opt : declaration_list
@@ -136,8 +136,8 @@ class UCParser:
         """ declaration : type_specifier init_declarator_list_opt SEMI
         """
 
-        if p[2] and type(p[2]) is not EmptyStatement:
-            for decl in p[2].list:
+        if p[2]:
+            for decl in p[2]:
                 decl.set_type(p[1])
 
         p[0] = p[2]
@@ -155,10 +155,7 @@ class UCParser:
         """ pointer_opt : TIMES pointer
                         | TIMES empty
         """
-        if type(p[2]) is not EmptyStatement:
-            p[0] = PtrDecl(p[2])
-        else:
-            p[0] = PtrDecl(p[2])
+        p[0] = PtrDecl(p[2])
 
     def p_pointer(self, p):
         """ pointer : pointer_opt
@@ -178,13 +175,13 @@ class UCParser:
             p[0] = p[2]
         elif p[2] == '[':
             p[0] = ArrayDecl(p[1], p[3])
-        elif len(p) == 5:
+        else:
             p[0] = FuncDecl(p[1], p[3])
 
     def p_identifier(self, p):
         """ identifier : ID
         """
-        p[0] = Id(name=p[1])
+        p[0] = ID(name=p[1], coord=self._token_coord(p, 1))
 
     def p_constant_expression_opt(self, p):
         """ constant_expression_opt : constant_expression
@@ -230,7 +227,7 @@ class UCParser:
         """
         if len(p) == 2:
             p[0] = p[1]
-        elif len(p) == 3:
+        else:
             p[0] = BinaryOp(p[2], p[1], p[3])
 
     def p_cast_expression(self, p):
@@ -242,8 +239,6 @@ class UCParser:
         elif len(p) == 5:
             p[0] = Cast(type=p[2], expr=p[4])
 
-    # Yuji fez, verificar! Aqui acho que pode estar errado no unary_operator (4º caso), não sei
-    # vai puxar o operador corretamente.
     def p_unary_expression(self, p):
         """ unary_expression : postfix_expression
                              | PLUSPLUS unary_expression
@@ -253,7 +248,7 @@ class UCParser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3:
-            p[0] = UnaryOp(p[1], p[2])
+            p[0] = UnaryOp(p[1], p[2], coord=self._token_coord(p, 1))
 
     def p_postfix_expression(self, p):
         """ postfix_expression : primary_expression
@@ -265,9 +260,9 @@ class UCParser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3:
-            p[0] = UnaryOp(p[2], p[1])
+            p[0] = UnaryOp('p'+p[2], p[1], coord=self._token_coord(p, 2))
         elif p[2] == '[':
-            p[0] = ArrayRef(p[1], p[3])
+            p[0] = ArrayRef(p[1], p[3], coord=self._token_coord(p, 1))
         elif p[2] == '(':
             p[0] = FuncCall(p[1], p[3])
 
@@ -367,9 +362,9 @@ class UCParser:
         """
 
         if len(p) == 2:
-            p[0] = DeclList([p[1]])
+            p[0] = [p[1]]
         else:
-            p[0] = p[1] + DeclList([p[3]])
+            p[0] = p[1] + [p[3]]
 
     def p_init_declarator(self, p):
         """ init_declarator : declarator
@@ -470,7 +465,7 @@ class UCParser:
         if len(p) == 3:
             p[0] = Break()
         else:
-            p[0] = Return(value=p[2])
+            p[0] = Return(value=p[2], coord=self._token_coord(p, 1))
 
     def p_assert_statement(self, p):
         """ assert_statement : ASSERT expression SEMI
@@ -480,7 +475,7 @@ class UCParser:
     def p_print_statement(self, p):
         """ print_statement : PRINT LPAREN expression_opt RPAREN SEMI
         """
-        p[0] = Print(expr=p[3])
+        p[0] = Print(expr=p[3], coord=self._token_coord(p, 1))
 
     def p_read_statement(self, p):
         """ read_statement : READ LPAREN argument_expression RPAREN SEMI

@@ -62,29 +62,27 @@ class Node(object):
                 Do you want the coordinates of each Node to be displayed.
         """
 
-        if type(self) not in (DeclList,):
-            lead = ' ' * offset
-            offset += 4
-            if nodenames and _my_node_name is not None:
-                buf.write(lead + self.__class__.__name__ + ' <' + _my_node_name + '>: ')
+        lead = ' ' * offset
+        if nodenames and _my_node_name is not None:
+            buf.write(lead + self.__class__.__name__ + ' <' + _my_node_name + '>: ')
+        else:
+            buf.write(lead + self.__class__.__name__ + ': ')
+
+        if self.attr_names:
+            if attrnames:
+                nvlist = [(n, getattr(self, n)) for n in self.attr_names if getattr(self, n) is not None]
+                attrstr = ', '.join('%s=%s' % nv for nv in nvlist)
             else:
-                buf.write(lead + self.__class__.__name__ + ': ')
+                vlist = [getattr(self, n) for n in self.attr_names]
+                attrstr = ', '.join('%s' % v for v in vlist)
+            buf.write(attrstr)
 
-            if self.attr_names:
-                if attrnames:
-                    nvlist = [(n, getattr(self, n)) for n in self.attr_names if getattr(self, n) is not None]
-                    attrstr = ', '.join('%s=%s' % nv for nv in nvlist)
-                else:
-                    vlist = [getattr(self, n) for n in self.attr_names]
-                    attrstr = ', '.join('%s' % v for v in vlist)
-                buf.write(attrstr)
-
-            if showcoord and self.coord:
-                buf.write('%s' % self.coord)
-            buf.write('\n')
+        if showcoord and self.coord:
+            buf.write('%s' % self.coord)
+        buf.write('\n')
 
         for (child_name, child) in self.children():
-            child.show(buf, offset, attrnames, nodenames, showcoord, child_name)
+            child.show(buf, offset + 4, attrnames, nodenames, showcoord, child_name)
 
 
 class ArrayDecl(Node):
@@ -102,13 +100,13 @@ class ArrayDecl(Node):
 
     def set_type(self, t):
         self.type = t
-        if self.dir_dec and type(self.dir_dec) is not EmptyStatement:
+        if self.dir_dec:
             self.dir_dec.set_type(t)
 
     def children(self):
-        if self.dir_dec and type(self.dir_dec) is not EmptyStatement:
+        if self.dir_dec:
             yield 'dir_dec', self.dir_dec
-        if self.const_exp and type(self.const_exp) is not EmptyStatement:
+        if self.const_exp:
             yield 'const_exp', self.const_exp
 
     attr_names = ()
@@ -241,7 +239,7 @@ class DeclList(Node):
 class Decl(Node):
     __slots__ = ('decl', 'init', 'name', 'type', 'coord')
 
-    def __init__(self, decl, init, name=None, type=None, coord=None):
+    def __init__(self, decl, init=None, name=None, type=None, coord=None):
         self.decl = decl
         self.init = init
         self.name = name
@@ -250,6 +248,9 @@ class Decl(Node):
 
         if self.decl:
             self.name = self.decl.name
+
+        if self.type:
+            self.set_type(self.type)
 
     def set_type(self, t):
         self.type = t
@@ -270,6 +271,9 @@ class EmptyStatement(Node):
 
     def __init__(self, coord=None):
         self.coord = coord
+
+    def __bool__(self):
+        return False
 
     def children(self):
         return []
@@ -298,7 +302,7 @@ class For(Node):
     __slots__ = ('p1', 'p2', 'p3', 'statement', 'coord')
 
     def __init__(self, p1, p2, p3, statement, coord=None):
-        self.p1 = p1
+        self.p1 = DeclList(p1)
         self.p2 = p2
         self.p3 = p3
         self.statement = statement
@@ -335,26 +339,33 @@ class FuncCall(Node):
 
 
 class FuncDecl(Node):
-    __slots__ = ('expr1', 'expr2', 'type', 'coord')
+    __slots__ = ('decl', 'init', 'type', 'name', 'coord')
 
-    def __init__(self, expr1, expr2, type=None, coord=None):
-        self.expr1 = expr1
-        self.expr2 = expr2
+    def __init__(self, decl, init, type=None, name=None, coord=None):
+        self.decl = decl
+        self.init = init
         self.type = type
+        self.name = name
         self.coord = coord
+
+        if self.decl:
+            self.name = self.decl.name
 
     def set_type(self, t):
         self.type = t
 
+        if self.decl:
+            self.decl.set_type(t)
+
     def children(self):
-        if self.expr1:
-            yield 'expr1', self.expr1
-        if self.expr2:
-            if type(self.expr2) == list:
-                for i, e in enumerate(self.expr2):
-                    yield 'expr2[%d]' % i, e
+        if self.decl:
+            yield 'decl', self.decl
+        if self.init:
+            if type(self.init) == list:
+                for i, e in enumerate(self.init):
+                    yield 'init[%d]' % i, e
             else:
-                yield 'expr2', self.expr2
+                yield 'init', self.init
 
     attr_names = ()
 
@@ -364,10 +375,13 @@ class FuncDef(Node):
 
     def __init__(self, type, decl, decl_list, compound, coord=None):
         self.type = type
-        self.decl = decl
+        self.decl = Decl(decl, type=type)
         self.decl_list = decl_list
         self.compound = compound
         self.coord = coord
+
+        if self.type and self.decl:
+            self.decl.set_type(type)
 
     def children(self):
         if self.type:
@@ -391,7 +405,8 @@ class GlobalDecl(Node):
 
     def children(self):
         if self.decl:
-            yield 'decl', self.decl
+            for i, d in enumerate(self.decl):
+                yield 'decl[%d]' % i, d
 
     attr_names = ()
 
@@ -416,7 +431,7 @@ class If(Node):
     attr_names = ()
 
 
-class Id(Node):
+class ID(Node):
     __slots__ = ('name', 'coord')
 
     def __init__(self, name, coord=None):
@@ -484,7 +499,8 @@ class Program(Node):
 
     def children(self):
         if self.decl_list:
-            yield 'decl_list', self.decl_list
+            for i, d in enumerate(self.decl_list):
+                yield 'decl_list[%d]' % i, d
 
     attr_names = ()
 
@@ -593,8 +609,8 @@ class BinaryOp(Node):
         self.coord = coord
 
     def children(self):
-        if self.op:
-            yield 'op', self.op
+        # if self.op:
+        #     yield 'op', self.op
         if self.expr1:
             yield 'expr1', self.expr1
         if self.expr2:
