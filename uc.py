@@ -7,7 +7,7 @@
 # to read and write to, and invokes the different stages of
 # the compiler proper.
 # ============================================================
-
+import re
 import sys
 from contextlib import contextmanager
 from uc_parser import UCParser
@@ -182,7 +182,7 @@ def run_compiler():
         open_files = []
         ast_file = None
         if emit_ast and not susy:
-            ast_filename = source_filename[:-3] + '.ast'
+            ast_filename = re.sub(r'.*/([^/]*$)', r'\1', source_filename[:-3]) + '.ast'
             print("Outputting the AST to %s." % (outputdir + ast_filename))
             ast_file = open(outputdir + ast_filename, 'w')
             open_files.append(ast_file)

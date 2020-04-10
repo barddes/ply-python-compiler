@@ -75,7 +75,7 @@ class Node(object):
         if nodenames and _my_node_name is not None:
             buf.write(lead + self.__class__.__name__ + ' <' + _my_node_name + '>:')
         else:
-            buf.write(lead + self.__class__.__name__ + ': ')
+            buf.write(lead + self.__class__.__name__ + ':')
 
         if self.attr_names:
             if attrnames:
@@ -84,9 +84,11 @@ class Node(object):
             else:
                 vlist = [getattr(self, n) for n in self.attr_names]
                 attrstr = ', '.join('%s' % v for v in vlist)
-            buf.write(attrstr)
+            buf.write(' ' + attrstr)
 
         if showcoord and self.coord:
+            if not self.attr_names:
+                buf.write(' ')
             buf.write('%s' % self.coord)
         buf.write('\n')
 
@@ -623,7 +625,7 @@ class While(Node):
 
     def children(self):
         if self.expr:
-            yield 'decl', self.expr
+            yield 'expr', self.expr
         if self.statement:
             yield 'statement', self.statement
 

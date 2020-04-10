@@ -74,7 +74,7 @@ class UCParser:
     def p_program(self, p):
         """ program : global_declaration_list
         """
-        p[0] = Program(decl_list=p[1], coord=self._token_coord(p, 1))
+        p[0] = Program(decl_list=p[1])
 
         self.last_generated_tree = p[0]
 
@@ -450,7 +450,7 @@ class UCParser:
                                 | FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement
         """
         if len(p) == 6:
-            p[0] = While(expr=p[2], statement=p[5])
+            p[0] = While(expr=p[3], statement=p[5], coord=self._token_coord(p, 1))
         elif len(p) == 9:
             p[0] = For(p1=DeclList(p[3], coord=self._token_coord(p, 1)), p2=p[4], p3=p[6], statement=p[8], coord=self._token_coord(p, 1))
         else:
