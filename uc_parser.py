@@ -60,7 +60,7 @@ class UCParser:
         return self.parse(**kwargs)
 
     def parse(self, source, **kwargs):
-        self.lexer.scan(source)
+        # self.lexer.scan(source)
         self.parser.parse(source, lexer=self.lexer.lexer, **kwargs)
         return self.last_generated_tree
 
@@ -104,7 +104,7 @@ class UCParser:
         if len(p) == 5:
             p[0] = FuncDef(p[1], p[2], p[3], p[4])
         else:
-            p[0] = FuncDef(Type(['void']), p[1], p[2], p[3])
+            p[0] = FuncDef(None, p[1], p[2], p[3])
 
     def p_declaration_list(self, p):
         """ declaration_list : declaration
@@ -248,7 +248,7 @@ class UCParser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3:
-            p[0] = UnaryOp(p[1], p[2], coord=self._token_coord(p, 1))
+            p[0] = UnaryOp(p[1], p[2])
 
     def p_postfix_expression(self, p):
         """ postfix_expression : primary_expression
@@ -260,9 +260,9 @@ class UCParser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3:
-            p[0] = UnaryOp('p'+p[2], p[1], coord=self._token_coord(p, 2))
+            p[0] = UnaryOp('p'+p[2], p[1])
         elif p[2] == '[':
-            p[0] = ArrayRef(p[1], p[3], coord=self._token_coord(p, 1))
+            p[0] = ArrayRef(p[1], p[3])
         elif p[2] == '(':
             p[0] = FuncCall(p[1], p[3])
 
@@ -334,7 +334,7 @@ class UCParser:
                            | MINUS
                            | EXMARK
         """
-        p[0] = Assignment(p[1])
+        p[0] = Assignment(p[1], coord=self._token_coord(p, 1))
 
     def p_parameter_list(self, p):
         """ parameter_list : parameter_declaration
@@ -390,7 +390,7 @@ class UCParser:
                              | initializer_list COMMA initializer
         """
         if len(p) == 2:
-            p[0] = InitList([p[1]])
+            p[0] = InitList([p[1]], coord=p[1].coord)
         else:
             p[0] = p[1] + InitList([p[3]])
 
@@ -454,9 +454,9 @@ class UCParser:
         if len(p) == 6:
             p[0] = While(expr=p[2], statement=p[5])
         elif len(p) == 9:
-            p[0] = For(p1=p[3], p2=p[4], p3=p[6], statement=p[8])
+            p[0] = For(p1=p[3], p2=p[4], p3=p[6], statement=p[8], coord=self._token_coord(p, 1))
         else:
-            p[0] = For(p1=p[3], p2=p[5], p3=p[7], statement=p[9])
+            p[0] = For(p1=p[3], p2=p[5], p3=p[7], statement=p[9], coord=self._token_coord(p, 1))
 
     def p_jump_statement(self, p):
         """ jump_statement : BREAK SEMI

@@ -48,6 +48,14 @@ class Node(object):
         result += indent + ')'
         return result
 
+    @staticmethod
+    def _token_coord(p, token_idx):
+        last_cr = p.lexer.lexdata.rfind('\n', 0, p.lexpos(token_idx))
+        if last_cr < 0:
+            last_cr = -1
+        column = (p.lexpos(token_idx) - last_cr)
+        return Coord(p.lineno(token_idx), column)
+
     def show(self, buf=sys.stdout, offset=0, attrnames=False, nodenames=False, showcoord=False, _my_node_name=None):
         """ Pretty print the Node and all its attributes and children (recursively) to a buffer.
             buf:
@@ -136,6 +144,9 @@ class ArrayRef(Node):
         self.post_expr = post_expr
         self.expr = expr
         self.coord = coord
+
+        if not self.coord:
+            self.coord = self.post_expr.coord
 
     def children(self):
         if self.post_expr is not None:
@@ -302,7 +313,7 @@ class For(Node):
     __slots__ = ('p1', 'p2', 'p3', 'statement', 'coord')
 
     def __init__(self, p1, p2, p3, statement, coord=None):
-        self.p1 = DeclList(p1)
+        self.p1 = DeclList(p1, coord=coord)
         self.p2 = p2
         self.p3 = p3
         self.statement = statement
@@ -374,11 +385,14 @@ class FuncDef(Node):
     __slots__ = ('type', 'decl', 'decl_list', 'compound', 'coord')
 
     def __init__(self, type, decl, decl_list, compound, coord=None):
-        self.type = type
+        self.type = type if type else Type(['void'])
         self.decl = Decl(decl, type=type)
         self.decl_list = decl_list
         self.compound = compound
         self.coord = coord
+
+        if self.type:
+            self.compound.coord = self.type.coord
 
         if self.type and self.decl:
             self.decl.set_type(type)
@@ -452,7 +466,7 @@ class InitList(Node):
         self.coord = coord
 
     def __add__(self, other):
-        return InitList(self.list + other.list)
+        return InitList(self.list + other.list, coord=self.coord)
 
     def children(self):
         if self.list:
@@ -608,6 +622,9 @@ class BinaryOp(Node):
         self.expr2 = expr2
         self.coord = coord
 
+        if not self.coord:
+            self.coord = self.expr1.coord
+
     def children(self):
         # if self.op:
         #     yield 'op', self.op
@@ -626,6 +643,9 @@ class UnaryOp(Node):
         self.op = op
         self.expr1 = expr1
         self.coord = coord
+
+        if not self.coord:
+            self.coord = self.expr1.coord
 
     def children(self):
         # if self.op:
