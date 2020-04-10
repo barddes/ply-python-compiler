@@ -242,7 +242,7 @@ class Decl(Node):
         if self.declarations:
             yield 'declarations', self.declarations
 
-    attr_names = ('type', 'declarations')
+    attr_names = ()
 
 
 class EmptyStatement(Node):
@@ -472,7 +472,7 @@ class PtrDecl(Node):
         if self.value:
             yield 'value', self.value
 
-    attr_names = ('values',)
+    attr_names = ('value',)
 
 
 class Read(Node):

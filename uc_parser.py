@@ -154,9 +154,9 @@ class UCParser:
                         | TIMES empty
         """
         if type(p[2]) is not EmptyStatement:
-            p[0] = ('*', p[2][1] + 1)
+            p[0] = PtrDecl(p[2])
         else:
-            p[0] = ('*', 1)
+            p[0] = PtrDecl(p[2])
 
     def p_pointer(self, p):
         """ pointer : pointer_opt
@@ -371,7 +371,7 @@ class UCParser:
         if len(p) == 2:
             p[0] = DeclList([p[1]])
         else:
-            p[0] = p[1] + DeclList([p[2]])
+            p[0] = p[1] + DeclList([p[3]])
 
     def p_init_declarator(self, p):
         """ init_declarator : declarator
