@@ -120,23 +120,6 @@ class ArrayDecl(Node):
     attr_names = ()
 
 
-class ParamDecl(Node):
-    __slots__ = ('type', 'decl', 'coord')
-
-    def __init__(self, type, decl, coord=None):
-        self.type = type
-        self.decl = decl
-        self.coord = coord
-
-    def children(self):
-        if self.type:
-            yield 'type', self.type
-        if self.decl:
-            yield 'decl', self.decl
-
-    attr_names = ('decl',)
-
-
 class ArrayRef(Node):
     __slots__ = ('post_expr', 'expr', 'coord')
 
@@ -207,7 +190,8 @@ class Compound(Node):
 
     def children(self):
         if self.decl_list:
-            yield 'decl_list', self.decl_list
+            for i, d in enumerate(self.decl_list):
+                yield 'decl_list[%d]' % i, d
         if self.stmt_list:
             for i, s in enumerate(self.stmt_list):
                 yield 'stmt_list[%d]' % i, s
@@ -369,14 +353,15 @@ class FuncDecl(Node):
             self.decl.set_type(t)
 
     def children(self):
-        if self.decl:
-            yield 'decl', self.decl
         if self.init:
             if type(self.init) == list:
                 for i, e in enumerate(self.init):
                     yield 'init[%d]' % i, e
             else:
                 yield 'init', self.init
+
+        if self.decl:
+            yield 'decl', self.decl
 
     attr_names = ()
 
@@ -477,15 +462,19 @@ class InitList(Node):
 
 
 class ParamList(Node):
-    __slots__ = ('values', 'coord')
+    __slots__ = ('list', 'coord')
 
-    def __init__(self, values, coord=None):
-        self.values = values
+    def __init__(self, list, coord=None):
+        self.list = list
         self.coord = coord
 
+    def __add__(self, other):
+        return ParamList(self.list + other.list)
+
     def children(self):
-        if self.values:
-            yield 'values', self.values
+        if self.list:
+            for i, e in enumerate(self.list):
+                yield 'list[%d]' % i, e
 
     attr_names = ()
 
@@ -648,8 +637,6 @@ class UnaryOp(Node):
             self.coord = self.expr1.coord
 
     def children(self):
-        # if self.op:
-        #     yield 'op', self.op
         if self.expr1:
             yield 'expr1', self.expr1
 
@@ -657,14 +644,19 @@ class UnaryOp(Node):
 
 
 class Assignment(Node):
-    __slots__ = ('op', 'coord')
+    __slots__ = ('op', 'name', 'func_call', 'coord')
 
-    def __init__(self, op, coord=None):
+    def __init__(self, op, name, func_call, coord=None):
         self.op = op
+        self.name = name
+        self.func_call = func_call
         self.coord = coord
 
     def children(self):
-        return []
+        if self.name:
+            yield 'name', self.name
+        if self.func_call:
+            yield 'func_call', self.func_call
 
     attr_names = ('op',)
 

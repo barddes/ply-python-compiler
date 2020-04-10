@@ -111,18 +111,15 @@ class UCParser:
                              | declaration_list declaration
         """
         if len(p) == 2:
-            p[0] = [p[1]]
+            p[0] = p[1]
         else:
-            p[0] = p[1] + [p[2]]
+            p[0] = p[1] + p[2]
 
     def p_declaration_list_opt(self, p):
         """ declaration_list_opt : declaration_list
                                  | empty
         """
-        if len(p) == 2:
-            p[0] = p[1]
-        else:
-            p[0] = None
+        p[0] = p[1]
 
     def p_type_specifier(self, p):
         """ type_specifier : VOID
@@ -315,7 +312,7 @@ class UCParser:
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = BinaryOp(p[2], p[1], p[3])
+            p[0] = Assignment(p[2], p[1], p[3])
 
     def p_assignment_operator(self, p):
         """ assignment_operator : EQUALS
@@ -325,7 +322,7 @@ class UCParser:
                                 | PLUSEQUALS
                                 | MINUSEQUALS
         """
-        p[0] = Assignment(p[1])
+        p[0] = p[1]
 
     def p_unary_operator(self, p):
         """ unary_operator : ADDRESS
@@ -334,21 +331,22 @@ class UCParser:
                            | MINUS
                            | EXMARK
         """
-        p[0] = Assignment(p[1], coord=self._token_coord(p, 1))
+        p[0] = p[1]
 
     def p_parameter_list(self, p):
         """ parameter_list : parameter_declaration
                            | parameter_list COMMA parameter_declaration
         """
         if len(p) == 2:
-            p[0] = [p[1]]
+            p[0] = ParamList([p[1]])
         else:
-            p[0] = p[1] + [p[2]]
+            p[0] = p[1] + ParamList([p[2]])
 
     def p_parameter_declaration(self, p):
         """ parameter_declaration : type_specifier declarator
         """
-        p[0] = ParamDecl(p[1], p[2])
+        p[2].set_type(p[1])
+        p[0] = Decl(p[2])
 
     def p_init_declarator_list_opt(self, p):
         """ init_declarator_list_opt : init_declarator_list
