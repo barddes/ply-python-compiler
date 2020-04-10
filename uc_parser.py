@@ -1,6 +1,5 @@
 import ply.yacc as yacc
 
-from node_visitor import NodeVisitor
 from objects import *
 from uc_lexer import UCLexer
 from functools import partial as bind
@@ -162,6 +161,10 @@ class UCParser:
             p[0] = p[2]
         elif p[2] == '[':
             p[0] = ArrayDecl(p[1], p[3])
+
+            if type(p[1]) == ArrayDecl:
+                p[0].const_exp = p[1].const_exp
+                p[1].const_exp = p[3]
         else:
             p[0] = FuncDecl(p[1], p[3])
 
