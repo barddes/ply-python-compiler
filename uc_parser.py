@@ -134,6 +134,9 @@ class UCParser:
         """
         if len(p) == 2:
             p[0] = p[1]
+
+            if type(p[0]) == ArrayDecl:
+                p[0] = self.invert_array_decl(p[0])
         else:
             p[0] = PtrDecl(p[1], p[2])
 
@@ -161,10 +164,6 @@ class UCParser:
             p[0] = p[2]
         elif p[2] == '[':
             p[0] = ArrayDecl(p[1], p[3])
-
-            if type(p[1]) == ArrayDecl:
-                p[0].const_exp = p[1].const_exp
-                p[1].const_exp = p[3]
         else:
             p[0] = FuncDecl(p[1], p[3])
 
@@ -486,6 +485,22 @@ class UCParser:
         """
         last_cr = self.lexer.lexdata.rfind('\n', 0, token.lexpos)
         return token.lexpos - last_cr
+
+    def invert_array_decl(self, p):
+        arrays = []
+
+        while type(p) == ArrayDecl:
+            arrays.append(p)
+            p = p.dir_dec
+
+        arrays.reverse()
+        for i in range(len(arrays)):
+            if i == len(arrays) - 1:
+                arrays[i].dir_dec = p
+            else:
+                arrays[i].dir_dec = arrays[i+1]
+
+        return arrays[0]
 
 
 if __name__ == '__main__':
