@@ -3,6 +3,8 @@ import sys
 
 from uc_sema import Environment
 from uc_type import uCType
+from uc_type import IntType, FloatType, CharType, BoolType, ArrayType, StringType, PtrType, VoidType
+
 
 
 class Coord(object):
@@ -37,10 +39,10 @@ class Node(object):
     just enough space in each instance to hold a value for each variable.
     Space is saved because __dict__ is not created for each instance.
     """
-    __slots__ = ('type', 'env', 'global_env')
+    __slots__ = ('name_type', 'env', 'global_env')
 
-    def __init__(self, type: uCType = None, env: Environment = None, global_env: Environment = None):
-        self.type = type
+    def __init__(self, name_type: uCType = None, env: Environment = None, global_env: Environment = None):
+        self.name_type = name_type
         self.env = env
         self.global_env = global_env
 
@@ -125,7 +127,7 @@ class ArrayDecl(Node):
     __slots__ = ('dir_dec', 'const_exp', 'type', 'name', 'coord')
 
     def __init__(self, dir_dec, const_exp, type=None, name=None, coord: Coord = None):
-        super().__init__(type)
+        super().__init__()
         self.dir_dec = dir_dec
         self.const_exp = const_exp
         self.type = type
@@ -199,7 +201,7 @@ class Cast(Node):
     __slots__ = ('type', 'expr', 'coord')
 
     def __init__(self, type, expr, coord: Coord = None):
-        super().__init__(type)
+        super().__init__()
         self.type = type
         self.expr = expr
         self.coord = coord
@@ -237,7 +239,14 @@ class Constant(Node):
     __slots__ = ('type', 'value', 'coord')
 
     def __init__(self, type, value, coord: Coord = None):
-        super().__init__(type)
+        super().__init__()
+        self.name_type = {
+            'int': IntType,
+            'char': CharType,
+            'float': FloatType,
+            'str': StringType
+        }[type]
+
         if type == 'str':
             type = 'string'
             value = '"' + value + '"'
@@ -274,7 +283,7 @@ class Decl(Node):
     __slots__ = ('decl', 'init', 'name', 'type', 'coord')
 
     def __init__(self, decl, init=None, name=None, type=None, coord: Coord = None):
-        super().__init__(type)
+        super().__init__()
         self.decl = decl
         self.init = init
         self.name = name
@@ -391,7 +400,7 @@ class FuncDecl(Node):
     __slots__ = ('decl', 'init', 'type', 'name', 'coord')
 
     def __init__(self, decl, init, type=None, name=None, coord: Coord = None):
-        super().__init__(type)
+        super().__init__()
         self.decl = decl
         self.init = init
         self.type = type
@@ -425,7 +434,7 @@ class FuncDef(Node):
     __slots__ = ('type', 'decl', 'decl_list', 'compound', 'coord')
 
     def __init__(self, type, decl, decl_list, compound, coord: Coord = None):
-        super().__init__(type)
+        super().__init__()
         self.type = type if type else Type(['void'])
         self.decl = Decl(decl, type=type)
         self.decl_list = decl_list
@@ -585,7 +594,7 @@ class PtrDecl(Node):
     __slots__ = ('value', 'type', 'coord')
 
     def __init__(self, value, type=None, coord: Coord = None):
-        super().__init__(type)
+        super().__init__()
         self.value = value
         self.type = type
         self.coord = coord
@@ -648,7 +657,7 @@ class VarDecl(Node):
     __slots__ = ('name', 'type', 'coord')
 
     def __init__(self, name, type=None, coord: Coord = None):
-        super().__init__(type)
+        super().__init__()
         self.name = name
         self.type = type
         self.coord = coord

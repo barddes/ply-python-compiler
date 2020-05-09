@@ -157,6 +157,27 @@ class Visitor(NodeVisitor):
         self.global_env = Environment()
         self.global_symtable = self.global_env.symtable
 
+    def BinaryOp_check(self, node):
+        expr1 = node.expr1
+        expr2 = node.expr2
+        op = node.op
+
+        if expr1.name_type.typename != expr2.name_type.typename:
+            assert False, ("Error. ",expr1.name_type.typename, op, expr2.name_type.typename)
+
+        if op not in expr1.name_type.binary_ops or op not in expr2.name_type.binary_ops:
+            assert False, ("Error (unsupported op", op, ")")
+
+        return expr1
+
+    def UnaryOp_check(self, node):
+        expr1 = node.expr1
+        op = node.op
+
+        if op not in expr1.name_type.binary_ops:
+            assert False, ("Error (unsupported op", op, ")")
+
+
     def visit_Program(self, node: Program):
         node.env = self.global_env
         node.global_env = self.global_env
@@ -171,15 +192,12 @@ class Visitor(NodeVisitor):
         # 1. Make sure left and right operands have the same type
         # 2. Make sure the operation is supported
         # 3. Assign the result type
-
-        # self.visit(node.left)
-        # self.visit(node.right)
-        # node.node_type = node.left.type
-
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        node.node_type = self.BinaryOp_check(node)
 
     def visit_Assignment(self, node: Assignment):
         # ## 1. Make sure the location of the assignment is defined
