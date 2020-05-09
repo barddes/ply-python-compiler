@@ -242,11 +242,11 @@ class Visitor(NodeVisitor):
     def visit_Type(self, node):
         pass
 
+    def visit_UnaryOp(self, node):
+        pass
+
     def visit_VarDecl(self, node):
         pass
 
     def visit_While(self, node):
-        pass
-
-    def visit_UnaryOp(self, node):
         pass

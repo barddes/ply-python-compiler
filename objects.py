@@ -17,6 +17,8 @@ class Node(object):
     """
     __slots__ = ()
 
+    node_type = None
+
     def children(self):
         """ A sequence of all children that are Nodes. """
         return []
