@@ -361,9 +361,9 @@ class UCParser:
                             | declarator EQUALS initializer
         """
         if len(p) == 2:
-            p[0] = Decl(p[1], EmptyStatement())
+            p[0] = Decl(decl=p[1], init=EmptyStatement())
         else:
-            p[0] = Decl(p[1], p[3])
+            p[0] = Decl(decl=p[1], init=p[3])
 
     def p_initializer(self, p):
         """ initializer : assignment_expression

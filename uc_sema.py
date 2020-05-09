@@ -1,3 +1,6 @@
+from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, BinaryOp, Assignment, ArrayDecl, \
+    ArrayRef, Assert, Break, Cast, Compound, Constant, DeclList, EmptyStatement, ExprList, For, FuncCall, FuncDecl, \
+    FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl
 from uc_type import IntType, FloatType, CharType, BoolType, ArrayType, StringType, PtrType, VoidType
 
 
@@ -154,7 +157,7 @@ class Visitor(NodeVisitor):
         self.global_env = Environment()
         self.global_symtable = self.global_env.symtable
 
-    def visit_Program(self, node):
+    def visit_Program(self, node: Program):
         node.env = self.global_env
         node.global_env = self.global_env
         node.type = None
@@ -164,7 +167,7 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_BinaryOp(self, node):
+    def visit_BinaryOp(self, node: BinaryOp):
         # 1. Make sure left and right operands have the same type
         # 2. Make sure the operation is supported
         # 3. Assign the result type
@@ -178,7 +181,7 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Assignment(self, node):
+    def visit_Assignment(self, node: Assignment):
         # ## 1. Make sure the location of the assignment is defined
         # sym = self.symtab.lookup(node.location)
         # assert sym, "Assigning to unknown sym"
@@ -191,37 +194,37 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_ArrayDecl(self, node):
+    def visit_ArrayDecl(self, node: ArrayDecl):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_ArrayRef(self, node):
+    def visit_ArrayRef(self, node: ArrayRef):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Assert(self, node):
+    def visit_Assert(self, node: Assert):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Break(self, node):
+    def visit_Break(self, node: Break):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Cast(self, node):
+    def visit_Cast(self, node: Cast):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Compound(self, node):
+    def visit_Compound(self, node: Compound):
         node.env = Environment(merge_with=node.env)
 
         for i, d in node.children():
@@ -229,37 +232,39 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Constant(self, node):
+    def visit_Constant(self, node: Constant):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_DeclList(self, node):
+    def visit_DeclList(self, node: DeclList):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Decl(self, node):
+    def visit_Decl(self, node: Decl):
+        node.env.symtable.add(node.name, node.init)
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_EmptyStatement(self, node):
+    def visit_EmptyStatement(self, node: EmptyStatement):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_ExprList(self, node):
+    def visit_ExprList(self, node: ExprList):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_For(self, node):
+    def visit_For(self, node: For):
         node.env = Environment(merge_with=node.env)
 
         for i, d in node.children():
@@ -267,19 +272,19 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_FuncCall(self, node):
+    def visit_FuncCall(self, node: FuncCall):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_FuncDecl(self, node):
+    def visit_FuncDecl(self, node: FuncDecl):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_FuncDef(self, node):
+    def visit_FuncDef(self, node: FuncDef):
         node.env = Environment()
 
         for i, d in node.children():
@@ -287,13 +292,13 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_GlobalDecl(self, node):
+    def visit_GlobalDecl(self, node: GlobalDecl):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_If(self, node):
+    def visit_If(self, node: If):
         node.env = Environment(merge_with=node.env)
 
         for i, d in node.children():
@@ -301,67 +306,67 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_ID(self, node):
+    def visit_ID(self, node: ID):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_InitList(self, node):
+    def visit_InitList(self, node: InitList):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_ParamList(self, node):
+    def visit_ParamList(self, node: ParamList):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Print(self, node):
+    def visit_Print(self, node: Print):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_PtrDecl(self, node):
+    def visit_PtrDecl(self, node: PtrDecl):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Read(self, node):
+    def visit_Read(self, node: Read):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Return(self, node):
+    def visit_Return(self, node: Return):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_Type(self, node):
+    def visit_Type(self, node: Type):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_UnaryOp(self, node):
+    def visit_UnaryOp(self, node: UnaryOp):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_VarDecl(self, node):
+    def visit_VarDecl(self, node: VarDecl):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-    def visit_While(self, node):
+    def visit_While(self, node: While):
         node.env = Environment(merge_with=node.env)
 
         for i, d in node.children():
