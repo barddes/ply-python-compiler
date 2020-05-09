@@ -1,6 +1,7 @@
 from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, BinaryOp, Assignment, ArrayDecl, \
     ArrayRef, Assert, Break, Cast, Compound, Constant, DeclList, EmptyStatement, ExprList, For, FuncCall, FuncDecl, \
-    FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl
+    FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node
+from uc_parser import UCParser
 from uc_type import IntType, FloatType, CharType, BoolType, ArrayType, StringType, PtrType, VoidType
 
 
@@ -40,7 +41,7 @@ class NodeVisitor(object):
 
     _method_cache = None
 
-    def visit(self, node):
+    def visit(self, node: Node):
         """ Visit a node.
         """
 
@@ -55,7 +56,7 @@ class NodeVisitor(object):
 
         return visitor(node)
 
-    def generic_visit(self, node):
+    def generic_visit(self, node: Node):
         """ Called if no explicit visitor function exists for a
             node. Implements preorder visiting of the node.
         """
@@ -85,9 +86,9 @@ class SymbolTable(dict):
         else:
             self[name] = value
 
-    def lookup(self, name):
+    def lookup(self, name: str):
         if self.merge_with and name not in self:
-            return self.merge_with.get(name, None)
+            return self.merge_with.lookup(name)
         else:
             return self.get(name, None)
 
@@ -391,3 +392,12 @@ class Visitor(NodeVisitor):
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+if __name__ == '__main__':
+    m = UCParser()
+    ast = m.parse(source=open('teste.c').read(), _=None, debug=True)
+    ast.show()
+
+    visitor = Visitor()
+    visitor.visit(ast)
+    pass

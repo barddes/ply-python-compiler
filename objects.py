@@ -1,7 +1,7 @@
 import copy
 import sys
 
-from uc_sema import Environment
+# from uc_sema import Environment
 from uc_type import uCType
 from uc_type import IntType, FloatType, CharType, BoolType, ArrayType, StringType, PtrType, VoidType
 
@@ -41,7 +41,7 @@ class Node(object):
     """
     __slots__ = ('name_type', 'env', 'global_env')
 
-    def __init__(self, name_type: uCType = None, env: Environment = None, global_env: Environment = None):
+    def __init__(self, name_type: uCType = None, env=None, global_env=None):
         self.name_type = name_type
         self.env = env
         self.global_env = global_env
