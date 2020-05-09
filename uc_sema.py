@@ -155,21 +155,31 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_BinaryOp(self, node):
-
         # 1. Make sure left and right operands have the same type
         # 2. Make sure the operation is supported
         # 3. Assign the result type
-        self.visit(node.left)
-        self.visit(node.right)
-        node.node_type = node.left.type
+
+        # self.visit(node.left)
+        # self.visit(node.right)
+        # node.node_type = node.left.type
+
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Assignment(self, node):
-        ## 1. Make sure the location of the assignment is defined
-        sym = self.symtab.lookup(node.location)
-        assert sym, "Assigning to unknown sym"
-        ## 2. Check that the types match
-        self.visit(node.value)
-        assert sym.type == node.value.type, "Type mismatch in assignment"
+        # ## 1. Make sure the location of the assignment is defined
+        # sym = self.symtab.lookup(node.location)
+        # assert sym, "Assigning to unknown sym"
+        # ## 2. Check that the types match
+        # self.visit(node.value)
+        # assert sym.type == node.value.type, "Type mismatch in assignment"
+
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_ArrayDecl(self, node):
         for i, d in node.children():
