@@ -66,71 +66,81 @@ class SymbolTable(dict):
     for adding and looking up nodes associated with identifiers.
     '''
 
-    def __init__(self, decl=None):
-        super().__init__()
-        self.decl = decl
+    __slots__ = ('merge_with',)
 
-    def add(self, name, value):
+    def __init__(self, merge_with: 'SymbolTable' = None):
+        super().__init__()
+        # self.decl = decl
+        self.merge_with = merge_with
+
+    def add(self, name: str, value):
         self[name] = value
 
-    def lookup(self, name):
-        return self.get(name, None)
+    def set(self, name: str, value):
+        if self.merge_with and name not in self:
+            self.merge_with[name] = value
+        else:
+            self[name] = value
 
-    def return_type(self):
-        if self.decl:
-            return self.decl.returntype
-        return None
+    def lookup(self, name):
+        if self.merge_with and name not in self:
+            return self.merge_with.get(name, None)
+        else:
+            return self.get(name, None)
+
+    # def return_type(self):
+    #     if self.decl:
+    #         return self.decl.returntype
+    #     return None
 
 
 class Environment(object):
-    def __init__(self, copy_from: 'Environment' = None):
-        self.stack = []
+    def __init__(self, merge_with: 'Environment' = None):
+        # self.stack = []
         # self.stack.append(self.symtab)
 
-        self.symtable = SymbolTable()
-        if copy_from:
-            self.symtable.update(copy_from.symtable)
-        else:
-            self.symtable.update({
-                "int": IntType,
-                "float": FloatType,
-                "char": CharType,
-                "bool": BoolType,
-                "array": ArrayType,
-                "string": StringType,
-                "prt": PtrType,
-                "void": VoidType
-            })
+        merge_symtable = None if not merge_with else merge_with.symtable
+        self.symtable = SymbolTable(merge_with=merge_symtable)
+        self.symtable.update({
+            "int": IntType,
+            "float": FloatType,
+            "char": CharType,
+            "bool": BoolType,
+            "array": ArrayType,
+            "string": StringType,
+            "prt": PtrType,
+            "void": VoidType
+        })
 
-    def push(self, enclosure):
-        self.stack.append(SymbolTable(decl=enclosure))
+    # def push(self, enclosure):
+    #     self.stack.append(SymbolTable(decl=enclosure))
 
-    def pop(self):
-        self.stack.pop()
+    # def pop(self):
+    #     self.stack.pop()
 
-    def peek(self):
-        return self.stack[-1]
+    # def peek(self):
+    #     return self.stack[-1]
 
-    def scope_level(self):
-        return len(self.stack)
+    # def scope_level(self):
+    #     return len(self.stack)
 
-    def add_local(self, name, value):
-        self.peek().add(name, value)
+    # def add_local(self, name, value):
+    #     self.peek().add(name, value)
 
-    def add_root(self, name, value):
-        self.root.add(name, value)
+    # def add_root(self, name, value):
+    #     self.root.add(name, value)
 
-    def lookup(self, name):
-        for scope in reversed(self.stack):
-            hit = scope.lookup(name)
-            if hit is not None:
-                return hit
-        return None
+    # def lookup(self, name):
+    #     for scope in reversed(self.stack):
+    #         hit = scope.lookup(name)
+    #         if hit is not None:
+    #             return hit
+    #     return None
 
-    def print(self):
-        for indent, scope in enumerate(reversed(self.stack)):
-            print("Scope for {}".format("ROOT" if scope.decl is None else scope.decl))
-            print(scope, indent=indent * 4, width=20)
+    # def print(self):
+    #     for indent, scope in enumerate(reversed(self.stack)):
+    #         print("Scope for {}".format("ROOT" if scope.decl is None else scope.decl))
+    #         print(scope, indent=indent * 4, width=20)
 
 
 class Visitor(NodeVisitor):
@@ -212,6 +222,8 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_Compound(self, node):
+        node.env = Environment(merge_with=node.env)
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
@@ -248,7 +260,7 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_For(self, node):
-        node.env = Environment(node.env)
+        node.env = Environment(merge_with=node.env)
 
         for i, d in node.children():
             d.env = node.env
@@ -282,6 +294,8 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_If(self, node):
+        node.env = Environment(merge_with=node.env)
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
@@ -348,6 +362,8 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_While(self, node):
+        node.env = Environment(merge_with=node.env)
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
