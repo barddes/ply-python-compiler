@@ -59,22 +59,28 @@ class NodeVisitor(object):
         for c in node:
             self.visit(c)
 
+
 class SymbolTable(dict):
     '''
     Class representing a symbol table.  It should provide functionality
     for adding and looking up nodes associated with identifiers.
     '''
+
     def __init__(self, decl=None):
         super().__init__()
         self.decl = decl
+
     def add(self, name, value):
         self[name] = value
+
     def lookup(self, name):
         return self.get(name, None)
+
     def return_type(self):
         if self.decl:
             return self.decl.returntype
         return None
+
 
 class Environment(object):
     def __init__(self):
@@ -120,9 +126,7 @@ class Environment(object):
     def print(self):
         for indent, scope in enumerate(reversed(self.stack)):
             print("Scope for {}".format("ROOT" if scope.decl is None else scope.decl))
-            pprint(scope, indent=indent*4, width=20)
-
-
+            print(scope, indent=indent * 4, width=20)
 
 
 class Visitor(NodeVisitor):
@@ -131,16 +135,17 @@ class Visitor(NodeVisitor):
     of the form visit_NodeName() for each kind of AST node that you want to process.
     Note: You will need to adjust the names of the AST nodes if you picked different names.
     '''
+
     def __init__(self):
-        # Initialize the symbol table
-        self.symtab = SymbolTable()
-
         # Add built-in type names (int, float, char) to the symbol table
-        self.symtab.add("int",uctype.int_type)
-        self.symtab.add("float",uctype.float_type)
-        self.symtab.add("char",uctype.char_type)
+        self.symtab.add("int", IntType)
+        self.symtab.add("float", FloatType)
+        self.symtab.add("char", CharType)
 
-    def visit_Program(self,node):
+    def visit_Program(self, node):
+        # Initialize the symbol table
+        globa_env = Environment()  # Global scope
+
         # 1. Visit all of the global declarations
         # 2. Record the associated symbol table
         for _decl in node.gdecls:
@@ -161,3 +166,87 @@ class Visitor(NodeVisitor):
         ## 2. Check that the types match
         self.visit(node.value)
         assert sym.type == node.value.type, "Type mismatch in assignment"
+
+    def visit_ArrayDecl(self, node):
+        pass
+
+    def visit_ArrayRef(self, node):
+        pass
+
+    def visit_Assert(self, node):
+        pass
+
+    def visit_Break(self, node):
+        pass
+
+    def visit_Cast(self, node):
+        pass
+
+    def visit_Compound(self, node):
+        pass
+
+    def visit_Constant(self, node):
+        pass
+
+    def visit_DeclList(self, node):
+        pass
+
+    def visit_Decl(self, node):
+        pass
+
+    def visit_EmptyStatement(self, node):
+        pass
+
+    def visit_ExprList(self, node):
+        pass
+
+    def visit_For(self, node):
+        pass
+
+    def visit_FuncCall(self, node):
+        pass
+
+    def visit_FuncDecl(self, node):
+        pass
+
+    def visit_FuncDef(self, node):
+        pass
+
+    def visit_GlobalDecl(self, node):
+        pass
+
+    def visit_If(self, node):
+        pass
+
+    def visit_ID(self, node):
+        pass
+
+    def visit_InitList(self, node):
+        pass
+
+    def visit_ParamList(self, node):
+        pass
+
+    def visit_Print(self, node):
+        pass
+
+    def visit_PtrDecl(self, node):
+        pass
+
+    def visit_Read(self, node):
+        pass
+
+    def visit_Return(self, node):
+        pass
+
+    def visit_Type(self, node):
+        pass
+
+    def visit_VarDecl(self, node):
+        pass
+
+    def visit_While(self, node):
+        pass
+
+    def visit_UnaryOp(self, node):
+        pass
