@@ -11,6 +11,9 @@
 import sys
 from contextlib import contextmanager
 from uc_parser import UCParser
+from uc_sema import Visitor
+from uc_code import GenerateCode
+from uc_interpreter import Interpreter
 
 """
 One of the most important (and difficult) parts of writing a compiler
@@ -68,9 +71,15 @@ def error(lineno, message, filename=None):
     """ Report a compiler error to all subscribers """
     global _num_errors
     if not filename:
-        errmsg = "{}: {}".format(lineno, message)
+        if not lineno:
+            errmsg = "{}".format(message)
+        else:
+            errmsg = "{}: {}".format(lineno, message)
     else:
-        errmsg = "{}:{}: {}".format(filename,lineno,message)
+        if not lineno:
+            errmsg = "{}: {}".format(filename, message)
+        else:
+            errmsg = "{}:{}: {}".format(filename, lineno, message)
     for subscriber in _subscribers:
         subscriber(errmsg)
     _num_errors += 1
@@ -119,22 +128,48 @@ class Compiler:
         """
         self.parser = UCParser()
         self.ast = self.parser.parse(self.code, '', debug)
-        if susy:
-            self.ast.show(showcoord=True)
-        elif ast_file is not None:
-            self.ast.show(buf=ast_file, showcoord=True)
 
-    def _do_compile(self, susy, ast_file, debug):
+    def _sema(self, susy, ast_file):
+        """ Decorate AST with semantic actions. If ast_file != None,
+            or running at susy machine,
+            prints out the abstract syntax tree. """
+        try:
+            self.sema = Visitor()
+            self.sema.visit(self.ast)
+            if not susy and ast_file is not None:
+                self.ast.show(buf=ast_file, showcoord=True)
+        except AssertionError as e:
+            error(None, e)
+
+    def _gencode(self, susy, ir_file):
+        """ Generate uCIR Code for the decorated AST. """
+        self.gen = GenerateCode()
+        self.gen.visit(self.ast)
+        self.gencode = self.gen.code
+        _str = ''
+        if not susy and ir_file is not None:
+            for _code in self.gencode:
+                _str += f"{_code}\n"
+            ir_file.write(_str)
+
+    def _do_compile(self, susy, ast_file, ir_file, debug):
         """ Compiles the code to the given file object. """
         self._parse(susy, ast_file, debug)
+        if not errors_reported():
+            self._sema(susy, ast_file)
+        if not errors_reported():
+            self._gencode(susy, ir_file)
 
-    def compile(self, code, susy, ast_file, debug):
+    def compile(self, code, susy, ast_file, ir_file, run_ir, debug):
         """ Compiles the given code string """
         self.code = code
-        with subscribe_errors(lambda msg: sys.stderr.write(msg+"\n")):
-            self._do_compile(susy, ast_file, debug)
+        with subscribe_errors(lambda msg: sys.stderr.write(msg + "\n")):
+            self._do_compile(susy, ast_file, ir_file, debug)
             if errors_reported():
                 sys.stderr.write("{} error(s) encountered.".format(errors_reported()))
+            elif run_ir:
+                self.vm = Interpreter()
+                self.vm.run(self.gencode)
         return 0
 
 
@@ -142,10 +177,12 @@ def run_compiler():
     """ Runs the command-line compiler. """
 
     if len(sys.argv) < 2:
-        print("Usage: ./uc.py <source-file> [-at-susy] [-no-ast] [-debug]")
+        print("Usage: ./uc <source-file> [-at-susy] [-no-ast] [-no-ir] [-no-run] [-debug]")
         sys.exit(1)
 
     emit_ast = True
+    emit_ir = True
+    run_ir = True
     susy = False
     debug = False
 
@@ -156,8 +193,12 @@ def run_compiler():
         if param[0] == '-':
             if param == '-no-ast':
                 emit_ast = False
+            elif param == '-no-ir':
+                emit_ir = False
             elif param == '-at-susy':
                 susy = True
+            elif param == '-no-run':
+                run_ir = False
             elif param == '-debug':
                 debug = True
             else:
@@ -172,6 +213,7 @@ def run_compiler():
             source_filename = file + '.uc'
 
         open_files = []
+
         ast_file = None
         if emit_ast and not susy:
             ast_filename = source_filename[:-3] + '.ast'
@@ -179,11 +221,18 @@ def run_compiler():
             ast_file = open(ast_filename, 'w')
             open_files.append(ast_file)
 
+        ir_file = None
+        if emit_ir and not susy:
+            ir_filename = source_filename[:-3] + '.ir'
+            print("Outputting the uCIR to %s." % ir_filename)
+            ir_file = open(ir_filename, 'w')
+            open_files.append(ir_file)
+
         source = open(source_filename, 'r')
         code = source.read()
         source.close()
 
-        retval = Compiler().compile(code, susy, ast_file, debug)
+        retval = Compiler().compile(code, susy, ast_file, ir_file, run_ir, debug)
         for f in open_files:
             f.close()
         if retval != 0:
