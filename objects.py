@@ -1,6 +1,28 @@
 import copy
 import sys
 
+from uc_sema import Environment
+from uc_type import uCType
+
+
+class Coord(object):
+    """ Coordinates of a syntactic element. Consists of:
+            - Line number
+            - (optional) column number, for the Lexer
+    """
+    __slots__ = ('line', 'column')
+
+    def __init__(self, line, column=None):
+        self.line = line
+        self.column = column
+
+    def __str__(self):
+        if self.line:
+            coord_str = "   @ %s:%s" % (self.line, self.column)
+        else:
+            coord_str = ""
+        return coord_str
+
 
 class Node(object):
     """
@@ -15,9 +37,12 @@ class Node(object):
     just enough space in each instance to hold a value for each variable.
     Space is saved because __dict__ is not created for each instance.
     """
-    __slots__ = ()
+    __slots__ = ('type', 'env', 'global_env')
 
-    node_type = None
+    def __init__(self, type: uCType = None, env: Environment = None, global_env: Environment = None):
+        self.type = type
+        self.env = env
+        self.global_env = global_env
 
     def children(self):
         """ A sequence of all children that are Nodes. """
@@ -99,7 +124,8 @@ class Node(object):
 class ArrayDecl(Node):
     __slots__ = ('dir_dec', 'const_exp', 'type', 'name', 'coord')
 
-    def __init__(self, dir_dec, const_exp, type=None, name=None, coord=None):
+    def __init__(self, dir_dec, const_exp, type=None, name=None, coord: Coord = None):
+        super().__init__(type)
         self.dir_dec = dir_dec
         self.const_exp = const_exp
         self.type = type
@@ -126,7 +152,8 @@ class ArrayDecl(Node):
 class ArrayRef(Node):
     __slots__ = ('post_expr', 'expr', 'coord')
 
-    def __init__(self, post_expr, expr, coord=None):
+    def __init__(self, post_expr, expr, coord: Coord = None):
+        super().__init__()
         self.post_expr = post_expr
         self.expr = expr
         self.coord = coord
@@ -146,7 +173,8 @@ class ArrayRef(Node):
 class Assert(Node):
     __slots__ = ('expr', 'coord')
 
-    def __init__(self, expr, coord=None):
+    def __init__(self, expr, coord: Coord = None):
+        super().__init__()
         self.expr = expr
         self.coord = coord
 
@@ -160,7 +188,8 @@ class Assert(Node):
 class Break(Node):
     __slots__ = ('coord',)
 
-    def __init__(self, coord=None):
+    def __init__(self, coord: Coord = None):
+        super().__init__()
         self.coord = coord
 
     attr_names = ()
@@ -169,7 +198,8 @@ class Break(Node):
 class Cast(Node):
     __slots__ = ('type', 'expr', 'coord')
 
-    def __init__(self, type, expr, coord=None):
+    def __init__(self, type, expr, coord: Coord = None):
+        super().__init__(type)
         self.type = type
         self.expr = expr
         self.coord = coord
@@ -186,7 +216,8 @@ class Cast(Node):
 class Compound(Node):
     __slots__ = ('decl_list', 'stmt_list', 'coord')
 
-    def __init__(self, decl_list, stmt_list, coord=None):
+    def __init__(self, decl_list, stmt_list, coord: Coord = None):
+        super().__init__()
         self.decl_list = decl_list
         self.stmt_list = stmt_list
         self.coord = coord
@@ -205,7 +236,8 @@ class Compound(Node):
 class Constant(Node):
     __slots__ = ('type', 'value', 'coord')
 
-    def __init__(self, type, value, coord=None):
+    def __init__(self, type, value, coord: Coord = None):
+        super().__init__(type)
         if type == 'str':
             type = 'string'
             value = '"' + value + '"'
@@ -222,7 +254,8 @@ class Constant(Node):
 class DeclList(Node):
     __slots__ = ('list', 'coord')
 
-    def __init__(self, list, coord=None):
+    def __init__(self, list, coord: Coord = None):
+        super().__init__()
         self.list = list
         self.coord = coord
 
@@ -240,7 +273,8 @@ class DeclList(Node):
 class Decl(Node):
     __slots__ = ('decl', 'init', 'name', 'type', 'coord')
 
-    def __init__(self, decl, init=None, name=None, type=None, coord=None):
+    def __init__(self, decl, init=None, name=None, type=None, coord: Coord = None):
+        super().__init__(type)
         self.decl = decl
         self.init = init
         self.name = name
@@ -270,7 +304,8 @@ class Decl(Node):
 class EmptyStatement(Node):
     __slots__ = ('coord',)
 
-    def __init__(self, coord=None):
+    def __init__(self, coord: Coord = None):
+        super().__init__()
         self.coord = coord
 
     def __bool__(self):
@@ -285,7 +320,8 @@ class EmptyStatement(Node):
 class ExprList(Node):
     __slots__ = ('expr1', 'expr2', 'coord')
 
-    def __init__(self, expr1, expr2, coord=None):
+    def __init__(self, expr1, expr2, coord: Coord = None):
+        super().__init__()
         self.expr1 = expr1
         self.expr2 = expr2
         self.coord = coord
@@ -305,7 +341,8 @@ class ExprList(Node):
 class For(Node):
     __slots__ = ('p1', 'p2', 'p3', 'statement', 'coord')
 
-    def __init__(self, p1, p2, p3, statement, coord=None):
+    def __init__(self, p1, p2, p3, statement, coord: Coord = None):
+        super().__init__()
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
@@ -332,7 +369,8 @@ class For(Node):
 class FuncCall(Node):
     __slots__ = ('expr1', 'expr2', 'coord')
 
-    def __init__(self, expr1, expr2, coord=None):
+    def __init__(self, expr1, expr2, coord: Coord = None):
+        super().__init__()
         self.expr1 = expr1
         self.expr2 = expr2
         self.coord = coord
@@ -352,7 +390,8 @@ class FuncCall(Node):
 class FuncDecl(Node):
     __slots__ = ('decl', 'init', 'type', 'name', 'coord')
 
-    def __init__(self, decl, init, type=None, name=None, coord=None):
+    def __init__(self, decl, init, type=None, name=None, coord: Coord = None):
+        super().__init__(type)
         self.decl = decl
         self.init = init
         self.type = type
@@ -385,7 +424,8 @@ class FuncDecl(Node):
 class FuncDef(Node):
     __slots__ = ('type', 'decl', 'decl_list', 'compound', 'coord')
 
-    def __init__(self, type, decl, decl_list, compound, coord=None):
+    def __init__(self, type, decl, decl_list, compound, coord: Coord = None):
+        super().__init__(type)
         self.type = type if type else Type(['void'])
         self.decl = Decl(decl, type=type)
         self.decl_list = decl_list
@@ -415,7 +455,8 @@ class FuncDef(Node):
 class GlobalDecl(Node):
     __slots__ = ('decl', 'coord')
 
-    def __init__(self, decl, coord=None):
+    def __init__(self, decl, coord: Coord = None):
+        super().__init__()
         self.decl = decl
         self.coord = coord
 
@@ -430,7 +471,8 @@ class GlobalDecl(Node):
 class If(Node):
     __slots__ = ('expr', 'then', 'elze', 'coord', 'coord_else')
 
-    def __init__(self, expr, then, elze, coord=None, coord_else=None):
+    def __init__(self, expr, then, elze, coord: Coord = None, coord_else: Coord = None):
+        super().__init__()
         self.expr = expr
         self.then = then
         self.elze = elze
@@ -459,7 +501,8 @@ class If(Node):
 class ID(Node):
     __slots__ = ('name', 'coord')
 
-    def __init__(self, name, coord=None):
+    def __init__(self, name, coord: Coord = None):
+        super().__init__()
         self.name = name
         self.coord = coord
 
@@ -472,7 +515,8 @@ class ID(Node):
 class InitList(Node):
     __slots__ = ('list', 'coord')
 
-    def __init__(self, list, coord=None):
+    def __init__(self, list, coord: Coord = None):
+        super().__init__()
         self.list = list
         self.coord = coord
 
@@ -490,7 +534,8 @@ class InitList(Node):
 class ParamList(Node):
     __slots__ = ('list', 'coord')
 
-    def __init__(self, list, coord=None):
+    def __init__(self, list, coord: Coord = None):
+        super().__init__()
         self.list = list
         self.coord = coord
 
@@ -508,7 +553,8 @@ class ParamList(Node):
 class Print(Node):
     __slots__ = ('expr', 'coord')
 
-    def __init__(self, expr, coord=None):
+    def __init__(self, expr, coord: Coord = None):
+        super().__init__()
         self.expr = expr
         self.coord = coord
 
@@ -522,7 +568,8 @@ class Print(Node):
 class Program(Node):
     __slots__ = ('decl_list', 'coord')
 
-    def __init__(self, decl_list, coord=None):
+    def __init__(self, decl_list, coord: Coord = None):
+        super().__init__()
         self.decl_list = decl_list
         self.coord = coord
 
@@ -537,7 +584,8 @@ class Program(Node):
 class PtrDecl(Node):
     __slots__ = ('value', 'type', 'coord')
 
-    def __init__(self, value, type=None, coord=None):
+    def __init__(self, value, type=None, coord: Coord = None):
+        super().__init__(type)
         self.value = value
         self.type = type
         self.coord = coord
@@ -555,7 +603,8 @@ class PtrDecl(Node):
 class Read(Node):
     __slots__ = ('expr', 'coord')
 
-    def __init__(self, expr, coord=None):
+    def __init__(self, expr, coord: Coord = None):
+        super().__init__()
         self.expr = expr
         self.coord = coord
 
@@ -569,7 +618,8 @@ class Read(Node):
 class Return(Node):
     __slots__ = ('value', 'coord')
 
-    def __init__(self, value, coord=None):
+    def __init__(self, value, coord: Coord = None):
+        super().__init__()
         self.value = value
         self.coord = coord
 
@@ -583,7 +633,8 @@ class Return(Node):
 class Type(Node):
     __slots__ = ('names', 'coord')
 
-    def __init__(self, names, coord=None):
+    def __init__(self, names, coord: Coord = None):
+        super().__init__()
         self.names = names
         self.coord = coord
 
@@ -596,7 +647,8 @@ class Type(Node):
 class VarDecl(Node):
     __slots__ = ('name', 'type', 'coord')
 
-    def __init__(self, name, type=None, coord=None):
+    def __init__(self, name, type=None, coord: Coord = None):
+        super().__init__(type)
         self.name = name
         self.type = type
         self.coord = coord
@@ -614,7 +666,8 @@ class VarDecl(Node):
 class While(Node):
     __slots__ = ('expr', 'statement', 'coord')
 
-    def __init__(self, expr, statement, coord=None):
+    def __init__(self, expr, statement, coord: Coord = None):
+        super().__init__()
         self.expr = expr
         self.statement = statement
         self.coord = coord
@@ -635,7 +688,8 @@ class While(Node):
 class BinaryOp(Node):
     __slots__ = ('op', 'expr1', 'expr2', 'coord')
 
-    def __init__(self, op, expr1, expr2, coord=None):
+    def __init__(self, op, expr1, expr2, coord: Coord = None):
+        super().__init__()
         self.op = op
         self.expr1 = expr1
         self.expr2 = expr2
@@ -658,7 +712,8 @@ class BinaryOp(Node):
 class UnaryOp(Node):
     __slots__ = ('op', 'expr1', 'coord')
 
-    def __init__(self, op, expr1, coord=None):
+    def __init__(self, op, expr1, coord: Coord = None):
+        super().__init__()
         self.op = op
         self.expr1 = expr1
         self.coord = coord
@@ -676,7 +731,8 @@ class UnaryOp(Node):
 class Assignment(Node):
     __slots__ = ('op', 'name', 'func_call', 'coord')
 
-    def __init__(self, op, name, func_call, coord=None):
+    def __init__(self, op, name, func_call, coord: Coord = None):
+        super().__init__()
         self.op = op
         self.name = name
         self.func_call = func_call
@@ -692,22 +748,3 @@ class Assignment(Node):
             yield 'func_call', self.func_call
 
     attr_names = ('op',)
-
-
-class Coord(object):
-    """ Coordinates of a syntactic element. Consists of:
-            - Line number
-            - (optional) column number, for the Lexer
-    """
-    __slots__ = ('line', 'column')
-
-    def __init__(self, line, column=None):
-        self.line = line
-        self.column = column
-
-    def __str__(self):
-        if self.line:
-            coord_str = "   @ %s:%s" % (self.line, self.column)
-        else:
-            coord_str = ""
-        return coord_str

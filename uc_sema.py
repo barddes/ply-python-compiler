@@ -83,20 +83,24 @@ class SymbolTable(dict):
 
 
 class Environment(object):
-    def __init__(self):
+    def __init__(self, copy_from: 'Environment' = None):
         self.stack = []
-        self.root = SymbolTable()
-        self.stack.append(self.root)
-        self.root.update({
-            "int": IntType,
-            "float": FloatType,
-            "char": CharType,
-            "bool": BoolType,
-            "array": ArrayType,
-            "string": StringType,
-            "prt": PtrType,
-            "void": VoidType
-        })
+        # self.stack.append(self.symtab)
+
+        self.symtable = SymbolTable()
+        if copy_from:
+            self.symtable.update(copy_from.symtable)
+        else:
+            self.symtable.update({
+                "int": IntType,
+                "float": FloatType,
+                "char": CharType,
+                "bool": BoolType,
+                "array": ArrayType,
+                "string": StringType,
+                "prt": PtrType,
+                "void": VoidType
+            })
 
     def push(self, enclosure):
         self.stack.append(SymbolTable(decl=enclosure))
@@ -137,27 +141,27 @@ class Visitor(NodeVisitor):
     '''
 
     def __init__(self):
-        # Add built-in type names (int, float, char) to the symbol table
-        self.symtab.add("int", IntType)
-        self.symtab.add("float", FloatType)
-        self.symtab.add("char", CharType)
+        self.global_env = Environment()
+        self.global_symtable = self.global_env.symtable
 
     def visit_Program(self, node):
-        # Initialize the symbol table
-        globa_env = Environment()  # Global scope
+        node.env = self.global_env
+        node.global_env = self.global_env
+        node.type = None
 
-        # 1. Visit all of the global declarations
-        # 2. Record the associated symbol table
-        for _decl in node.gdecls:
-            self.visit(_decl)
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_BinaryOp(self, node):
+
         # 1. Make sure left and right operands have the same type
         # 2. Make sure the operation is supported
         # 3. Assign the result type
         self.visit(node.left)
         self.visit(node.right)
-        node.type = node.left.type
+        node.node_type = node.left.type
 
     def visit_Assignment(self, node):
         ## 1. Make sure the location of the assignment is defined
@@ -168,85 +172,173 @@ class Visitor(NodeVisitor):
         assert sym.type == node.value.type, "Type mismatch in assignment"
 
     def visit_ArrayDecl(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_ArrayRef(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Assert(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Break(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Cast(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Compound(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Constant(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_DeclList(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Decl(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_EmptyStatement(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_ExprList(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_For(self, node):
-        pass
+        node.env = Environment(node.env)
+
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_FuncCall(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_FuncDecl(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_FuncDef(self, node):
-        pass
+        node.env = Environment()
+
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_GlobalDecl(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_If(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_ID(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_InitList(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_ParamList(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Print(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_PtrDecl(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Read(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Return(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_Type(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_UnaryOp(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_VarDecl(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
     def visit_While(self, node):
-        pass
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
