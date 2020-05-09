@@ -25,7 +25,7 @@ class UCParser:
         """ Create a new Parser.
         """
         self.error_func = error_func if error_func else self.error
-        self.filename = ''
+        self.filename = ''r
         self.parser = None
         self.lexer = None
 
