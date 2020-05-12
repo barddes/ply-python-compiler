@@ -177,8 +177,10 @@ class Visitor(NodeVisitor):
         expr1 = node.expr1
         op = node.op
 
-        if op not in expr1.name_type.binary_ops:
+        if op not in expr1.name_type.unary_ops:
             print("Error (unsupported op %s)" % op, file=sys.stderr)
+
+        return expr1.name_type
 
     def visit_Program(self, node: Program):
         node.env = self.global_env
@@ -275,16 +277,19 @@ class Visitor(NodeVisitor):
             }[node.type.name[0]]
         }
 
-        if(info['func']==True):
-            print('FUNC')
-
-
+        if info['func']:
+            node.global_env.add_local_var(name, info)
         node.env.add_local_var(name, info)
+
+        node.name_type = info['type']
 
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        if node.init and node.init.name_type != node.name_type:
+            print('Error.  %s = %s' % (node.name_type, node.init.name_type), file=sys.stderr)
 
     def visit_EmptyStatement(self, node: EmptyStatement):
         for i, d in node.children():
@@ -347,10 +352,13 @@ class Visitor(NodeVisitor):
             print("ERROR: Variável '%s' não definida." % name, file=sys.stderr)
             node.env.add_local_var(name, {
                 'func': False,
-                'type': 'void'
+                'type': VoidType
             })
 
-        node.name_type = node.env.lookup(name)['type']
+        if node.env.lookup(name):
+            node.name_type = node.env.lookup(name)['type']
+        else:
+            node.name_type = node.global_env.lookup(name)['type']
 
     def visit_InitList(self, node: InitList):
         for i, d in node.children():
@@ -400,6 +408,8 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
+        node.name_type = self.UnaryOp_check(node)
+
     def visit_VarDecl(self, node: VarDecl):
         for i, d in node.children():
             d.env = node.env
@@ -417,7 +427,7 @@ class Visitor(NodeVisitor):
 
 if __name__ == '__main__':
     m = UCParser()
-    ast = m.parse(source=open('teste.c').read(), _=None, debug=False)
+    ast = m.parse(source=open('teste.c').read(), _=None, debug=True)
     ast.show()
 
     visitor = Visitor()

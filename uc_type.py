@@ -11,6 +11,15 @@ class uCType(object):
         self.rel_ops = rel_ops if rel_ops else set()
         self.assign_ops = assign_ops if assign_ops else set()
 
+    def __eq__(self, other):
+        if self and other:
+            return self.typename == other.typename
+        else:
+            return False
+
+    def __str__(self):
+        return self.typename
+
 
 IntType = uCType("int",
                  unary_ops={"-", "+", "--", "++", "p--", "p++", "*", "&"},
