@@ -78,6 +78,9 @@ class SymbolTable(dict):
         self.merge_with = merge_with
 
     def add(self, name: str, value):
+        if name in self:
+            raise Exception("Variavel '%s' já definida no escopo." % name)
+
         self[name] = value
 
     def set(self, name: str, value):
@@ -128,18 +131,21 @@ class Environment(object):
     # def scope_level(self):
     #     return len(self.stack)
 
-    # def add_local(self, name, value):
-    #     self.peek().add(name, value)
+    def add_local_var(self, name, value):
+        try:
+            self.symtable.add(name, value)
+        except Exception as e:
+            print('ERROR: ' + str(e))
+
 
     # def add_root(self, name, value):
     #     self.root.add(name, value)
 
-    # def lookup(self, name):
-    #     for scope in reversed(self.stack):
-    #         hit = scope.lookup(name)
-    #         if hit is not None:
-    #             return hit
-    #     return None
+    def lookup(self, name):
+        var = self.symtable.lookup(name)
+        if not var:
+            raise Exception("Variável '%s' não definida anteriormente" % name)
+        return var
 
     # def print(self):
     #     for indent, scope in enumerate(reversed(self.stack)):
@@ -158,31 +164,30 @@ class Visitor(NodeVisitor):
         self.global_env = Environment()
         self.global_symtable = self.global_env.symtable
 
-    def BinaryOp_check(self, node):
+    def BinaryOp_check(self, node: BinaryOp):
         expr1 = node.expr1
         expr2 = node.expr2
         op = node.op
 
         if expr1.name_type.typename != expr2.name_type.typename:
-            assert False, ("Error. ",expr1.name_type.typename, op, expr2.name_type.typename)
+            assert False, ("Error. ", expr1.name_type.typename, op, expr2.name_type.typename)
 
         if op not in expr1.name_type.binary_ops or op not in expr2.name_type.binary_ops:
             assert False, ("Error (unsupported op", op, ")")
 
         return expr1
 
-    def UnaryOp_check(self, node):
+    def UnaryOp_check(self, node: UnaryOp):
         expr1 = node.expr1
         op = node.op
 
         if op not in expr1.name_type.binary_ops:
             assert False, ("Error (unsupported op", op, ")")
 
-
     def visit_Program(self, node: Program):
         node.env = self.global_env
         node.global_env = self.global_env
-        node.type = None
+        node.name_type = None
 
         for i, d in node.children():
             d.env = node.env
@@ -198,7 +203,7 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-        node.node_type = self.BinaryOp_check(node)
+        node.name_type = self.BinaryOp_check(node)
 
     def visit_Assignment(self, node: Assignment):
         # ## 1. Make sure the location of the assignment is defined
@@ -264,7 +269,7 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_Decl(self, node: Decl):
-        node.env.symtable.add(node.name, node.init)
+        node.env.add_local_var(node.name, node.init)
 
         for i, d in node.children():
             d.env = node.env
@@ -326,6 +331,11 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_ID(self, node: ID):
+        name = node.name
+        if node.env.lookup(name):
+            # TODO finalizar verificação de IDs nos envs locais e globais
+            pass
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
@@ -393,6 +403,7 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
+
 if __name__ == '__main__':
     m = UCParser()
     ast = m.parse(source=open('teste.c').read(), _=None, debug=True)
@@ -400,4 +411,3 @@ if __name__ == '__main__':
 
     visitor = Visitor()
     visitor.visit(ast)
-    pass
