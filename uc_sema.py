@@ -4,7 +4,7 @@ from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, 
     ArrayRef, Assert, Break, Cast, Compound, Constant, DeclList, EmptyStatement, ExprList, For, FuncCall, FuncDecl, \
     FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node
 from uc_parser import UCParser
-from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType, FuncType
+from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType
 
 
 class NodeVisitor(object):
@@ -265,24 +265,19 @@ class Visitor(NodeVisitor):
     def visit_Decl(self, node: Decl):
         name = node.name.name
         info = {
+            'func': isinstance(node.decl, FuncDecl),
             'type': {
                 'int': IntType,
                 'char': CharType,
                 'float': FloatType,
                 'string': StringType,
-                'void': VoidType,
-                'func': FuncType
+                'void': VoidType
             }[node.type.name[0]]
         }
 
-        # if node.type.name[0] == 'int':
-        #     print ("Int Impresso \n");
+        if(info['func']==True):
+            print('FUNC')
 
-        #descobri o erro, nunca será functype
-        #ja que func type nao eh um tipo
-        #logo nao pode haver o tipo func
-        if node.type.name[0] == 'func':
-            print ("Func Impresso \n");
 
         node.env.add_local_var(name, info)
 
