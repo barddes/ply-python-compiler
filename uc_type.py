@@ -50,3 +50,6 @@ VoidType = uCType("void",
                   unary_ops={"*", "&"},
                   binary_ops={}
                   )
+
+FuncType = uCType("func")
+

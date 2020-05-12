@@ -3,7 +3,7 @@ import sys
 
 # from uc_sema import Environment
 from uc_type import uCType
-from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType
+from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType, FuncType
 
 
 class Coord(object):
