@@ -31,11 +31,6 @@ CharType = uCType("char",
                   rel_ops={"==", "!=", "&&", "||"},
                   )
 
-BoolType = uCType("bool",
-                  unary_ops={"!", "*", "&"},
-                  rel_ops={"==", "!=", "&&", "||"},
-                  )
-
 ArrayType = uCType("array",
                    unary_ops={"*", "&"},
                    rel_ops={"==", "!="}

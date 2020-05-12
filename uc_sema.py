@@ -1,8 +1,10 @@
+import sys
+
 from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, BinaryOp, Assignment, ArrayDecl, \
     ArrayRef, Assert, Break, Cast, Compound, Constant, DeclList, EmptyStatement, ExprList, For, FuncCall, FuncDecl, \
     FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node
 from uc_parser import UCParser
-from uc_type import IntType, FloatType, CharType, BoolType, ArrayType, StringType, PtrType, VoidType
+from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType
 
 
 class NodeVisitor(object):
@@ -112,7 +114,6 @@ class Environment(object):
             "int": IntType,
             "float": FloatType,
             "char": CharType,
-            "bool": BoolType,
             "array": ArrayType,
             "string": StringType,
             "prt": PtrType,
@@ -131,21 +132,17 @@ class Environment(object):
     # def scope_level(self):
     #     return len(self.stack)
 
-    def add_local_var(self, name, value):
+    def add_local_var(self, name, info):
         try:
-            self.symtable.add(name, value)
+            self.symtable.add(name, info)
         except Exception as e:
-            print('ERROR: ' + str(e))
-
+            print('ERROR: ' + str(e), file=sys.stderr)
 
     # def add_root(self, name, value):
     #     self.root.add(name, value)
 
     def lookup(self, name):
-        var = self.symtable.lookup(name)
-        if not var:
-            raise Exception("Variável '%s' não definida anteriormente" % name)
-        return var
+        return self.symtable.lookup(name)
 
     # def print(self):
     #     for indent, scope in enumerate(reversed(self.stack)):
@@ -170,19 +167,18 @@ class Visitor(NodeVisitor):
         op = node.op
 
         if expr1.name_type.typename != expr2.name_type.typename:
-            assert False, ("Error. ", expr1.name_type.typename, op, expr2.name_type.typename)
+            print("Error. ", expr1.name_type.typename, op, expr2.name_type.typename, file=sys.stderr)
+        elif op not in expr1.name_type.binary_ops:
+            print("Error (unsupported op %s)" % op, file=sys.stderr)
 
-        if op not in expr1.name_type.binary_ops or op not in expr2.name_type.binary_ops:
-            assert False, ("Error (unsupported op", op, ")")
-
-        return expr1
+        return expr1.name_type
 
     def UnaryOp_check(self, node: UnaryOp):
         expr1 = node.expr1
         op = node.op
 
         if op not in expr1.name_type.binary_ops:
-            assert False, ("Error (unsupported op", op, ")")
+            print("Error (unsupported op %s)" % op, file=sys.stderr)
 
     def visit_Program(self, node: Program):
         node.env = self.global_env
@@ -195,9 +191,6 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_BinaryOp(self, node: BinaryOp):
-        # 1. Make sure left and right operands have the same type
-        # 2. Make sure the operation is supported
-        # 3. Assign the result type
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
@@ -257,6 +250,8 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_Constant(self, node: Constant):
+        node.name_type
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
@@ -269,7 +264,19 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_Decl(self, node: Decl):
-        node.env.add_local_var(node.name, node.init)
+        name = node.name.name
+        info = {
+            'func': isinstance(node.decl, FuncDecl),
+            'type': {
+                'int': IntType,
+                'char': CharType,
+                'float': FloatType,
+                'string': StringType,
+                'void': VoidType
+            }[node.type.name[0]]
+        }
+
+        node.env.add_local_var(name, info)
 
         for i, d in node.children():
             d.env = node.env
@@ -332,14 +339,15 @@ class Visitor(NodeVisitor):
 
     def visit_ID(self, node: ID):
         name = node.name
-        if node.env.lookup(name):
-            # TODO finalizar verificação de IDs nos envs locais e globais
-            pass
 
-        for i, d in node.children():
-            d.env = node.env
-            d.global_env = node.global_env
-            self.visit(d)
+        if not node.env.lookup(name) and not node.global_env.lookup(name):
+            print("ERROR: Variável '%s' não definida." % name, file=sys.stderr)
+            node.env.add_local_var(name, {
+                'func': False,
+                'type': 'void'
+            })
+
+        node.name_type = node.env.lookup(name)['type']
 
     def visit_InitList(self, node: InitList):
         for i, d in node.children():
@@ -406,7 +414,7 @@ class Visitor(NodeVisitor):
 
 if __name__ == '__main__':
     m = UCParser()
-    ast = m.parse(source=open('teste.c').read(), _=None, debug=True)
+    ast = m.parse(source=open('teste.c').read(), _=None, debug=False)
     ast.show()
 
     visitor = Visitor()

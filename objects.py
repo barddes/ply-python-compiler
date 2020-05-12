@@ -3,8 +3,7 @@ import sys
 
 # from uc_sema import Environment
 from uc_type import uCType
-from uc_type import IntType, FloatType, CharType, BoolType, ArrayType, StringType, PtrType, VoidType
-
+from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType
 
 
 class Coord(object):
@@ -240,22 +239,24 @@ class Constant(Node):
 
     def __init__(self, type, value, coord: Coord = None):
         super().__init__()
+        if type == 'str':
+            if len(value) == 1:
+                type = 'char'
+                value = "'" + value + "'"
+            else:
+                type = 'string'
+                value = '"' + value + '"'
+
         self.name_type = {
             'int': IntType,
             'char': CharType,
             'float': FloatType,
-            'str': StringType
+            'string': StringType
         }[type]
 
-        if type == 'str':
-            type = 'string'
-            value = '"' + value + '"'
         self.type = type
         self.value = value
         self.coord = coord
-
-    def children(self):
-        return []
 
     attr_names = ('type', 'value')
 
@@ -640,17 +641,14 @@ class Return(Node):
 
 
 class Type(Node):
-    __slots__ = ('names', 'coord')
+    __slots__ = ('name', 'coord')
 
     def __init__(self, names, coord: Coord = None):
         super().__init__()
-        self.names = names
+        self.name = names
         self.coord = coord
 
-    def children(self):
-        return []
-
-    attr_names = ('names',)
+    attr_names = ('name',)
 
 
 class VarDecl(Node):
