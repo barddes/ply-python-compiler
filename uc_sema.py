@@ -214,12 +214,14 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_ArrayDecl(self, node: ArrayDecl):
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
     def visit_ArrayRef(self, node: ArrayRef):
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
@@ -282,6 +284,15 @@ class Visitor(NodeVisitor):
         node.env.add_local_var(name, info)
 
         node.name_type = info['type']
+
+        #size mismatch on initialization
+        if isinstance(node.decl, ArrayDecl):
+            decl_size = node.decl.const_exp.value
+            list_size = len(node.init.list)
+            if decl_size != list_size:
+                print("Error (size mismatch on initialization)", file=sys.stderr)
+
+
 
         for i, d in node.children():
             d.env = node.env
@@ -427,7 +438,7 @@ class Visitor(NodeVisitor):
 
 if __name__ == '__main__':
     m = UCParser()
-    ast = m.parse(source=open('teste.c').read(), _=None, debug=True)
+    ast = m.parse(source=open('teste.c').read(), _=None, debug=False)
     ast.show()
 
     visitor = Visitor()

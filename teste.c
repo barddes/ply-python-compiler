@@ -1,4 +1,3 @@
 int main () {
-    int[] a = "Hello" + "World";     // OK
-//    char[] b = "Hello" * "World";     // Error (unsupported op *)
+    int v[4] = {1, 2, 3, 4};
 }
