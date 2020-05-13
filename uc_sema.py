@@ -168,7 +168,8 @@ class Visitor(NodeVisitor):
 
         if expr1.node_info != expr2.node_info:
             print("Error. ", expr1.node_info['type'].typename, op, expr2.node_info['type'].typename, file=sys.stderr)
-        elif op not in expr1.node_info['type'].binary_ops:
+        # nao tenho certeza se esta certo mas concerta o erro do teste 1
+        elif op not in expr1.node_info['type'].binary_ops and op not in expr1.node_info['type'].rel_ops:
             print("Error (unsupported op %s)" % op, file=sys.stderr)
 
         return expr1.node_info['type']
@@ -207,7 +208,7 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         if node.name.node_info != node.assign_expr.node_info:
-            print('Error (canot assign %s to %s)' % (node.assign_expr.node_info['type'], node.name.node_info['type']), file=sys.stderr)
+            print('Error (cannot assign %s to %s)' % (node.assign_expr.node_info['type'], node.name.node_info['type']), file=sys.stderr)
 
     def visit_ArrayDecl(self, node: ArrayDecl):
         for i, d in node.children():
