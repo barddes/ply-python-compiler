@@ -25,6 +25,27 @@ class Coord(object):
         return coord_str
 
 
+class NodeInfo(dict):
+    def __init__(self, init):
+        self['func'] = False
+        self['array'] = False
+        self['type'] = None
+        super().__init__(init)
+
+    def __eq__(self, other):
+        if not other:
+            return False
+
+        if self['func'] == other['func'] and self['array'] == other['array'] and self['type'] == other['type']:
+            return True
+
+        if not self['func'] and not other['func'] and self['array'] and not other['array'] and self[
+            'type'] == CharType and other['type'] == StringType:
+            return True
+
+        return self['type'] == other['type']
+
+
 class Node(object):
     """
     Base class example for the AST nodes.
@@ -38,10 +59,10 @@ class Node(object):
     just enough space in each instance to hold a value for each variable.
     Space is saved because __dict__ is not created for each instance.
     """
-    __slots__ = ('name_type', 'env', 'global_env')
+    __slots__ = ('node_info', 'env', 'global_env')
 
-    def __init__(self, name_type: uCType = None, env=None, global_env=None):
-        self.name_type = name_type
+    def __init__(self, node_info: NodeInfo = None, env=None, global_env=None):
+        self.node_info = node_info
         self.env = env
         self.global_env = global_env
 
@@ -240,19 +261,17 @@ class Constant(Node):
     def __init__(self, type, value, coord: Coord = None):
         super().__init__()
         if type == 'str':
-            if len(value) == 1:
-                type = 'char'
-                value = "'" + value + "'"
-            else:
-                type = 'string'
-                value = '"' + value + '"'
+            type = 'string'
+            value = '"' + value + '"'
+        elif type == 'char':
+            value = "'" + value + "'"
 
-        self.name_type = {
+        self.node_info = NodeInfo({'type': {
             'int': IntType,
             'char': CharType,
             'float': FloatType,
             'string': StringType
-        }[type]
+        }[type]})
 
         self.type = type
         self.value = value

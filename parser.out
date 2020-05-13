@@ -68,9 +68,9 @@ Rule 62    primary_expression -> identifier
 Rule 63    primary_expression -> constant
 Rule 64    primary_expression -> LPAREN expression RPAREN
 Rule 65    constant -> INT_CONST
-Rule 66    constant -> CHAR_CONST
-Rule 67    constant -> FLOAT_CONST
-Rule 68    constant -> STR_CONST
+Rule 66    constant -> FLOAT_CONST
+Rule 67    constant -> STR_CONST
+Rule 68    constant -> CHAR_CONST
 Rule 69    expression -> assignment_expression
 Rule 70    expression -> expression COMMA assignment_expression
 Rule 71    argument_expression -> assignment_expression
@@ -137,7 +137,7 @@ AND                  : 47
 ASSERT               : 123
 BREAK                : 121
 CHAR                 : 13
-CHAR_CONST           : 66
+CHAR_CONST           : 68
 COMMA                : 70 72 87 92 97 99
 DIVIDE               : 37
 DIVIDEEQUALS         : 77
@@ -146,7 +146,7 @@ EQ                   : 45
 EQUALS               : 75 94
 EXMARK               : 85
 FLOAT                : 15
-FLOAT_CONST          : 67
+FLOAT_CONST          : 66
 FOR                  : 119 120
 GE                   : 44
 GT                   : 43
@@ -176,7 +176,7 @@ READ                 : 125
 RETURN               : 122
 RPAREN               : 23 25 26 50 57 64 116 117 118 119 120 124 125
 SEMI                 : 16 113 119 119 120 121 122 123 124 125
-STR_CONST            : 68
+STR_CONST            : 67
 TIMES                : 19 20 36 82
 TIMESEQUALS          : 76
 VOID                 : 12
@@ -725,9 +725,9 @@ state 25
     EXMARK          reduce using rule 10 (declaration_list_opt -> declaration_list .)
     ID              reduce using rule 10 (declaration_list_opt -> declaration_list .)
     INT_CONST       reduce using rule 10 (declaration_list_opt -> declaration_list .)
-    CHAR_CONST      reduce using rule 10 (declaration_list_opt -> declaration_list .)
     FLOAT_CONST     reduce using rule 10 (declaration_list_opt -> declaration_list .)
     STR_CONST       reduce using rule 10 (declaration_list_opt -> declaration_list .)
+    CHAR_CONST      reduce using rule 10 (declaration_list_opt -> declaration_list .)
     RBRACE          reduce using rule 10 (declaration_list_opt -> declaration_list .)
     SEMI            reduce using rule 10 (declaration_list_opt -> declaration_list .)
     VOID            shift and go to state 8
@@ -761,9 +761,9 @@ state 26
     EXMARK          reduce using rule 11 (declaration_list_opt -> empty .)
     ID              reduce using rule 11 (declaration_list_opt -> empty .)
     INT_CONST       reduce using rule 11 (declaration_list_opt -> empty .)
-    CHAR_CONST      reduce using rule 11 (declaration_list_opt -> empty .)
     FLOAT_CONST     reduce using rule 11 (declaration_list_opt -> empty .)
     STR_CONST       reduce using rule 11 (declaration_list_opt -> empty .)
+    CHAR_CONST      reduce using rule 11 (declaration_list_opt -> empty .)
     RBRACE          reduce using rule 11 (declaration_list_opt -> empty .)
     SEMI            reduce using rule 11 (declaration_list_opt -> empty .)
 
@@ -795,9 +795,9 @@ state 27
     EXMARK          reduce using rule 8 (declaration_list -> declaration .)
     ID              reduce using rule 8 (declaration_list -> declaration .)
     INT_CONST       reduce using rule 8 (declaration_list -> declaration .)
-    CHAR_CONST      reduce using rule 8 (declaration_list -> declaration .)
     FLOAT_CONST     reduce using rule 8 (declaration_list -> declaration .)
     STR_CONST       reduce using rule 8 (declaration_list -> declaration .)
+    CHAR_CONST      reduce using rule 8 (declaration_list -> declaration .)
     RBRACE          reduce using rule 8 (declaration_list -> declaration .)
     SEMI            reduce using rule 8 (declaration_list -> declaration .)
 
@@ -879,9 +879,9 @@ state 29
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     RBRACKET        reduce using rule 126 (empty -> .)
     LPAREN          shift and go to state 53
@@ -894,9 +894,9 @@ state 29
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     constant_expression_opt        shift and go to state 44
     constant_expression            shift and go to state 45
@@ -1022,9 +1022,9 @@ state 36
     MINUS           reduce using rule 16 (declaration -> type_specifier init_declarator_list_opt SEMI .)
     EXMARK          reduce using rule 16 (declaration -> type_specifier init_declarator_list_opt SEMI .)
     INT_CONST       reduce using rule 16 (declaration -> type_specifier init_declarator_list_opt SEMI .)
-    CHAR_CONST      reduce using rule 16 (declaration -> type_specifier init_declarator_list_opt SEMI .)
     FLOAT_CONST     reduce using rule 16 (declaration -> type_specifier init_declarator_list_opt SEMI .)
     STR_CONST       reduce using rule 16 (declaration -> type_specifier init_declarator_list_opt SEMI .)
+    CHAR_CONST      reduce using rule 16 (declaration -> type_specifier init_declarator_list_opt SEMI .)
     RBRACE          reduce using rule 16 (declaration -> type_specifier init_declarator_list_opt SEMI .)
     SEMI            reduce using rule 16 (declaration -> type_specifier init_declarator_list_opt SEMI .)
 
@@ -1081,9 +1081,9 @@ state 38
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LBRACE          shift and go to state 78
     PLUSPLUS        shift and go to state 55
@@ -1096,9 +1096,9 @@ state 38
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     initializer                    shift and go to state 76
     assignment_expression          shift and go to state 77
@@ -1184,9 +1184,9 @@ state 41
     EXMARK          reduce using rule 126 (empty -> .)
     ID              reduce using rule 126 (empty -> .)
     INT_CONST       reduce using rule 126 (empty -> .)
-    CHAR_CONST      reduce using rule 126 (empty -> .)
     FLOAT_CONST     reduce using rule 126 (empty -> .)
     STR_CONST       reduce using rule 126 (empty -> .)
+    CHAR_CONST      reduce using rule 126 (empty -> .)
     RBRACE          reduce using rule 126 (empty -> .)
     SEMI            reduce using rule 126 (empty -> .)
     VOID            shift and go to state 8
@@ -1227,9 +1227,9 @@ state 42
     EXMARK          reduce using rule 9 (declaration_list -> declaration_list declaration .)
     ID              reduce using rule 9 (declaration_list -> declaration_list declaration .)
     INT_CONST       reduce using rule 9 (declaration_list -> declaration_list declaration .)
-    CHAR_CONST      reduce using rule 9 (declaration_list -> declaration_list declaration .)
     FLOAT_CONST     reduce using rule 9 (declaration_list -> declaration_list declaration .)
     STR_CONST       reduce using rule 9 (declaration_list -> declaration_list declaration .)
+    CHAR_CONST      reduce using rule 9 (declaration_list -> declaration_list declaration .)
     RBRACE          reduce using rule 9 (declaration_list -> declaration_list declaration .)
     SEMI            reduce using rule 9 (declaration_list -> declaration_list declaration .)
 
@@ -1336,9 +1336,9 @@ state 49
     EXMARK          reduce using rule 82 (unary_operator -> TIMES .)
     ID              reduce using rule 82 (unary_operator -> TIMES .)
     INT_CONST       reduce using rule 82 (unary_operator -> TIMES .)
-    CHAR_CONST      reduce using rule 82 (unary_operator -> TIMES .)
     FLOAT_CONST     reduce using rule 82 (unary_operator -> TIMES .)
     STR_CONST       reduce using rule 82 (unary_operator -> TIMES .)
+    CHAR_CONST      reduce using rule 82 (unary_operator -> TIMES .)
 
 
 state 50
@@ -1355,9 +1355,9 @@ state 50
     EXMARK          reduce using rule 83 (unary_operator -> PLUS .)
     ID              reduce using rule 83 (unary_operator -> PLUS .)
     INT_CONST       reduce using rule 83 (unary_operator -> PLUS .)
-    CHAR_CONST      reduce using rule 83 (unary_operator -> PLUS .)
     FLOAT_CONST     reduce using rule 83 (unary_operator -> PLUS .)
     STR_CONST       reduce using rule 83 (unary_operator -> PLUS .)
+    CHAR_CONST      reduce using rule 83 (unary_operator -> PLUS .)
 
 
 state 51
@@ -1374,9 +1374,9 @@ state 51
     EXMARK          reduce using rule 84 (unary_operator -> MINUS .)
     ID              reduce using rule 84 (unary_operator -> MINUS .)
     INT_CONST       reduce using rule 84 (unary_operator -> MINUS .)
-    CHAR_CONST      reduce using rule 84 (unary_operator -> MINUS .)
     FLOAT_CONST     reduce using rule 84 (unary_operator -> MINUS .)
     STR_CONST       reduce using rule 84 (unary_operator -> MINUS .)
+    CHAR_CONST      reduce using rule 84 (unary_operator -> MINUS .)
 
 
 state 52
@@ -1456,9 +1456,9 @@ state 53
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     VOID            shift and go to state 8
     CHAR            shift and go to state 9
@@ -1474,9 +1474,9 @@ state 53
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     type_specifier                 shift and go to state 97
     cast_expression                shift and go to state 48
@@ -1550,9 +1550,9 @@ state 55
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -1564,9 +1564,9 @@ state 55
     LPAREN          shift and go to state 105
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     unary_expression               shift and go to state 104
     postfix_expression             shift and go to state 54
@@ -1597,9 +1597,9 @@ state 56
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -1611,9 +1611,9 @@ state 56
     LPAREN          shift and go to state 105
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     unary_expression               shift and go to state 106
     postfix_expression             shift and go to state 54
@@ -1646,9 +1646,9 @@ state 57
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -1660,9 +1660,9 @@ state 57
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     unary_operator                 shift and go to state 57
     cast_expression                shift and go to state 107
@@ -1720,9 +1720,9 @@ state 59
     EXMARK          reduce using rule 81 (unary_operator -> ADDRESS .)
     ID              reduce using rule 81 (unary_operator -> ADDRESS .)
     INT_CONST       reduce using rule 81 (unary_operator -> ADDRESS .)
-    CHAR_CONST      reduce using rule 81 (unary_operator -> ADDRESS .)
     FLOAT_CONST     reduce using rule 81 (unary_operator -> ADDRESS .)
     STR_CONST       reduce using rule 81 (unary_operator -> ADDRESS .)
+    CHAR_CONST      reduce using rule 81 (unary_operator -> ADDRESS .)
 
 
 state 60
@@ -1739,9 +1739,9 @@ state 60
     EXMARK          reduce using rule 85 (unary_operator -> EXMARK .)
     ID              reduce using rule 85 (unary_operator -> EXMARK .)
     INT_CONST       reduce using rule 85 (unary_operator -> EXMARK .)
-    CHAR_CONST      reduce using rule 85 (unary_operator -> EXMARK .)
     FLOAT_CONST     reduce using rule 85 (unary_operator -> EXMARK .)
     STR_CONST       reduce using rule 85 (unary_operator -> EXMARK .)
+    CHAR_CONST      reduce using rule 85 (unary_operator -> EXMARK .)
 
 
 state 61
@@ -1848,104 +1848,104 @@ state 63
 
 state 64
 
-    (66) constant -> CHAR_CONST .
+    (66) constant -> FLOAT_CONST .
 
-    LBRACKET        reduce using rule 66 (constant -> CHAR_CONST .)
-    LPAREN          reduce using rule 66 (constant -> CHAR_CONST .)
-    PLUSPLUS        reduce using rule 66 (constant -> CHAR_CONST .)
-    MINUSMINUS      reduce using rule 66 (constant -> CHAR_CONST .)
-    TIMES           reduce using rule 66 (constant -> CHAR_CONST .)
-    DIVIDE          reduce using rule 66 (constant -> CHAR_CONST .)
-    MOD             reduce using rule 66 (constant -> CHAR_CONST .)
-    PLUS            reduce using rule 66 (constant -> CHAR_CONST .)
-    MINUS           reduce using rule 66 (constant -> CHAR_CONST .)
-    LT              reduce using rule 66 (constant -> CHAR_CONST .)
-    LE              reduce using rule 66 (constant -> CHAR_CONST .)
-    GT              reduce using rule 66 (constant -> CHAR_CONST .)
-    GE              reduce using rule 66 (constant -> CHAR_CONST .)
-    EQ              reduce using rule 66 (constant -> CHAR_CONST .)
-    NE              reduce using rule 66 (constant -> CHAR_CONST .)
-    AND             reduce using rule 66 (constant -> CHAR_CONST .)
-    OR              reduce using rule 66 (constant -> CHAR_CONST .)
-    RBRACKET        reduce using rule 66 (constant -> CHAR_CONST .)
-    EQUALS          reduce using rule 66 (constant -> CHAR_CONST .)
-    TIMESEQUALS     reduce using rule 66 (constant -> CHAR_CONST .)
-    DIVIDEEQUALS    reduce using rule 66 (constant -> CHAR_CONST .)
-    MODEQUALS       reduce using rule 66 (constant -> CHAR_CONST .)
-    PLUSEQUALS      reduce using rule 66 (constant -> CHAR_CONST .)
-    MINUSEQUALS     reduce using rule 66 (constant -> CHAR_CONST .)
-    COMMA           reduce using rule 66 (constant -> CHAR_CONST .)
-    SEMI            reduce using rule 66 (constant -> CHAR_CONST .)
-    RPAREN          reduce using rule 66 (constant -> CHAR_CONST .)
-    RBRACE          reduce using rule 66 (constant -> CHAR_CONST .)
+    LBRACKET        reduce using rule 66 (constant -> FLOAT_CONST .)
+    LPAREN          reduce using rule 66 (constant -> FLOAT_CONST .)
+    PLUSPLUS        reduce using rule 66 (constant -> FLOAT_CONST .)
+    MINUSMINUS      reduce using rule 66 (constant -> FLOAT_CONST .)
+    TIMES           reduce using rule 66 (constant -> FLOAT_CONST .)
+    DIVIDE          reduce using rule 66 (constant -> FLOAT_CONST .)
+    MOD             reduce using rule 66 (constant -> FLOAT_CONST .)
+    PLUS            reduce using rule 66 (constant -> FLOAT_CONST .)
+    MINUS           reduce using rule 66 (constant -> FLOAT_CONST .)
+    LT              reduce using rule 66 (constant -> FLOAT_CONST .)
+    LE              reduce using rule 66 (constant -> FLOAT_CONST .)
+    GT              reduce using rule 66 (constant -> FLOAT_CONST .)
+    GE              reduce using rule 66 (constant -> FLOAT_CONST .)
+    EQ              reduce using rule 66 (constant -> FLOAT_CONST .)
+    NE              reduce using rule 66 (constant -> FLOAT_CONST .)
+    AND             reduce using rule 66 (constant -> FLOAT_CONST .)
+    OR              reduce using rule 66 (constant -> FLOAT_CONST .)
+    RBRACKET        reduce using rule 66 (constant -> FLOAT_CONST .)
+    EQUALS          reduce using rule 66 (constant -> FLOAT_CONST .)
+    TIMESEQUALS     reduce using rule 66 (constant -> FLOAT_CONST .)
+    DIVIDEEQUALS    reduce using rule 66 (constant -> FLOAT_CONST .)
+    MODEQUALS       reduce using rule 66 (constant -> FLOAT_CONST .)
+    PLUSEQUALS      reduce using rule 66 (constant -> FLOAT_CONST .)
+    MINUSEQUALS     reduce using rule 66 (constant -> FLOAT_CONST .)
+    COMMA           reduce using rule 66 (constant -> FLOAT_CONST .)
+    SEMI            reduce using rule 66 (constant -> FLOAT_CONST .)
+    RPAREN          reduce using rule 66 (constant -> FLOAT_CONST .)
+    RBRACE          reduce using rule 66 (constant -> FLOAT_CONST .)
 
 
 state 65
 
-    (67) constant -> FLOAT_CONST .
+    (67) constant -> STR_CONST .
 
-    LBRACKET        reduce using rule 67 (constant -> FLOAT_CONST .)
-    LPAREN          reduce using rule 67 (constant -> FLOAT_CONST .)
-    PLUSPLUS        reduce using rule 67 (constant -> FLOAT_CONST .)
-    MINUSMINUS      reduce using rule 67 (constant -> FLOAT_CONST .)
-    TIMES           reduce using rule 67 (constant -> FLOAT_CONST .)
-    DIVIDE          reduce using rule 67 (constant -> FLOAT_CONST .)
-    MOD             reduce using rule 67 (constant -> FLOAT_CONST .)
-    PLUS            reduce using rule 67 (constant -> FLOAT_CONST .)
-    MINUS           reduce using rule 67 (constant -> FLOAT_CONST .)
-    LT              reduce using rule 67 (constant -> FLOAT_CONST .)
-    LE              reduce using rule 67 (constant -> FLOAT_CONST .)
-    GT              reduce using rule 67 (constant -> FLOAT_CONST .)
-    GE              reduce using rule 67 (constant -> FLOAT_CONST .)
-    EQ              reduce using rule 67 (constant -> FLOAT_CONST .)
-    NE              reduce using rule 67 (constant -> FLOAT_CONST .)
-    AND             reduce using rule 67 (constant -> FLOAT_CONST .)
-    OR              reduce using rule 67 (constant -> FLOAT_CONST .)
-    RBRACKET        reduce using rule 67 (constant -> FLOAT_CONST .)
-    EQUALS          reduce using rule 67 (constant -> FLOAT_CONST .)
-    TIMESEQUALS     reduce using rule 67 (constant -> FLOAT_CONST .)
-    DIVIDEEQUALS    reduce using rule 67 (constant -> FLOAT_CONST .)
-    MODEQUALS       reduce using rule 67 (constant -> FLOAT_CONST .)
-    PLUSEQUALS      reduce using rule 67 (constant -> FLOAT_CONST .)
-    MINUSEQUALS     reduce using rule 67 (constant -> FLOAT_CONST .)
-    COMMA           reduce using rule 67 (constant -> FLOAT_CONST .)
-    SEMI            reduce using rule 67 (constant -> FLOAT_CONST .)
-    RPAREN          reduce using rule 67 (constant -> FLOAT_CONST .)
-    RBRACE          reduce using rule 67 (constant -> FLOAT_CONST .)
+    LBRACKET        reduce using rule 67 (constant -> STR_CONST .)
+    LPAREN          reduce using rule 67 (constant -> STR_CONST .)
+    PLUSPLUS        reduce using rule 67 (constant -> STR_CONST .)
+    MINUSMINUS      reduce using rule 67 (constant -> STR_CONST .)
+    TIMES           reduce using rule 67 (constant -> STR_CONST .)
+    DIVIDE          reduce using rule 67 (constant -> STR_CONST .)
+    MOD             reduce using rule 67 (constant -> STR_CONST .)
+    PLUS            reduce using rule 67 (constant -> STR_CONST .)
+    MINUS           reduce using rule 67 (constant -> STR_CONST .)
+    LT              reduce using rule 67 (constant -> STR_CONST .)
+    LE              reduce using rule 67 (constant -> STR_CONST .)
+    GT              reduce using rule 67 (constant -> STR_CONST .)
+    GE              reduce using rule 67 (constant -> STR_CONST .)
+    EQ              reduce using rule 67 (constant -> STR_CONST .)
+    NE              reduce using rule 67 (constant -> STR_CONST .)
+    AND             reduce using rule 67 (constant -> STR_CONST .)
+    OR              reduce using rule 67 (constant -> STR_CONST .)
+    RBRACKET        reduce using rule 67 (constant -> STR_CONST .)
+    EQUALS          reduce using rule 67 (constant -> STR_CONST .)
+    TIMESEQUALS     reduce using rule 67 (constant -> STR_CONST .)
+    DIVIDEEQUALS    reduce using rule 67 (constant -> STR_CONST .)
+    MODEQUALS       reduce using rule 67 (constant -> STR_CONST .)
+    PLUSEQUALS      reduce using rule 67 (constant -> STR_CONST .)
+    MINUSEQUALS     reduce using rule 67 (constant -> STR_CONST .)
+    COMMA           reduce using rule 67 (constant -> STR_CONST .)
+    SEMI            reduce using rule 67 (constant -> STR_CONST .)
+    RPAREN          reduce using rule 67 (constant -> STR_CONST .)
+    RBRACE          reduce using rule 67 (constant -> STR_CONST .)
 
 
 state 66
 
-    (68) constant -> STR_CONST .
+    (68) constant -> CHAR_CONST .
 
-    LBRACKET        reduce using rule 68 (constant -> STR_CONST .)
-    LPAREN          reduce using rule 68 (constant -> STR_CONST .)
-    PLUSPLUS        reduce using rule 68 (constant -> STR_CONST .)
-    MINUSMINUS      reduce using rule 68 (constant -> STR_CONST .)
-    TIMES           reduce using rule 68 (constant -> STR_CONST .)
-    DIVIDE          reduce using rule 68 (constant -> STR_CONST .)
-    MOD             reduce using rule 68 (constant -> STR_CONST .)
-    PLUS            reduce using rule 68 (constant -> STR_CONST .)
-    MINUS           reduce using rule 68 (constant -> STR_CONST .)
-    LT              reduce using rule 68 (constant -> STR_CONST .)
-    LE              reduce using rule 68 (constant -> STR_CONST .)
-    GT              reduce using rule 68 (constant -> STR_CONST .)
-    GE              reduce using rule 68 (constant -> STR_CONST .)
-    EQ              reduce using rule 68 (constant -> STR_CONST .)
-    NE              reduce using rule 68 (constant -> STR_CONST .)
-    AND             reduce using rule 68 (constant -> STR_CONST .)
-    OR              reduce using rule 68 (constant -> STR_CONST .)
-    RBRACKET        reduce using rule 68 (constant -> STR_CONST .)
-    EQUALS          reduce using rule 68 (constant -> STR_CONST .)
-    TIMESEQUALS     reduce using rule 68 (constant -> STR_CONST .)
-    DIVIDEEQUALS    reduce using rule 68 (constant -> STR_CONST .)
-    MODEQUALS       reduce using rule 68 (constant -> STR_CONST .)
-    PLUSEQUALS      reduce using rule 68 (constant -> STR_CONST .)
-    MINUSEQUALS     reduce using rule 68 (constant -> STR_CONST .)
-    COMMA           reduce using rule 68 (constant -> STR_CONST .)
-    SEMI            reduce using rule 68 (constant -> STR_CONST .)
-    RPAREN          reduce using rule 68 (constant -> STR_CONST .)
-    RBRACE          reduce using rule 68 (constant -> STR_CONST .)
+    LBRACKET        reduce using rule 68 (constant -> CHAR_CONST .)
+    LPAREN          reduce using rule 68 (constant -> CHAR_CONST .)
+    PLUSPLUS        reduce using rule 68 (constant -> CHAR_CONST .)
+    MINUSMINUS      reduce using rule 68 (constant -> CHAR_CONST .)
+    TIMES           reduce using rule 68 (constant -> CHAR_CONST .)
+    DIVIDE          reduce using rule 68 (constant -> CHAR_CONST .)
+    MOD             reduce using rule 68 (constant -> CHAR_CONST .)
+    PLUS            reduce using rule 68 (constant -> CHAR_CONST .)
+    MINUS           reduce using rule 68 (constant -> CHAR_CONST .)
+    LT              reduce using rule 68 (constant -> CHAR_CONST .)
+    LE              reduce using rule 68 (constant -> CHAR_CONST .)
+    GT              reduce using rule 68 (constant -> CHAR_CONST .)
+    GE              reduce using rule 68 (constant -> CHAR_CONST .)
+    EQ              reduce using rule 68 (constant -> CHAR_CONST .)
+    NE              reduce using rule 68 (constant -> CHAR_CONST .)
+    AND             reduce using rule 68 (constant -> CHAR_CONST .)
+    OR              reduce using rule 68 (constant -> CHAR_CONST .)
+    RBRACKET        reduce using rule 68 (constant -> CHAR_CONST .)
+    EQUALS          reduce using rule 68 (constant -> CHAR_CONST .)
+    TIMESEQUALS     reduce using rule 68 (constant -> CHAR_CONST .)
+    DIVIDEEQUALS    reduce using rule 68 (constant -> CHAR_CONST .)
+    MODEQUALS       reduce using rule 68 (constant -> CHAR_CONST .)
+    PLUSEQUALS      reduce using rule 68 (constant -> CHAR_CONST .)
+    MINUSEQUALS     reduce using rule 68 (constant -> CHAR_CONST .)
+    COMMA           reduce using rule 68 (constant -> CHAR_CONST .)
+    SEMI            reduce using rule 68 (constant -> CHAR_CONST .)
+    RPAREN          reduce using rule 68 (constant -> CHAR_CONST .)
+    RBRACE          reduce using rule 68 (constant -> CHAR_CONST .)
 
 
 state 67
@@ -2115,9 +2115,9 @@ state 78
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LBRACE          shift and go to state 78
     PLUSPLUS        shift and go to state 55
@@ -2130,9 +2130,9 @@ state 78
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     initializer_list               shift and go to state 113
     initializer                    shift and go to state 114
@@ -2298,9 +2298,9 @@ state 82
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     RBRACE          reduce using rule 126 (empty -> .)
     SEMI            reduce using rule 126 (empty -> .)
@@ -2323,9 +2323,9 @@ state 82
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     statement_list_opt             shift and go to state 122
     statement_list                 shift and go to state 123
@@ -2406,9 +2406,9 @@ state 84
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -2420,9 +2420,9 @@ state 84
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 144
     cast_expression                shift and go to state 48
@@ -2471,9 +2471,9 @@ state 85
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -2485,9 +2485,9 @@ state 85
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 145
     cast_expression                shift and go to state 48
@@ -2536,9 +2536,9 @@ state 86
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -2550,9 +2550,9 @@ state 86
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 146
     cast_expression                shift and go to state 48
@@ -2601,9 +2601,9 @@ state 87
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -2615,9 +2615,9 @@ state 87
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 147
     cast_expression                shift and go to state 48
@@ -2666,9 +2666,9 @@ state 88
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -2680,9 +2680,9 @@ state 88
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 148
     cast_expression                shift and go to state 48
@@ -2731,9 +2731,9 @@ state 89
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -2745,9 +2745,9 @@ state 89
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 149
     cast_expression                shift and go to state 48
@@ -2796,9 +2796,9 @@ state 90
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -2810,9 +2810,9 @@ state 90
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 150
     cast_expression                shift and go to state 48
@@ -2861,9 +2861,9 @@ state 91
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -2875,9 +2875,9 @@ state 91
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 151
     cast_expression                shift and go to state 48
@@ -2926,9 +2926,9 @@ state 92
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -2940,9 +2940,9 @@ state 92
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 152
     cast_expression                shift and go to state 48
@@ -2991,9 +2991,9 @@ state 93
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -3005,9 +3005,9 @@ state 93
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 153
     cast_expression                shift and go to state 48
@@ -3056,9 +3056,9 @@ state 94
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -3070,9 +3070,9 @@ state 94
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 154
     cast_expression                shift and go to state 48
@@ -3121,9 +3121,9 @@ state 95
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -3135,9 +3135,9 @@ state 95
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 155
     cast_expression                shift and go to state 48
@@ -3186,9 +3186,9 @@ state 96
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -3200,9 +3200,9 @@ state 96
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     binary_expression              shift and go to state 156
     cast_expression                shift and go to state 48
@@ -3281,9 +3281,9 @@ state 100
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -3295,9 +3295,9 @@ state 100
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     postfix_expression             shift and go to state 54
     expression                     shift and go to state 160
@@ -3355,9 +3355,9 @@ state 101
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     RPAREN          reduce using rule 126 (empty -> .)
     PLUSPLUS        shift and go to state 55
@@ -3370,9 +3370,9 @@ state 101
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     postfix_expression             shift and go to state 54
     argument_expression_opt        shift and go to state 161
@@ -3527,9 +3527,9 @@ state 105
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -3541,9 +3541,9 @@ state 105
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression                     shift and go to state 98
     assignment_expression          shift and go to state 99
@@ -3741,9 +3741,9 @@ state 115
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -3755,9 +3755,9 @@ state 115
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     unary_expression               shift and go to state 80
     assignment_expression          shift and go to state 168
@@ -3783,9 +3783,9 @@ state 116
     EXMARK          reduce using rule 75 (assignment_operator -> EQUALS .)
     ID              reduce using rule 75 (assignment_operator -> EQUALS .)
     INT_CONST       reduce using rule 75 (assignment_operator -> EQUALS .)
-    CHAR_CONST      reduce using rule 75 (assignment_operator -> EQUALS .)
     FLOAT_CONST     reduce using rule 75 (assignment_operator -> EQUALS .)
     STR_CONST       reduce using rule 75 (assignment_operator -> EQUALS .)
+    CHAR_CONST      reduce using rule 75 (assignment_operator -> EQUALS .)
 
 
 state 117
@@ -3802,9 +3802,9 @@ state 117
     EXMARK          reduce using rule 76 (assignment_operator -> TIMESEQUALS .)
     ID              reduce using rule 76 (assignment_operator -> TIMESEQUALS .)
     INT_CONST       reduce using rule 76 (assignment_operator -> TIMESEQUALS .)
-    CHAR_CONST      reduce using rule 76 (assignment_operator -> TIMESEQUALS .)
     FLOAT_CONST     reduce using rule 76 (assignment_operator -> TIMESEQUALS .)
     STR_CONST       reduce using rule 76 (assignment_operator -> TIMESEQUALS .)
+    CHAR_CONST      reduce using rule 76 (assignment_operator -> TIMESEQUALS .)
 
 
 state 118
@@ -3821,9 +3821,9 @@ state 118
     EXMARK          reduce using rule 77 (assignment_operator -> DIVIDEEQUALS .)
     ID              reduce using rule 77 (assignment_operator -> DIVIDEEQUALS .)
     INT_CONST       reduce using rule 77 (assignment_operator -> DIVIDEEQUALS .)
-    CHAR_CONST      reduce using rule 77 (assignment_operator -> DIVIDEEQUALS .)
     FLOAT_CONST     reduce using rule 77 (assignment_operator -> DIVIDEEQUALS .)
     STR_CONST       reduce using rule 77 (assignment_operator -> DIVIDEEQUALS .)
+    CHAR_CONST      reduce using rule 77 (assignment_operator -> DIVIDEEQUALS .)
 
 
 state 119
@@ -3840,9 +3840,9 @@ state 119
     EXMARK          reduce using rule 78 (assignment_operator -> MODEQUALS .)
     ID              reduce using rule 78 (assignment_operator -> MODEQUALS .)
     INT_CONST       reduce using rule 78 (assignment_operator -> MODEQUALS .)
-    CHAR_CONST      reduce using rule 78 (assignment_operator -> MODEQUALS .)
     FLOAT_CONST     reduce using rule 78 (assignment_operator -> MODEQUALS .)
     STR_CONST       reduce using rule 78 (assignment_operator -> MODEQUALS .)
+    CHAR_CONST      reduce using rule 78 (assignment_operator -> MODEQUALS .)
 
 
 state 120
@@ -3859,9 +3859,9 @@ state 120
     EXMARK          reduce using rule 79 (assignment_operator -> PLUSEQUALS .)
     ID              reduce using rule 79 (assignment_operator -> PLUSEQUALS .)
     INT_CONST       reduce using rule 79 (assignment_operator -> PLUSEQUALS .)
-    CHAR_CONST      reduce using rule 79 (assignment_operator -> PLUSEQUALS .)
     FLOAT_CONST     reduce using rule 79 (assignment_operator -> PLUSEQUALS .)
     STR_CONST       reduce using rule 79 (assignment_operator -> PLUSEQUALS .)
+    CHAR_CONST      reduce using rule 79 (assignment_operator -> PLUSEQUALS .)
 
 
 state 121
@@ -3878,9 +3878,9 @@ state 121
     EXMARK          reduce using rule 80 (assignment_operator -> MINUSEQUALS .)
     ID              reduce using rule 80 (assignment_operator -> MINUSEQUALS .)
     INT_CONST       reduce using rule 80 (assignment_operator -> MINUSEQUALS .)
-    CHAR_CONST      reduce using rule 80 (assignment_operator -> MINUSEQUALS .)
     FLOAT_CONST     reduce using rule 80 (assignment_operator -> MINUSEQUALS .)
     STR_CONST       reduce using rule 80 (assignment_operator -> MINUSEQUALS .)
+    CHAR_CONST      reduce using rule 80 (assignment_operator -> MINUSEQUALS .)
 
 
 state 122
@@ -3956,9 +3956,9 @@ state 123
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     RBRACE          reduce using rule 103 (statement_list_opt -> statement_list .)
     LBRACE          shift and go to state 41
@@ -3981,9 +3981,9 @@ state 123
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     statement                      shift and go to state 170
     expression_statement           shift and go to state 126
@@ -4039,9 +4039,9 @@ state 125
     EXMARK          reduce using rule 101 (statement_list -> statement .)
     ID              reduce using rule 101 (statement_list -> statement .)
     INT_CONST       reduce using rule 101 (statement_list -> statement .)
-    CHAR_CONST      reduce using rule 101 (statement_list -> statement .)
     FLOAT_CONST     reduce using rule 101 (statement_list -> statement .)
     STR_CONST       reduce using rule 101 (statement_list -> statement .)
+    CHAR_CONST      reduce using rule 101 (statement_list -> statement .)
     SEMI            reduce using rule 101 (statement_list -> statement .)
     RBRACE          reduce using rule 101 (statement_list -> statement .)
 
@@ -4069,9 +4069,9 @@ state 126
     EXMARK          reduce using rule 105 (statement -> expression_statement .)
     ID              reduce using rule 105 (statement -> expression_statement .)
     INT_CONST       reduce using rule 105 (statement -> expression_statement .)
-    CHAR_CONST      reduce using rule 105 (statement -> expression_statement .)
     FLOAT_CONST     reduce using rule 105 (statement -> expression_statement .)
     STR_CONST       reduce using rule 105 (statement -> expression_statement .)
+    CHAR_CONST      reduce using rule 105 (statement -> expression_statement .)
     SEMI            reduce using rule 105 (statement -> expression_statement .)
     RBRACE          reduce using rule 105 (statement -> expression_statement .)
     ELSE            reduce using rule 105 (statement -> expression_statement .)
@@ -4100,9 +4100,9 @@ state 127
     EXMARK          reduce using rule 106 (statement -> compound_statement .)
     ID              reduce using rule 106 (statement -> compound_statement .)
     INT_CONST       reduce using rule 106 (statement -> compound_statement .)
-    CHAR_CONST      reduce using rule 106 (statement -> compound_statement .)
     FLOAT_CONST     reduce using rule 106 (statement -> compound_statement .)
     STR_CONST       reduce using rule 106 (statement -> compound_statement .)
+    CHAR_CONST      reduce using rule 106 (statement -> compound_statement .)
     SEMI            reduce using rule 106 (statement -> compound_statement .)
     RBRACE          reduce using rule 106 (statement -> compound_statement .)
     ELSE            reduce using rule 106 (statement -> compound_statement .)
@@ -4131,9 +4131,9 @@ state 128
     EXMARK          reduce using rule 107 (statement -> selection_statement .)
     ID              reduce using rule 107 (statement -> selection_statement .)
     INT_CONST       reduce using rule 107 (statement -> selection_statement .)
-    CHAR_CONST      reduce using rule 107 (statement -> selection_statement .)
     FLOAT_CONST     reduce using rule 107 (statement -> selection_statement .)
     STR_CONST       reduce using rule 107 (statement -> selection_statement .)
+    CHAR_CONST      reduce using rule 107 (statement -> selection_statement .)
     SEMI            reduce using rule 107 (statement -> selection_statement .)
     RBRACE          reduce using rule 107 (statement -> selection_statement .)
     ELSE            reduce using rule 107 (statement -> selection_statement .)
@@ -4162,9 +4162,9 @@ state 129
     EXMARK          reduce using rule 108 (statement -> iteration_statement .)
     ID              reduce using rule 108 (statement -> iteration_statement .)
     INT_CONST       reduce using rule 108 (statement -> iteration_statement .)
-    CHAR_CONST      reduce using rule 108 (statement -> iteration_statement .)
     FLOAT_CONST     reduce using rule 108 (statement -> iteration_statement .)
     STR_CONST       reduce using rule 108 (statement -> iteration_statement .)
+    CHAR_CONST      reduce using rule 108 (statement -> iteration_statement .)
     SEMI            reduce using rule 108 (statement -> iteration_statement .)
     RBRACE          reduce using rule 108 (statement -> iteration_statement .)
     ELSE            reduce using rule 108 (statement -> iteration_statement .)
@@ -4193,9 +4193,9 @@ state 130
     EXMARK          reduce using rule 109 (statement -> jump_statement .)
     ID              reduce using rule 109 (statement -> jump_statement .)
     INT_CONST       reduce using rule 109 (statement -> jump_statement .)
-    CHAR_CONST      reduce using rule 109 (statement -> jump_statement .)
     FLOAT_CONST     reduce using rule 109 (statement -> jump_statement .)
     STR_CONST       reduce using rule 109 (statement -> jump_statement .)
+    CHAR_CONST      reduce using rule 109 (statement -> jump_statement .)
     SEMI            reduce using rule 109 (statement -> jump_statement .)
     RBRACE          reduce using rule 109 (statement -> jump_statement .)
     ELSE            reduce using rule 109 (statement -> jump_statement .)
@@ -4224,9 +4224,9 @@ state 131
     EXMARK          reduce using rule 110 (statement -> assert_statement .)
     ID              reduce using rule 110 (statement -> assert_statement .)
     INT_CONST       reduce using rule 110 (statement -> assert_statement .)
-    CHAR_CONST      reduce using rule 110 (statement -> assert_statement .)
     FLOAT_CONST     reduce using rule 110 (statement -> assert_statement .)
     STR_CONST       reduce using rule 110 (statement -> assert_statement .)
+    CHAR_CONST      reduce using rule 110 (statement -> assert_statement .)
     SEMI            reduce using rule 110 (statement -> assert_statement .)
     RBRACE          reduce using rule 110 (statement -> assert_statement .)
     ELSE            reduce using rule 110 (statement -> assert_statement .)
@@ -4255,9 +4255,9 @@ state 132
     EXMARK          reduce using rule 111 (statement -> print_statement .)
     ID              reduce using rule 111 (statement -> print_statement .)
     INT_CONST       reduce using rule 111 (statement -> print_statement .)
-    CHAR_CONST      reduce using rule 111 (statement -> print_statement .)
     FLOAT_CONST     reduce using rule 111 (statement -> print_statement .)
     STR_CONST       reduce using rule 111 (statement -> print_statement .)
+    CHAR_CONST      reduce using rule 111 (statement -> print_statement .)
     SEMI            reduce using rule 111 (statement -> print_statement .)
     RBRACE          reduce using rule 111 (statement -> print_statement .)
     ELSE            reduce using rule 111 (statement -> print_statement .)
@@ -4286,9 +4286,9 @@ state 133
     EXMARK          reduce using rule 112 (statement -> read_statement .)
     ID              reduce using rule 112 (statement -> read_statement .)
     INT_CONST       reduce using rule 112 (statement -> read_statement .)
-    CHAR_CONST      reduce using rule 112 (statement -> read_statement .)
     FLOAT_CONST     reduce using rule 112 (statement -> read_statement .)
     STR_CONST       reduce using rule 112 (statement -> read_statement .)
+    CHAR_CONST      reduce using rule 112 (statement -> read_statement .)
     SEMI            reduce using rule 112 (statement -> read_statement .)
     RBRACE          reduce using rule 112 (statement -> read_statement .)
     ELSE            reduce using rule 112 (statement -> read_statement .)
@@ -4386,9 +4386,9 @@ state 140
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     SEMI            reduce using rule 126 (empty -> .)
     PLUSPLUS        shift and go to state 55
@@ -4401,9 +4401,9 @@ state 140
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression_opt                 shift and go to state 177
     expression                     shift and go to state 136
@@ -4460,9 +4460,9 @@ state 141
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -4474,9 +4474,9 @@ state 141
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression                     shift and go to state 178
     assignment_expression          shift and go to state 99
@@ -5190,9 +5190,9 @@ state 157
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LPAREN          shift and go to state 53
     PLUSPLUS        shift and go to state 55
@@ -5204,9 +5204,9 @@ state 157
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     cast_expression                shift and go to state 181
     unary_expression               shift and go to state 52
@@ -5290,9 +5290,9 @@ state 159
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -5304,9 +5304,9 @@ state 159
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     assignment_expression          shift and go to state 182
     binary_expression              shift and go to state 79
@@ -5419,9 +5419,9 @@ state 167
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     RBRACE          shift and go to state 186
     LBRACE          shift and go to state 78
@@ -5435,9 +5435,9 @@ state 167
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     initializer                    shift and go to state 187
     assignment_expression          shift and go to state 77
@@ -5489,9 +5489,9 @@ state 169
     MINUS           reduce using rule 100 (compound_statement -> LBRACE declaration_list_opt statement_list_opt RBRACE .)
     EXMARK          reduce using rule 100 (compound_statement -> LBRACE declaration_list_opt statement_list_opt RBRACE .)
     INT_CONST       reduce using rule 100 (compound_statement -> LBRACE declaration_list_opt statement_list_opt RBRACE .)
-    CHAR_CONST      reduce using rule 100 (compound_statement -> LBRACE declaration_list_opt statement_list_opt RBRACE .)
     FLOAT_CONST     reduce using rule 100 (compound_statement -> LBRACE declaration_list_opt statement_list_opt RBRACE .)
     STR_CONST       reduce using rule 100 (compound_statement -> LBRACE declaration_list_opt statement_list_opt RBRACE .)
+    CHAR_CONST      reduce using rule 100 (compound_statement -> LBRACE declaration_list_opt statement_list_opt RBRACE .)
     SEMI            reduce using rule 100 (compound_statement -> LBRACE declaration_list_opt statement_list_opt RBRACE .)
     RBRACE          reduce using rule 100 (compound_statement -> LBRACE declaration_list_opt statement_list_opt RBRACE .)
     ELSE            reduce using rule 100 (compound_statement -> LBRACE declaration_list_opt statement_list_opt RBRACE .)
@@ -5520,9 +5520,9 @@ state 170
     EXMARK          reduce using rule 102 (statement_list -> statement_list statement .)
     ID              reduce using rule 102 (statement_list -> statement_list statement .)
     INT_CONST       reduce using rule 102 (statement_list -> statement_list statement .)
-    CHAR_CONST      reduce using rule 102 (statement_list -> statement_list statement .)
     FLOAT_CONST     reduce using rule 102 (statement_list -> statement_list statement .)
     STR_CONST       reduce using rule 102 (statement_list -> statement_list statement .)
+    CHAR_CONST      reduce using rule 102 (statement_list -> statement_list statement .)
     SEMI            reduce using rule 102 (statement_list -> statement_list statement .)
     RBRACE          reduce using rule 102 (statement_list -> statement_list statement .)
 
@@ -5558,9 +5558,9 @@ state 172
     EXMARK          reduce using rule 113 (expression_statement -> expression_opt SEMI .)
     ID              reduce using rule 113 (expression_statement -> expression_opt SEMI .)
     INT_CONST       reduce using rule 113 (expression_statement -> expression_opt SEMI .)
-    CHAR_CONST      reduce using rule 113 (expression_statement -> expression_opt SEMI .)
     FLOAT_CONST     reduce using rule 113 (expression_statement -> expression_opt SEMI .)
     STR_CONST       reduce using rule 113 (expression_statement -> expression_opt SEMI .)
+    CHAR_CONST      reduce using rule 113 (expression_statement -> expression_opt SEMI .)
     SEMI            reduce using rule 113 (expression_statement -> expression_opt SEMI .)
     RBRACE          reduce using rule 113 (expression_statement -> expression_opt SEMI .)
     ELSE            reduce using rule 113 (expression_statement -> expression_opt SEMI .)
@@ -5609,9 +5609,9 @@ state 173
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -5623,9 +5623,9 @@ state 173
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression                     shift and go to state 188
     assignment_expression          shift and go to state 99
@@ -5680,9 +5680,9 @@ state 174
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -5694,9 +5694,9 @@ state 174
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression                     shift and go to state 189
     assignment_expression          shift and go to state 99
@@ -5760,9 +5760,9 @@ state 175
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     SEMI            reduce using rule 126 (empty -> .)
     VOID            shift and go to state 8
@@ -5779,9 +5779,9 @@ state 175
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression_opt                 shift and go to state 190
     declaration                    shift and go to state 191
@@ -5821,9 +5821,9 @@ state 176
     EXMARK          reduce using rule 121 (jump_statement -> BREAK SEMI .)
     ID              reduce using rule 121 (jump_statement -> BREAK SEMI .)
     INT_CONST       reduce using rule 121 (jump_statement -> BREAK SEMI .)
-    CHAR_CONST      reduce using rule 121 (jump_statement -> BREAK SEMI .)
     FLOAT_CONST     reduce using rule 121 (jump_statement -> BREAK SEMI .)
     STR_CONST       reduce using rule 121 (jump_statement -> BREAK SEMI .)
+    CHAR_CONST      reduce using rule 121 (jump_statement -> BREAK SEMI .)
     SEMI            reduce using rule 121 (jump_statement -> BREAK SEMI .)
     RBRACE          reduce using rule 121 (jump_statement -> BREAK SEMI .)
     ELSE            reduce using rule 121 (jump_statement -> BREAK SEMI .)
@@ -5890,9 +5890,9 @@ state 179
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     RPAREN          reduce using rule 126 (empty -> .)
     PLUSPLUS        shift and go to state 55
@@ -5905,9 +5905,9 @@ state 179
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression_opt                 shift and go to state 194
     expression                     shift and go to state 136
@@ -5964,9 +5964,9 @@ state 180
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -5978,9 +5978,9 @@ state 180
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     argument_expression            shift and go to state 195
     assignment_expression          shift and go to state 164
@@ -6141,9 +6141,9 @@ state 185
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     PLUSPLUS        shift and go to state 55
     MINUSMINUS      shift and go to state 56
@@ -6155,9 +6155,9 @@ state 185
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     assignment_expression          shift and go to state 196
     binary_expression              shift and go to state 79
@@ -6257,9 +6257,9 @@ state 191
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     SEMI            reduce using rule 126 (empty -> .)
     PLUSPLUS        shift and go to state 55
@@ -6272,9 +6272,9 @@ state 191
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression_opt                 shift and go to state 200
     expression                     shift and go to state 136
@@ -6312,9 +6312,9 @@ state 192
     EXMARK          reduce using rule 122 (jump_statement -> RETURN expression_opt SEMI .)
     ID              reduce using rule 122 (jump_statement -> RETURN expression_opt SEMI .)
     INT_CONST       reduce using rule 122 (jump_statement -> RETURN expression_opt SEMI .)
-    CHAR_CONST      reduce using rule 122 (jump_statement -> RETURN expression_opt SEMI .)
     FLOAT_CONST     reduce using rule 122 (jump_statement -> RETURN expression_opt SEMI .)
     STR_CONST       reduce using rule 122 (jump_statement -> RETURN expression_opt SEMI .)
+    CHAR_CONST      reduce using rule 122 (jump_statement -> RETURN expression_opt SEMI .)
     SEMI            reduce using rule 122 (jump_statement -> RETURN expression_opt SEMI .)
     RBRACE          reduce using rule 122 (jump_statement -> RETURN expression_opt SEMI .)
     ELSE            reduce using rule 122 (jump_statement -> RETURN expression_opt SEMI .)
@@ -6343,9 +6343,9 @@ state 193
     EXMARK          reduce using rule 123 (assert_statement -> ASSERT expression SEMI .)
     ID              reduce using rule 123 (assert_statement -> ASSERT expression SEMI .)
     INT_CONST       reduce using rule 123 (assert_statement -> ASSERT expression SEMI .)
-    CHAR_CONST      reduce using rule 123 (assert_statement -> ASSERT expression SEMI .)
     FLOAT_CONST     reduce using rule 123 (assert_statement -> ASSERT expression SEMI .)
     STR_CONST       reduce using rule 123 (assert_statement -> ASSERT expression SEMI .)
+    CHAR_CONST      reduce using rule 123 (assert_statement -> ASSERT expression SEMI .)
     SEMI            reduce using rule 123 (assert_statement -> ASSERT expression SEMI .)
     RBRACE          reduce using rule 123 (assert_statement -> ASSERT expression SEMI .)
     ELSE            reduce using rule 123 (assert_statement -> ASSERT expression SEMI .)
@@ -6441,9 +6441,9 @@ state 197
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LBRACE          shift and go to state 41
     IF              shift and go to state 135
@@ -6465,9 +6465,9 @@ state 197
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression                     shift and go to state 136
     statement                      shift and go to state 203
@@ -6556,9 +6556,9 @@ state 198
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LBRACE          shift and go to state 41
     IF              shift and go to state 135
@@ -6580,9 +6580,9 @@ state 198
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression                     shift and go to state 136
     statement                      shift and go to state 204
@@ -6651,9 +6651,9 @@ state 199
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     SEMI            reduce using rule 126 (empty -> .)
     PLUSPLUS        shift and go to state 55
@@ -6666,9 +6666,9 @@ state 199
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression_opt                 shift and go to state 205
     expression                     shift and go to state 136
@@ -6729,9 +6729,9 @@ state 203
     EXMARK          reduce using rule 116 (selection_statement -> IF LPAREN expression RPAREN statement .)
     ID              reduce using rule 116 (selection_statement -> IF LPAREN expression RPAREN statement .)
     INT_CONST       reduce using rule 116 (selection_statement -> IF LPAREN expression RPAREN statement .)
-    CHAR_CONST      reduce using rule 116 (selection_statement -> IF LPAREN expression RPAREN statement .)
     FLOAT_CONST     reduce using rule 116 (selection_statement -> IF LPAREN expression RPAREN statement .)
     STR_CONST       reduce using rule 116 (selection_statement -> IF LPAREN expression RPAREN statement .)
+    CHAR_CONST      reduce using rule 116 (selection_statement -> IF LPAREN expression RPAREN statement .)
     SEMI            reduce using rule 116 (selection_statement -> IF LPAREN expression RPAREN statement .)
     RBRACE          reduce using rule 116 (selection_statement -> IF LPAREN expression RPAREN statement .)
     ELSE            shift and go to state 209
@@ -6762,9 +6762,9 @@ state 204
     EXMARK          reduce using rule 118 (iteration_statement -> WHILE LPAREN expression RPAREN statement .)
     ID              reduce using rule 118 (iteration_statement -> WHILE LPAREN expression RPAREN statement .)
     INT_CONST       reduce using rule 118 (iteration_statement -> WHILE LPAREN expression RPAREN statement .)
-    CHAR_CONST      reduce using rule 118 (iteration_statement -> WHILE LPAREN expression RPAREN statement .)
     FLOAT_CONST     reduce using rule 118 (iteration_statement -> WHILE LPAREN expression RPAREN statement .)
     STR_CONST       reduce using rule 118 (iteration_statement -> WHILE LPAREN expression RPAREN statement .)
+    CHAR_CONST      reduce using rule 118 (iteration_statement -> WHILE LPAREN expression RPAREN statement .)
     SEMI            reduce using rule 118 (iteration_statement -> WHILE LPAREN expression RPAREN statement .)
     RBRACE          reduce using rule 118 (iteration_statement -> WHILE LPAREN expression RPAREN statement .)
     ELSE            reduce using rule 118 (iteration_statement -> WHILE LPAREN expression RPAREN statement .)
@@ -6822,9 +6822,9 @@ state 206
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     RPAREN          reduce using rule 126 (empty -> .)
     PLUSPLUS        shift and go to state 55
@@ -6837,9 +6837,9 @@ state 206
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression_opt                 shift and go to state 211
     expression                     shift and go to state 136
@@ -6877,9 +6877,9 @@ state 207
     EXMARK          reduce using rule 124 (print_statement -> PRINT LPAREN expression_opt RPAREN SEMI .)
     ID              reduce using rule 124 (print_statement -> PRINT LPAREN expression_opt RPAREN SEMI .)
     INT_CONST       reduce using rule 124 (print_statement -> PRINT LPAREN expression_opt RPAREN SEMI .)
-    CHAR_CONST      reduce using rule 124 (print_statement -> PRINT LPAREN expression_opt RPAREN SEMI .)
     FLOAT_CONST     reduce using rule 124 (print_statement -> PRINT LPAREN expression_opt RPAREN SEMI .)
     STR_CONST       reduce using rule 124 (print_statement -> PRINT LPAREN expression_opt RPAREN SEMI .)
+    CHAR_CONST      reduce using rule 124 (print_statement -> PRINT LPAREN expression_opt RPAREN SEMI .)
     SEMI            reduce using rule 124 (print_statement -> PRINT LPAREN expression_opt RPAREN SEMI .)
     RBRACE          reduce using rule 124 (print_statement -> PRINT LPAREN expression_opt RPAREN SEMI .)
     ELSE            reduce using rule 124 (print_statement -> PRINT LPAREN expression_opt RPAREN SEMI .)
@@ -6908,9 +6908,9 @@ state 208
     EXMARK          reduce using rule 125 (read_statement -> READ LPAREN argument_expression RPAREN SEMI .)
     ID              reduce using rule 125 (read_statement -> READ LPAREN argument_expression RPAREN SEMI .)
     INT_CONST       reduce using rule 125 (read_statement -> READ LPAREN argument_expression RPAREN SEMI .)
-    CHAR_CONST      reduce using rule 125 (read_statement -> READ LPAREN argument_expression RPAREN SEMI .)
     FLOAT_CONST     reduce using rule 125 (read_statement -> READ LPAREN argument_expression RPAREN SEMI .)
     STR_CONST       reduce using rule 125 (read_statement -> READ LPAREN argument_expression RPAREN SEMI .)
+    CHAR_CONST      reduce using rule 125 (read_statement -> READ LPAREN argument_expression RPAREN SEMI .)
     SEMI            reduce using rule 125 (read_statement -> READ LPAREN argument_expression RPAREN SEMI .)
     RBRACE          reduce using rule 125 (read_statement -> READ LPAREN argument_expression RPAREN SEMI .)
     ELSE            reduce using rule 125 (read_statement -> READ LPAREN argument_expression RPAREN SEMI .)
@@ -6981,9 +6981,9 @@ state 209
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LBRACE          shift and go to state 41
     IF              shift and go to state 135
@@ -7005,9 +7005,9 @@ state 209
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression                     shift and go to state 136
     statement                      shift and go to state 212
@@ -7076,9 +7076,9 @@ state 210
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     RPAREN          reduce using rule 126 (empty -> .)
     PLUSPLUS        shift and go to state 55
@@ -7091,9 +7091,9 @@ state 210
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression_opt                 shift and go to state 213
     expression                     shift and go to state 136
@@ -7138,9 +7138,9 @@ state 212
     EXMARK          reduce using rule 117 (selection_statement -> IF LPAREN expression RPAREN statement ELSE statement .)
     ID              reduce using rule 117 (selection_statement -> IF LPAREN expression RPAREN statement ELSE statement .)
     INT_CONST       reduce using rule 117 (selection_statement -> IF LPAREN expression RPAREN statement ELSE statement .)
-    CHAR_CONST      reduce using rule 117 (selection_statement -> IF LPAREN expression RPAREN statement ELSE statement .)
     FLOAT_CONST     reduce using rule 117 (selection_statement -> IF LPAREN expression RPAREN statement ELSE statement .)
     STR_CONST       reduce using rule 117 (selection_statement -> IF LPAREN expression RPAREN statement ELSE statement .)
+    CHAR_CONST      reduce using rule 117 (selection_statement -> IF LPAREN expression RPAREN statement ELSE statement .)
     SEMI            reduce using rule 117 (selection_statement -> IF LPAREN expression RPAREN statement ELSE statement .)
     RBRACE          reduce using rule 117 (selection_statement -> IF LPAREN expression RPAREN statement ELSE statement .)
     ELSE            reduce using rule 117 (selection_statement -> IF LPAREN expression RPAREN statement ELSE statement .)
@@ -7218,9 +7218,9 @@ state 214
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LBRACE          shift and go to state 41
     IF              shift and go to state 135
@@ -7242,9 +7242,9 @@ state 214
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression_opt                 shift and go to state 134
     statement                      shift and go to state 216
@@ -7333,9 +7333,9 @@ state 215
     (64) primary_expression -> . LPAREN expression RPAREN
     (27) identifier -> . ID
     (65) constant -> . INT_CONST
-    (66) constant -> . CHAR_CONST
-    (67) constant -> . FLOAT_CONST
-    (68) constant -> . STR_CONST
+    (66) constant -> . FLOAT_CONST
+    (67) constant -> . STR_CONST
+    (68) constant -> . CHAR_CONST
 
     LBRACE          shift and go to state 41
     IF              shift and go to state 135
@@ -7357,9 +7357,9 @@ state 215
     EXMARK          shift and go to state 60
     ID              shift and go to state 17
     INT_CONST       shift and go to state 63
-    CHAR_CONST      shift and go to state 64
-    FLOAT_CONST     shift and go to state 65
-    STR_CONST       shift and go to state 66
+    FLOAT_CONST     shift and go to state 64
+    STR_CONST       shift and go to state 65
+    CHAR_CONST      shift and go to state 66
 
     expression_opt                 shift and go to state 134
     statement                      shift and go to state 217
@@ -7406,9 +7406,9 @@ state 216
     EXMARK          reduce using rule 120 (iteration_statement -> FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement .)
     ID              reduce using rule 120 (iteration_statement -> FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement .)
     INT_CONST       reduce using rule 120 (iteration_statement -> FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement .)
-    CHAR_CONST      reduce using rule 120 (iteration_statement -> FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement .)
     FLOAT_CONST     reduce using rule 120 (iteration_statement -> FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement .)
     STR_CONST       reduce using rule 120 (iteration_statement -> FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement .)
+    CHAR_CONST      reduce using rule 120 (iteration_statement -> FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement .)
     SEMI            reduce using rule 120 (iteration_statement -> FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement .)
     RBRACE          reduce using rule 120 (iteration_statement -> FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement .)
     ELSE            reduce using rule 120 (iteration_statement -> FOR LPAREN declaration expression_opt SEMI expression_opt RPAREN statement .)
@@ -7437,9 +7437,9 @@ state 217
     EXMARK          reduce using rule 119 (iteration_statement -> FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement .)
     ID              reduce using rule 119 (iteration_statement -> FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement .)
     INT_CONST       reduce using rule 119 (iteration_statement -> FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement .)
-    CHAR_CONST      reduce using rule 119 (iteration_statement -> FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement .)
     FLOAT_CONST     reduce using rule 119 (iteration_statement -> FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement .)
     STR_CONST       reduce using rule 119 (iteration_statement -> FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement .)
+    CHAR_CONST      reduce using rule 119 (iteration_statement -> FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement .)
     SEMI            reduce using rule 119 (iteration_statement -> FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement .)
     RBRACE          reduce using rule 119 (iteration_statement -> FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement .)
     ELSE            reduce using rule 119 (iteration_statement -> FOR LPAREN expression_opt SEMI expression_opt SEMI expression_opt RPAREN statement .)

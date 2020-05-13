@@ -271,13 +271,17 @@ class UCParser:
         else:
             p[0] = p[2]
 
-    def p_constant(self, p):
+    def p_constant_1(self, p):
         """ constant : INT_CONST
-                     | CHAR_CONST
                      | FLOAT_CONST
                      | STR_CONST
         """
         p[0] = Constant(type=type(p[1]).__name__, value=p[1], coord=self._token_coord(p, 1))
+
+    def p_constant_2(self, p):
+        """ constant : CHAR_CONST
+        """
+        p[0] = Constant(type='char', value=p[1], coord=self._token_coord(p, 1))
 
     def p_expression(self, p):
         """ expression : assignment_expression

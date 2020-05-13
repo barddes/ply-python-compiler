@@ -2,7 +2,7 @@ import sys
 
 from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, BinaryOp, Assignment, ArrayDecl, \
     ArrayRef, Assert, Break, Cast, Compound, Constant, DeclList, EmptyStatement, ExprList, For, FuncCall, FuncDecl, \
-    FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node
+    FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node, NodeInfo
 from uc_parser import UCParser
 from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType
 
@@ -111,13 +111,13 @@ class Environment(object):
         merge_symtable = None if not merge_with else merge_with.symtable
         self.symtable = SymbolTable(merge_with=merge_symtable)
         self.symtable.update({
-            "int": IntType,
-            "float": FloatType,
-            "char": CharType,
-            "array": ArrayType,
-            "string": StringType,
-            "prt": PtrType,
-            "void": VoidType
+            "int": {'type': IntType},
+            "float": {'type': FloatType},
+            "char": {'type': CharType},
+            "array": {'type': ArrayType},
+            "string": {'type': StringType},
+            "prt": {'type': PtrType},
+            "void": {'type': VoidType}
         })
 
     # def push(self, enclosure):
@@ -166,26 +166,26 @@ class Visitor(NodeVisitor):
         expr2 = node.expr2
         op = node.op
 
-        if expr1.name_type.typename != expr2.name_type.typename:
-            print("Error. ", expr1.name_type.typename, op, expr2.name_type.typename, file=sys.stderr)
-        elif op not in expr1.name_type.binary_ops:
+        if expr1.node_info != expr2.node_info:
+            print("Error. ", expr1.node_info['type'].typename, op, expr2.node_info['type'].typename, file=sys.stderr)
+        elif op not in expr1.node_info['type'].binary_ops:
             print("Error (unsupported op %s)" % op, file=sys.stderr)
 
-        return expr1.name_type
+        return expr1.node_info['type']
 
     def UnaryOp_check(self, node: UnaryOp):
         expr1 = node.expr1
         op = node.op
 
-        if op not in expr1.name_type.unary_ops:
+        if op not in expr1.node_info['type'].unary_ops:
             print("Error (unsupported op %s)" % op, file=sys.stderr)
 
-        return expr1.name_type
+        return expr1.node_info
 
     def visit_Program(self, node: Program):
         node.env = self.global_env
         node.global_env = self.global_env
-        node.name_type = None
+        node.node_info = None
 
         for i, d in node.children():
             d.env = node.env
@@ -198,7 +198,7 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-        node.name_type = self.BinaryOp_check(node)
+        node.node_info = NodeInfo({'type': self.BinaryOp_check(node)})
 
     def visit_Assignment(self, node: Assignment):
         # ## 1. Make sure the location of the assignment is defined
@@ -269,7 +269,8 @@ class Visitor(NodeVisitor):
     def visit_Decl(self, node: Decl):
         name = node.name.name
         info = {
-            'func': isinstance(node.decl, FuncDecl),
+            'func': type(node.decl) == FuncDecl,
+            'array': type(node.decl) == ArrayDecl,
             'type': {
                 'int': IntType,
                 'char': CharType,
@@ -279,28 +280,26 @@ class Visitor(NodeVisitor):
             }[node.type.name[0]]
         }
 
+        node.node_info = NodeInfo(info)
+
         if info['func']:
             node.global_env.add_local_var(name, info)
         node.env.add_local_var(name, info)
 
-        node.name_type = info['type']
-
-        #size mismatch on initialization
-        if isinstance(node.decl, ArrayDecl):
+        # size mismatch on initialization
+        if isinstance(node.decl, ArrayDecl) and node.decl.const_exp:
             decl_size = node.decl.const_exp.value
             list_size = len(node.init.list)
             if decl_size != list_size:
                 print("Error (size mismatch on initialization)", file=sys.stderr)
-
-
 
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
 
-        if node.init and node.init.name_type != node.name_type:
-            print('Error.  %s = %s' % (node.name_type, node.init.name_type), file=sys.stderr)
+        if node.init and node.init.node_info == node.node_info:
+            print('Error.  %s = %s' % (node.node_info['type'], node.init.node_info['type']), file=sys.stderr)
 
     def visit_EmptyStatement(self, node: EmptyStatement):
         for i, d in node.children():
@@ -367,9 +366,9 @@ class Visitor(NodeVisitor):
             })
 
         if node.env.lookup(name):
-            node.name_type = node.env.lookup(name)['type']
+            node.node_info = NodeInfo(node.env.lookup(name))
         else:
-            node.name_type = node.global_env.lookup(name)['type']
+            node.node_info = NodeInfo(node.global_env.lookup(name))
 
     def visit_InitList(self, node: InitList):
         for i, d in node.children():
@@ -419,7 +418,11 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-        node.name_type = self.UnaryOp_check(node)
+        is_array = False
+        if node.expr1:
+            is_array = node.expr1.node_info['array']
+
+        node.node_info = NodeInfo({'array': is_array, 'type': self.UnaryOp_check(node)})
 
     def visit_VarDecl(self, node: VarDecl):
         for i, d in node.children():
