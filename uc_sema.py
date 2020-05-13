@@ -325,6 +325,9 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
+        node.node_info = NodeInfo(node.expr1.node_info)
+        node.node_info['func'] = False
+
     def visit_FuncDecl(self, node: FuncDecl):
         for i, d in node.children():
             d.env = node.env
@@ -341,6 +344,19 @@ class Visitor(NodeVisitor):
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        # Procura filho de node compound que é o Return
+        x = 0;
+        y = -1;
+        for i in node.compound.stmt_list:
+            if isinstance(i, Return):
+                y = x;
+            x+=1
+
+        # Verifica se ele eh diferente do decl da funcao
+        if y != -1 and node.decl.node_info != node.compound.stmt_list[y].value.node_info:
+            print("Return statement type does not match function declaration type", file=sys.stderr)
+
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         for i, d in node.children():
