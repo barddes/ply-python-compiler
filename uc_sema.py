@@ -293,6 +293,12 @@ class Visitor(NodeVisitor):
             if decl_size != list_size:
                 print("Error (size mismatch on initialization)", file=sys.stderr)
 
+            # if node.decl
+            array_name = node.decl.name.name
+            print(array_name)
+            array_type = node.global_env.lookup(node.decl.name.name)
+            print(array_type)
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
@@ -371,6 +377,14 @@ class Visitor(NodeVisitor):
             node.node_info = NodeInfo(node.global_env.lookup(name))
 
     def visit_InitList(self, node: InitList):
+
+        type_aux = None
+        for element in node.list:
+            if type_aux and type_aux != type(element):
+                print("Error mismatch type in array", file=sys.stderr)
+            type_aux = type(element)
+
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
