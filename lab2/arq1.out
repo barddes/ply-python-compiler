@@ -1,0 +1,3 @@
+Outputting the AST to semantic_tests/t1.ast.
+   @ 4:17: name 'j' not found
+   @ 5:5: Type of return statement expression does not match declared return type for function

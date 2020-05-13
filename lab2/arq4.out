@@ -1,0 +1,6 @@
+Outputting the AST to semantic_tests/t4.ast.
+   @ 7:10: name 'i' not found
+   @ 7:10: name 'i' not defined
+   @ 7:17: name 'i' not found
+   @ 7:5: Expression in for statement must evaluate to bool. Type 'None' not accepted
+   @ 7:27: name 'i' not found

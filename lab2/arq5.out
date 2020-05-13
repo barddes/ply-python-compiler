@@ -1,0 +1,2 @@
+Outputting the AST to semantic_tests/t5.ast.
+   @ 5:5: Expression in while statement must evaluate to bool. Type 'UCType(int)' not accepted

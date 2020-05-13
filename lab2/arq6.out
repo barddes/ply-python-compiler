@@ -1,0 +1,2 @@
+Outputting the AST to semantic_tests/t6.ast.
+   @ 12:8: Binary operator == does not have matching LHS/RHS types

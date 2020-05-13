@@ -1,0 +1,4 @@
+Outputting the AST to semantic_tests/t3.ast.
+   @ 8:25: Number of arguments for call to function 'f' do not match function parameter declaration on line None
+None: Function f return type does not match declared type
+None: Nested functions not implemented

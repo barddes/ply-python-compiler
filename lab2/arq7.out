@@ -1,0 +1,6 @@
+Outputting the AST to semantic_tests/t7.ast.
+   @ 9:12: Operator '||' not supported for 'UCType(bool)' and 'UCType(bool)'
+   @ 17:14: Subscripted value its not a array, pointer or vector
+   @ 18:21: Subscripted value its not a array, pointer or vector
+   @ 18:9: Cannot assign None to UCType(float)
+   @ 21:11: Binary operator / does not have matching LHS/RHS types
