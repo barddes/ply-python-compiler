@@ -32,7 +32,12 @@ class uCType(object):
 
 EmptyType = uCType(None)
 
-AnyType = uCType('any')
+AnyType = uCType('any',
+                 unary_ops={"-", "+", "--", "++", "p--", "p++", "*", "&"},
+                 binary_ops={"+", "-", "*", "/", "%"},
+                 rel_ops={"==", "!=", "<", ">", "<=", ">=", "&&", "||"},
+                 assign_ops={"=", "+=", "-=", "*=", "/=", "%="}
+                 )
 
 IntType = uCType("int",
                  unary_ops={"-", "+", "--", "++", "p--", "p++", "*", "&"},

@@ -614,12 +614,13 @@ class Program(Node):
 
 
 class PtrDecl(Node):
-    __slots__ = ('value', 'type', 'coord')
+    __slots__ = ('value', 'type', 'name', 'coord')
 
-    def __init__(self, value, type=None, coord: Coord = None):
+    def __init__(self, value, type=None, name=None, coord: Coord = None):
         super().__init__()
         self.value = value
         self.type = type
+        self.name = name
         self.coord = coord
 
     def set_type(self, t):

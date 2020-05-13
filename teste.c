@@ -1,18 +1,15 @@
-int f(int n, int k) {
-    int p, q, t;
-    if (n < 2) {
-        k = 0;
-        return n;
-    }
-    else {
-        t = f(n-1, p) + f(n-2, 1, 'c');
-        k = p + q + 1;
-        return t;
-    }
-}
-
 int main() {
-    int m = 9;
-    print(f(3, m), m);
+    int n, t1 = 0, t2 = 1, nextTerm;
+    print("Enter the number of terms: ");
+    read(n);
+    print("Fibonacci Series: ");
+
+    for (int i = 1; i <= n; ++i) {
+        print(t1, " ");
+        nextTerm = t1 + t2;
+        t1 = t2;
+        t2 = nextTerm;
+    }
+
     return 0;
 }

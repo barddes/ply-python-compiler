@@ -168,6 +168,7 @@ class Visitor(NodeVisitor):
 
         if expr1.node_info != expr2.node_info:
             print("Error. ", expr1.node_info['type'].typename, op, expr2.node_info['type'].typename, file=sys.stderr)
+
         # nao tenho certeza se esta certo mas concerta o erro do teste 1
         elif op not in expr1.node_info['type'].binary_ops and op not in expr1.node_info['type'].rel_ops:
             print("Error (unsupported op %s)" % op, file=sys.stderr)
