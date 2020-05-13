@@ -17,9 +17,17 @@ class uCType(object):
         else:
             return False
 
+    def __ne__(self, other):
+        return not self == other
+
     def __str__(self):
         return self.typename
 
+    def __repr__(self):
+        return self.typename
+
+
+EmptyType = uCType(None)
 
 IntType = uCType("int",
                  unary_ops={"-", "+", "--", "++", "p--", "p++", "*", "&"},
@@ -61,4 +69,3 @@ VoidType = uCType("void",
                   )
 
 FuncType = uCType("func")
-

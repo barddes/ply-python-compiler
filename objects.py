@@ -28,6 +28,7 @@ class Coord(object):
 class NodeInfo(dict):
     def __init__(self, init):
         self['func'] = False
+        self['length'] = None
         self['array'] = False
         self['type'] = None
         super().__init__(init)
@@ -39,11 +40,15 @@ class NodeInfo(dict):
         if self['func'] == other['func'] and self['array'] == other['array'] and self['type'] == other['type']:
             return True
 
-        if not self['func'] and not other['func'] and self['array'] and not other['array'] and self[
-            'type'] == CharType and other['type'] == StringType:
+        if not self['func'] and not other['func'] and self['array'] != other['array'] and (
+                (self['type'] == CharType and other['type'] == StringType) or (
+                self['type'] == StringType and other['type'] == CharType)):
             return True
 
         return self['type'] == other['type']
+
+    def __ne__(self, other):
+        return not self == other
 
 
 class Node(object):
@@ -662,9 +667,9 @@ class Return(Node):
 class Type(Node):
     __slots__ = ('name', 'coord')
 
-    def __init__(self, names, coord: Coord = None):
+    def __init__(self, name, coord: Coord = None):
         super().__init__()
-        self.name = names
+        self.name = name
         self.coord = coord
 
     attr_names = ('name',)

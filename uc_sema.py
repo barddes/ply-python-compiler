@@ -4,7 +4,7 @@ from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, 
     ArrayRef, Assert, Break, Cast, Compound, Constant, DeclList, EmptyStatement, ExprList, For, FuncCall, FuncDecl, \
     FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node, NodeInfo
 from uc_parser import UCParser
-from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType
+from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType, EmptyType
 
 
 class NodeVisitor(object):
@@ -214,11 +214,16 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_ArrayDecl(self, node: ArrayDecl):
-
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        node.node_info = NodeInfo({
+            'array': True,
+            'length': None if not node.const_exp else node.const_exp.value,
+            'type': node.dir_dec.node_info['type']
+        })
 
     def visit_ArrayRef(self, node: ArrayRef):
 
@@ -267,24 +272,19 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_Decl(self, node: Decl):
-        name = node.name.name
-        info = {
-            'func': type(node.decl) == FuncDecl,
-            'array': type(node.decl) == ArrayDecl,
-            'type': {
-                'int': IntType,
-                'char': CharType,
-                'float': FloatType,
-                'string': StringType,
-                'void': VoidType
-            }[node.type.name[0]]
-        }
+        for i, d in node.children():
+            d.env = node.env
+            d.global_env = node.global_env
+            self.visit(d)
 
-        node.node_info = NodeInfo(info)
+        name = node.name.name
+        info = node.decl.node_info
 
         if info['func']:
             node.global_env.add_local_var(name, info)
         node.env.add_local_var(name, info)
+
+        node.node_info = NodeInfo(info)
 
         # size mismatch on initialization
         if isinstance(node.decl, ArrayDecl) and node.decl.const_exp:
@@ -293,19 +293,7 @@ class Visitor(NodeVisitor):
             if decl_size != list_size:
                 print("Error (size mismatch on initialization)", file=sys.stderr)
 
-            # verifica se o vetor possui todos os elementos de mesmo tipo
-            type_aux = None
-            for element in node.init.list :
-                if type_aux and type_aux != element.type:
-                    print("Error mismatch type in array's elements", file=sys.stderr)
-                type_aux = element.type
-
-        for i, d in node.children():
-            d.env = node.env
-            d.global_env = node.global_env
-            self.visit(d)
-
-        if node.init and node.init.node_info == node.node_info:
+        if node.init and node.init.node_info != node.node_info:
             print('Error.  %s = %s' % (node.node_info['type'], node.init.node_info['type']), file=sys.stderr)
 
     def visit_EmptyStatement(self, node: EmptyStatement):
@@ -339,6 +327,9 @@ class Visitor(NodeVisitor):
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        node.node_info = node.decl.node_info
+        node.node_info['func'] = True
 
     def visit_FuncDef(self, node: FuncDef):
         node.env = Environment()
@@ -378,19 +369,23 @@ class Visitor(NodeVisitor):
             node.node_info = NodeInfo(node.global_env.lookup(name))
 
     def visit_InitList(self, node: InitList):
-
-        # #verifica se o vetor possui todos os elementos de mesmo tipo
-        # type_aux = None
-        # for element in node.list:
-        #     if type_aux and type_aux != element.type:
-        #         print("Error mismatch type in array's elements", file=sys.stderr)
-        #     type_aux = element.type
-
-
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        #verifica se o vetor possui todos os elementos de mesmo tipo
+        type_aux = None
+        for element in node.list:
+            if type_aux and type_aux != element.type:
+                print("Error mismatch type in array's elements", file=sys.stderr)
+            type_aux = element.type
+
+        node.node_info = NodeInfo({
+            'array': True,
+            'length': len(node.list),
+            'type': EmptyType if len(node.list) == 0 else node.list[0].node_info['type']
+        })
 
     def visit_ParamList(self, node: ParamList):
         for i, d in node.children():
@@ -423,10 +418,16 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_Type(self, node: Type):
-        for i, d in node.children():
-            d.env = node.env
-            d.global_env = node.global_env
-            self.visit(d)
+        node.node_info = NodeInfo({
+            'type': {
+                'int': IntType,
+                'char': CharType,
+                'float': FloatType,
+                'string': StringType,
+                'void': VoidType
+            }[node.name[0]]
+        })
+
 
     def visit_UnaryOp(self, node: UnaryOp):
         for i, d in node.children():
@@ -445,6 +446,8 @@ class Visitor(NodeVisitor):
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        node.node_info = node.type.node_info
 
     def visit_While(self, node: While):
         node.env = Environment(merge_with=node.env)
