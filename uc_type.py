@@ -12,6 +12,9 @@ class uCType(object):
         self.assign_ops = assign_ops if assign_ops else set()
 
     def __eq__(self, other):
+        if self.typename == 'any' or other.typename == 'any':
+            return True
+
         if self and other:
             return self.typename == other.typename
         else:
@@ -28,6 +31,8 @@ class uCType(object):
 
 
 EmptyType = uCType(None)
+
+AnyType = uCType('any')
 
 IntType = uCType("int",
                  unary_ops={"-", "+", "--", "++", "p--", "p++", "*", "&"},

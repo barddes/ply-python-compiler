@@ -4,7 +4,7 @@ from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, 
     ArrayRef, Assert, Break, Cast, Compound, Constant, DeclList, EmptyStatement, ExprList, For, FuncCall, FuncDecl, \
     FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node, NodeInfo
 from uc_parser import UCParser
-from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType, EmptyType
+from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType, EmptyType, AnyType
 
 
 class NodeVisitor(object):
@@ -346,12 +346,12 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         # Procura filho de node compound que é o Return
-        x = 0;
-        y = -1;
+        x = 0
+        y = -1
         for i in node.compound.stmt_list:
             if isinstance(i, Return):
-                y = x;
-            x+=1
+                y = x
+            x += 1
 
         # Verifica se ele eh diferente do decl da funcao
         if y != -1 and node.decl.node_info != node.compound.stmt_list[y].value.node_info:
@@ -378,7 +378,7 @@ class Visitor(NodeVisitor):
         if not node.env.lookup(name) and not node.global_env.lookup(name):
             print("ERROR: Variável '%s' não definida." % name, file=sys.stderr)
             node.env.add_local_var(name, NodeInfo({
-                'type': VoidType
+                'type': AnyType
             }))
 
         if node.env.lookup(name):
