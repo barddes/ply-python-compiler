@@ -254,6 +254,16 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
+        node.node_info = NodeInfo({
+            'type': {
+                'int': IntType,
+                'char': CharType,
+                'float': FloatType,
+                'string': StringType,
+                'void': VoidType
+            }[node.type.name[0]]
+        })
+
     def visit_Compound(self, node: Compound):
         node.env = Environment(merge_with=node.env)
 

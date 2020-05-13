@@ -1,15 +1,17 @@
 int main() {
-    int n, t1 = 0, t2 = 1, nextTerm;
-    print("Enter the number of terms: ");
+    int n, r, temp;
+    float sum = 0.;
+    print("enter the number = ");
     read(n);
-    print("Fibonacci Series: ");
-
-    for (int i = 1; i <= n; ++i) {
-        print(t1, " ");
-        nextTerm = t1 + t2;
-        t1 = t2;
-        t2 = nextTerm;
+    temp = n;
+    while(n > 0) {
+        r = n % 10;
+        sum = (sum * 10.) + (float) r;
+        n = n / 10;
     }
-
+    if(temp == sum)
+        print("palindrome number ");
+    else
+        print("not palindrome");
     return 0;
 }
