@@ -209,7 +209,9 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         if node.name.node_info != node.assign_expr.node_info:
-            print('Error (cannot assign %s to %s)' % (node.assign_expr.node_info['type'], node.name.node_info['type']), file=sys.stderr)
+            print('Error (cannot assign %s to %s)' % (
+            ''.join(['*' for _ in range(node.assign_expr.node_info['depth'])]) + str(node.assign_expr.node_info['type']), ''.join(['*' for _ in range(node.name.node_info['depth'])]) + str(node.name.node_info['type'])),
+                  file=sys.stderr)
 
     def visit_ArrayDecl(self, node: ArrayDecl):
         for i, d in node.children():
@@ -220,7 +222,8 @@ class Visitor(NodeVisitor):
         node.node_info = NodeInfo({
             'array': True,
             'length': None if not node.const_exp else node.const_exp.value,
-            'type': node.dir_dec.node_info['type']
+            'type': node.dir_dec.node_info['type'],
+            'depth': node.dir_dec.node_info['depth'] + 1
         })
 
     def visit_ArrayRef(self, node: ArrayRef):
@@ -233,7 +236,9 @@ class Visitor(NodeVisitor):
             print('Error (array index must be of type int)', file=sys.stderr)
 
         node.node_info = NodeInfo(node.post_expr.node_info)
-        node.node_info['array'] = False
+        node.node_info['depth'] -= 1
+        if node.node_info['depth'] == 0:
+            node.node_info['array'] = False
         node.node_info['length'] = None
 
     def visit_Assert(self, node: Assert):
@@ -301,7 +306,7 @@ class Visitor(NodeVisitor):
         node.node_info = info
 
         # size mismatch on initialization
-        if isinstance(node.decl, ArrayDecl) and node.decl.const_exp:
+        if isinstance(node.decl, ArrayDecl) and node.decl.const_exp and node.init:
             decl_size = node.decl.const_exp.value
             list_size = len(node.init.list)
             if decl_size != list_size:
@@ -337,12 +342,14 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         if node.expr2:
-            params = [x.node_info['type'] for x in ([node.expr2] if not isinstance(node.expr2, ExprList) else node.expr2.list)]
+            params = [x.node_info['type'] for x in
+                      ([node.expr2] if not isinstance(node.expr2, ExprList) else node.expr2.list)]
             if len(params) != len(node.expr1.node_info['params']):
                 print('Number of arguments for call to function 'f' do not match function parameter declaration',
                       file=sys.stderr)
             elif params != node.expr1.node_info['params']:
-                print('Types of arguments for call to function 'f' do not match function parameter declaration', file=sys.stderr)
+                print('Types of arguments for call to function 'f' do not match function parameter declaration',
+                      file=sys.stderr)
 
         node.node_info = NodeInfo(node.expr1.node_info)
         node.node_info['func'] = False
@@ -361,8 +368,6 @@ class Visitor(NodeVisitor):
         else:
             node.node_info['params'] = []
 
-
-
     def visit_FuncDef(self, node: FuncDef):
         node.env = Environment()
 
@@ -377,7 +382,8 @@ class Visitor(NodeVisitor):
         for i in node.compound.stmt_list:
             if isinstance(i, Return):
                 if i.node_info['type'] != node.node_info['type']:
-                    print('Type of return statement expression does not match declared return type for function', file=sys.stderr)
+                    print('Type of return statement expression does not match declared return type for function',
+                          file=sys.stderr)
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         for i, d in node.children():

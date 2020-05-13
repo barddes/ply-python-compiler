@@ -29,6 +29,7 @@ class NodeInfo(dict):
     def __init__(self, init=dict()):
         self['func'] = False
         self['params'] = None
+        self['depth'] = 0
         self['length'] = None
         self['array'] = False
         self['type'] = None
@@ -38,7 +39,7 @@ class NodeInfo(dict):
         if not other:
             return False
 
-        if self['func'] == other['func'] and self['array'] == other['array'] and self['type'] == other['type']:
+        if self['func'] == other['func'] and self['array'] == other['array'] and self['type'] == other['type'] and self['depth'] == other['depth']:
             return True
 
         if not self['func'] and not other['func'] and self['array'] != other['array'] and (
@@ -46,7 +47,7 @@ class NodeInfo(dict):
                 self['type'] == StringType and other['type'] == CharType)):
             return True
 
-        return self['type'] == other['type']
+        return self['type'] == other['type'] and self['array'] == other['array'] and self['depth'] == other['depth']
 
     def __ne__(self, other):
         return not self == other
