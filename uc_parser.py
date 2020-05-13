@@ -290,7 +290,10 @@ class UCParser:
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = ExprList(p[1], p[3])
+            if isinstance(p[1], ExprList):
+                p[0] = p[1] + ExprList([p[3]])
+            else:
+                p[0] = ExprList([p[1], p[3]])
 
     def p_argument_expression(self, p):
         """ argument_expression : assignment_expression
@@ -299,7 +302,10 @@ class UCParser:
         if len(p) == 2:
             p[0] = p[1]
         else:
-            p[0] = ExprList(p[1], p[3])
+            if isinstance(p[1], ExprList):
+                p[0] = p[1] + ExprList([p[3]])
+            else:
+                p[0] = ExprList([p[1], p[3]])
 
     def p_assignment_expression(self, p):
         """ assignment_expression : binary_expression

@@ -136,7 +136,7 @@ class Environment(object):
         try:
             self.symtable.add(name, info)
         except Exception as e:
-            print('ERROR: ' + str(e), file=sys.stderr)
+            print('Error. ' + str(e), file=sys.stderr)
 
     # def add_root(self, name, value):
     #     self.root.add(name, value)
@@ -325,8 +325,17 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
+        if node.expr2:
+            params = [x.node_info['type'] for x in ([node.expr2] if not isinstance(node.expr2, ExprList) else node.expr2.list)]
+            if len(params) != len(node.expr1.node_info['params']):
+                print('Number of arguments for call to function 'f' do not match function parameter declaration',
+                      file=sys.stderr)
+            elif params != node.expr1.node_info['params']:
+                print('Types of arguments for call to function 'f' do not match function parameter declaration', file=sys.stderr)
+
         node.node_info = NodeInfo(node.expr1.node_info)
         node.node_info['func'] = False
+        node.node_info['params'] = None
 
     def visit_FuncDecl(self, node: FuncDecl):
         for i, d in node.children():
@@ -336,6 +345,12 @@ class Visitor(NodeVisitor):
 
         node.node_info = node.decl.node_info
         node.node_info['func'] = True
+        if node.init:
+            node.node_info['params'] = node.init.node_info['params']
+        else:
+            node.node_info['params'] = []
+
+
 
     def visit_FuncDef(self, node: FuncDef):
         node.env = Environment()
@@ -345,18 +360,13 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
+        node.node_info = node.decl.node_info
+
         # Procura filho de node compound que é o Return
-        x = 0
-        y = -1
         for i in node.compound.stmt_list:
             if isinstance(i, Return):
-                y = x
-            x += 1
-
-        # Verifica se ele eh diferente do decl da funcao
-        if y != -1 and node.decl.node_info != node.compound.stmt_list[y].value.node_info:
-            print("Return statement type does not match function declaration type", file=sys.stderr)
-
+                if i.node_info['type'] != node.node_info['type']:
+                    print('Type of return statement expression does not match declared return type for function', file=sys.stderr)
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         for i, d in node.children():
@@ -376,7 +386,7 @@ class Visitor(NodeVisitor):
         name = node.name
 
         if not node.env.lookup(name) and not node.global_env.lookup(name):
-            print("ERROR: Variável '%s' não definida." % name, file=sys.stderr)
+            print("Error. Variable '%s' not defined." % name, file=sys.stderr)
             node.env.add_local_var(name, NodeInfo({
                 'type': AnyType
             }))
@@ -411,6 +421,12 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
+        node.node_info = NodeInfo({
+            'params': [x.node_info['type'] for x in node.list]
+        })
+
+        pass
+
     def visit_Print(self, node: Print):
         for i, d in node.children():
             d.env = node.env
@@ -434,6 +450,12 @@ class Visitor(NodeVisitor):
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        node.node_info = node.value.node_info
+        if not node.node_info:
+            node.node_info = NodeInfo({
+                'type': VoidType
+            })
 
     def visit_Type(self, node: Type):
         node.node_info = NodeInfo({

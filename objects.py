@@ -28,6 +28,7 @@ class Coord(object):
 class NodeInfo(dict):
     def __init__(self, init=dict()):
         self['func'] = False
+        self['params'] = None
         self['length'] = None
         self['array'] = False
         self['type'] = None
@@ -352,25 +353,22 @@ class EmptyStatement(Node):
 
 
 class ExprList(Node):
-    __slots__ = ('expr1', 'expr2', 'coord')
+    __slots__ = ('list', 'coord')
 
-    def __init__(self, expr1, expr2, coord: Coord = None):
+    def __init__(self, list, coord: Coord = None):
         super().__init__()
-        self.expr1 = expr1
-        self.expr2 = expr2
+        self.list = list
         self.coord = coord
 
-        if not self.coord:
-            self.coord = self.expr1.coord
+    def __add__(self, other):
+        return ExprList(self.list + other.list)
 
     def children(self):
-        if self.expr1:
-            yield 'expr1', self.expr1
-        if self.expr2:
-            yield 'expr2', self.expr2
+        if self.list:
+            for i, e in enumerate(self.list):
+                yield 'list[%d]' % i, e
 
     attr_names = ()
-
 
 class For(Node):
     __slots__ = ('p1', 'p2', 'p3', 'statement', 'coord')
@@ -650,11 +648,12 @@ class Read(Node):
 
 
 class Return(Node):
-    __slots__ = ('value', 'coord')
+    __slots__ = ('value', 'func_def', 'coord')
 
-    def __init__(self, value, coord: Coord = None):
+    def __init__(self, value, func_def: FuncDef = None, coord: Coord = None):
         super().__init__()
         self.value = value
+        self.func_def = func_def
         self.coord = coord
 
     def children(self):
