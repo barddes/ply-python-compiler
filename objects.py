@@ -2,8 +2,7 @@ import copy
 import sys
 
 # from uc_sema import Environment
-from uc_type import uCType
-from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType, FuncType
+from uc_type import IntType, FloatType, CharType, StringType
 
 
 class Coord(object):

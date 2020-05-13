@@ -12,13 +12,12 @@ class uCType(object):
         self.assign_ops = assign_ops if assign_ops else set()
 
     def __eq__(self, other):
-        if self.typename == 'any' or other.typename == 'any':
-            return True
-
-        if self and other:
-            return self.typename == other.typename
-        else:
+        if not self or not other:
             return False
+        elif self.typename == 'any' or other.typename == 'any':
+            return True
+        else:
+            return self.typename == other.typename
 
     def __ne__(self, other):
         return not self == other
@@ -79,4 +78,6 @@ VoidType = uCType("void",
                   binary_ops={}
                   )
 
-FuncType = uCType("func")
+BoolType = uCType("bool",
+                  rel_ops={"==", "!=", "&&", "||"}
+                  )

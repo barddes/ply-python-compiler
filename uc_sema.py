@@ -4,7 +4,7 @@ from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, 
     ArrayRef, Assert, Break, Cast, Compound, Constant, DeclList, EmptyStatement, ExprList, For, FuncCall, FuncDecl, \
     FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node, NodeInfo
 from uc_parser import UCParser
-from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType, EmptyType, AnyType
+from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType, EmptyType, AnyType, BoolType
 
 
 class NodeVisitor(object):
@@ -172,6 +172,9 @@ class Visitor(NodeVisitor):
         # nao tenho certeza se esta certo mas concerta o erro do teste 1
         elif op not in expr1.node_info['type'].binary_ops and op not in expr1.node_info['type'].rel_ops:
             print("Error (unsupported op %s)" % op, file=sys.stderr)
+
+        if op in expr1.node_info['type'].rel_ops:
+            return BoolType
 
         return expr1.node_info['type']
 
@@ -513,6 +516,9 @@ class Visitor(NodeVisitor):
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        if node.expr.node_info['type'] != BoolType:
+            print('Erro. While expression evaluate a BoolType', file=sys.stderr)
 
 
 if __name__ == '__main__':
