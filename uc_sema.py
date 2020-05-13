@@ -429,7 +429,8 @@ class Visitor(NodeVisitor):
         node.node_info = NodeInfo({
             'array': True,
             'length': len(node.list),
-            'type': EmptyType if len(node.list) == 0 else node.list[0].node_info['type']
+            'type': EmptyType if len(node.list) == 0 else node.list[0].node_info['type'],
+            'depth': max([x.node_info['depth'] for x in node.list]) + 1
         })
 
     def visit_ParamList(self, node: ParamList):
