@@ -26,7 +26,7 @@ class Coord(object):
 
 
 class NodeInfo(dict):
-    def __init__(self, init):
+    def __init__(self, init=dict()):
         self['func'] = False
         self['length'] = None
         self['array'] = False
@@ -760,13 +760,13 @@ class UnaryOp(Node):
 
 
 class Assignment(Node):
-    __slots__ = ('op', 'name', 'func_call', 'coord')
+    __slots__ = ('op', 'name', 'assign_expr', 'coord')
 
-    def __init__(self, op, name, func_call, coord: Coord = None):
+    def __init__(self, op, name, assign_expr, coord: Coord = None):
         super().__init__()
         self.op = op
         self.name = name
-        self.func_call = func_call
+        self.assign_expr = assign_expr
         self.coord = coord
 
         if not self.coord:
@@ -775,7 +775,7 @@ class Assignment(Node):
     def children(self):
         if self.name:
             yield 'name', self.name
-        if self.func_call:
-            yield 'func_call', self.func_call
+        if self.assign_expr:
+            yield 'assign_expr', self.assign_expr
 
     attr_names = ('op',)

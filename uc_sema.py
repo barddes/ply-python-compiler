@@ -201,17 +201,13 @@ class Visitor(NodeVisitor):
         node.node_info = NodeInfo({'type': self.BinaryOp_check(node)})
 
     def visit_Assignment(self, node: Assignment):
-        # ## 1. Make sure the location of the assignment is defined
-        # sym = self.symtab.lookup(node.location)
-        # assert sym, "Assigning to unknown sym"
-        # ## 2. Check that the types match
-        # self.visit(node.value)
-        # assert sym.type == node.value.type, "Type mismatch in assignment"
-
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        if node.name.node_info != node.assign_expr.node_info:
+            print('Error (canot assign %s to %s)' % (node.assign_expr.node_info['type'], node.name.node_info['type']), file=sys.stderr)
 
     def visit_ArrayDecl(self, node: ArrayDecl):
         for i, d in node.children():
@@ -226,11 +222,17 @@ class Visitor(NodeVisitor):
         })
 
     def visit_ArrayRef(self, node: ArrayRef):
-
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        if node.expr.node_info['type'] != IntType:
+            print('Error (array index must be of type int)', file=sys.stderr)
+
+        node.node_info = NodeInfo(node.post_expr.node_info)
+        node.node_info['array'] = False
+        node.node_info['length'] = None
 
     def visit_Assert(self, node: Assert):
         for i, d in node.children():
@@ -284,7 +286,7 @@ class Visitor(NodeVisitor):
             node.global_env.add_local_var(name, info)
         node.env.add_local_var(name, info)
 
-        node.node_info = NodeInfo(info)
+        node.node_info = info
 
         # size mismatch on initialization
         if isinstance(node.decl, ArrayDecl) and node.decl.const_exp:
@@ -358,10 +360,9 @@ class Visitor(NodeVisitor):
 
         if not node.env.lookup(name) and not node.global_env.lookup(name):
             print("ERROR: Variável '%s' não definida." % name, file=sys.stderr)
-            node.env.add_local_var(name, {
-                'func': False,
+            node.env.add_local_var(name, NodeInfo({
                 'type': VoidType
-            })
+            }))
 
         if node.env.lookup(name):
             node.node_info = NodeInfo(node.env.lookup(name))
@@ -374,7 +375,7 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-        #verifica se o vetor possui todos os elementos de mesmo tipo
+        # verifica se o vetor possui todos os elementos de mesmo tipo
         type_aux = None
         for element in node.list:
             if type_aux and type_aux != element.type:
@@ -427,7 +428,6 @@ class Visitor(NodeVisitor):
                 'void': VoidType
             }[node.name[0]]
         })
-
 
     def visit_UnaryOp(self, node: UnaryOp):
         for i, d in node.children():

@@ -55,6 +55,7 @@ ArrayType = uCType("array",
 
 StringType = uCType("string",
                     unary_ops={},
+                    binary_ops={"+"},
                     rel_ops={"==", "!="}
                     )
 
