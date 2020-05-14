@@ -1,16 +1,64 @@
+from objects import Program, BinaryOp, Assignment, ArrayDecl, ArrayRef, Assert, Break, Cast, Compound, Constant, \
+    DeclList, Decl, EmptyStatement, ExprList, For, FuncCall, FuncDecl, FuncDef, GlobalDecl, If, ID, InitList, ParamList, \
+    Print, PtrDecl, Read, Return, Type, UnaryOp, VarDecl, While
 from uc_sema import NodeVisitor
 
 
 class GenerateCode(NodeVisitor):
+    # rel_opcodes = {
+    #     '==': 'eq',
+    #     '!=': 'ne',
+    #     '>': 'gt',
+    #     '<': 'lt',
+    #     '>=': 'ge',
+    #     '<=': 'le',
+    # }
+
+    unary_ops = {
+        '+': '',
+        '-': 'sub',
+        '++': 'add',
+        '--': 'sub',
+        'p++': 'add',
+        'p--': 'sub',
+        '*': 'pointer',
+        '&': 'address',
+    }
+
+    binary_ops = {
+        '+': 'add',
+        '-': 'sub',
+        '*': 'mul',
+        '/': 'div',
+        '%': 'mod',
+        '&&': 'and',
+        '||': 'or',
+        '==': 'eq',
+        '!=': 'ne',
+        '>': 'gt',
+        '<': 'lt',
+        '>=': 'ge',
+        '<=': 'le',
+    }
+    #
+    # assing_opcodes = {
+    #     '+=': 'add',
+    #     '-=': 'sub',
+    #     '*=': 'mul',
+    #     '/=': 'div',
+    #     '%=': 'mod',
+    # }
+
     '''
     Node visitor class that creates 3-address encoded instruction sequences.
     '''
+
     def __init__(self):
         super(GenerateCode, self).__init__()
 
         # version dictionary for temporaries
         self.fname = 'main'  # We use the function name as a key
-        self.versions = {self.fname:0}
+        self.versions = {self.fname: 0}
 
         # The generated code (list of tuples)
         self.code = []
@@ -45,15 +93,15 @@ class GenerateCode(NodeVisitor):
 
     def visit_BinaryOp(self, node):
         # Visit the left and right expressions
-        self.visit(node.left)
-        self.visit(node.right)
+        self.visit(node.expr1)
+        self.visit(node.expr2)
 
         # Make a new temporary for storing the result
         target = self.new_temp()
 
         # Create the opcode and append to list
-        opcode = binary_ops[node.op] + "_"+node.left.type.name
-        inst = (opcode, node.left.gen_location, node.right.gen_location, target)
+        opcode = self.binary_ops[node.op] + "_" + node.expr1.node_info['type'].typename
+        inst = (opcode, node.expr1.gen_location, node.expr2.gen_location, target)
         self.code.append(inst)
 
         # Store location of the result on the node
@@ -89,9 +137,133 @@ class GenerateCode(NodeVisitor):
         self.code.append(inst)
 
     def visit_UnaryOp(self, node):
-        self.visit(node.left)
+        self.visit(node.expr1)
         target = self.new_temp()
-        opcode = unary_ops[node.op] + "_" + node.left.type.name
-        inst = (opcode, node.left.gen_location)
+        opcode = self.unary_ops[node.op] + "_" + node.expr1.node_info['type'].typename
+        inst = (opcode, node.expr1.gen_location)
         self.code.append(inst)
         node.gen_location = target
+
+    def visit_Program(self, node: Program):
+        for i, d in node.children():
+            self.visit(d)
+
+    # def visit_BinaryOp(self, node: BinaryOp):
+    #     for i, c in node.children():
+    #         self.visit(c)
+
+    def visit_Assignment(self, node: Assignment):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_ArrayDecl(self, node: ArrayDecl):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_ArrayRef(self, node: ArrayRef):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_Assert(self, node: Assert):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_Break(self, node: Break):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_Cast(self, node: Cast):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_Compound(self, node: Compound):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_Constant(self, node: Constant):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_DeclList(self, node: DeclList):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_Decl(self, node: Decl):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_EmptyStatement(self, node: EmptyStatement):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_ExprList(self, node: ExprList):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_For(self, node: For):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_FuncCall(self, node: FuncCall):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_FuncDecl(self, node: FuncDecl):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_FuncDef(self, node: FuncDef):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_GlobalDecl(self, node: GlobalDecl):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_If(self, node: If):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_ID(self, node: ID):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_InitList(self, node: InitList):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_ParamList(self, node: ParamList):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_Print(self, node: Print):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_PtrDecl(self, node: PtrDecl):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_Read(self, node: Read):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_Return(self, node: Return):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_Type(self, node: Type):
+        for i, c in node.children():
+            self.visit(c)
+
+    # def visit_UnaryOp(self, node: UnaryOp):
+    #     for i, c in node.children():
+    #         self.visit(c)
+
+    def visit_VarDecl(self, node: VarDecl):
+        for i, c in node.children():
+            self.visit(c)
+
+    def visit_While(self, node: While):
+        for i, c in node.children():
+            self.visit(c)

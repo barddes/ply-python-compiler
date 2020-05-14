@@ -187,4 +187,4 @@ if __name__ == '__main__':
 
     m = UCLexer(print_error).build()  # Build the lexer
     # m.scan(open(sys.argv[1]).read())  # print tokens
-    m.scan(open('teste.c').read())  # print tokens
+    m.scan(open('teste.uc').read())  # print tokens

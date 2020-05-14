@@ -4,7 +4,90 @@ from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, 
     ArrayRef, Assert, Break, Cast, Compound, Constant, DeclList, EmptyStatement, ExprList, For, FuncCall, FuncDecl, \
     FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node, NodeInfo
 from uc_parser import UCParser
-from uc_type import IntType, FloatType, CharType, ArrayType, StringType, PtrType, VoidType, EmptyType, AnyType, BoolType
+
+class uCType(object):
+    '''
+    Class that represents a type in the uC language.  Types
+    are declared as singleton instances of this type.
+    '''
+
+    def __init__(self, typename, binary_ops=None, unary_ops=None, rel_ops=None, assign_ops=None):
+        self.typename = typename
+        self.unary_ops = unary_ops if unary_ops else set()
+        self.binary_ops = binary_ops if binary_ops else set()
+        self.rel_ops = rel_ops if rel_ops else set()
+        self.assign_ops = assign_ops if assign_ops else set()
+
+    def __eq__(self, other):
+        if not self or not other:
+            return False
+        elif self.typename == 'any' or other.typename == 'any':
+            return True
+        else:
+            return self.typename == other.typename
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __str__(self):
+        return self.typename
+
+    def __repr__(self):
+        return self.typename
+
+
+EmptyType = uCType(None)
+
+AnyType = uCType('any',
+                 unary_ops={"-", "+", "--", "++", "p--", "p++", "*", "&"},
+                 binary_ops={"+", "-", "*", "/", "%"},
+                 rel_ops={"==", "!=", "<", ">", "<=", ">=", "&&", "||"},
+                 assign_ops={"=", "+=", "-=", "*=", "/=", "%="}
+                 )
+
+IntType = uCType("int",
+                 unary_ops={"-", "+", "--", "++", "p--", "p++", "*", "&"},
+                 binary_ops={"+", "-", "*", "/", "%"},
+                 rel_ops={"==", "!=", "<", ">", "<=", ">="},
+                 assign_ops={"=", "+=", "-=", "*=", "/=", "%="}
+                 )
+
+FloatType = uCType("float",
+                   unary_ops={"-", "+", "*", "&"},
+                   binary_ops={"+", "-", "*", "/", "%"},
+                   rel_ops={"==", "!=", "<", ">", "<=", ">="},
+                   assign_ops={"=", "+=", "-=", "*=", "/=", "%="}
+                   )
+
+CharType = uCType("char",
+                  unary_ops={"*", "&"},
+                  rel_ops={"==", "!=", "&&", "||"},
+                  )
+
+ArrayType = uCType("array",
+                   unary_ops={"*", "&"},
+                   rel_ops={"==", "!="}
+                   )
+
+StringType = uCType("string",
+                    unary_ops={},
+                    binary_ops={"+"},
+                    rel_ops={"==", "!="}
+                    )
+
+PtrType = uCType("ptr",
+                 unary_ops={"*", "&"},
+                 rel_ops={"==", "!="}
+                 )
+
+VoidType = uCType("void",
+                  unary_ops={"*", "&"},
+                  binary_ops={}
+                  )
+
+BoolType = uCType("bool",
+                  rel_ops={"==", "!=", "&&", "||"}
+                  )
 
 
 class NodeVisitor(object):
@@ -62,7 +145,7 @@ class NodeVisitor(object):
         """ Called if no explicit visitor function exists for a
             node. Implements preorder visiting of the node.
         """
-        for c in node:
+        for i, c in node.children():
             self.visit(c)
 
 
@@ -213,7 +296,9 @@ class Visitor(NodeVisitor):
 
         if node.name.node_info != node.assign_expr.node_info:
             print('Error (cannot assign %s to %s)' % (
-            ''.join(['*' for _ in range(node.assign_expr.node_info['depth'])]) + str(node.assign_expr.node_info['type']), ''.join(['*' for _ in range(node.name.node_info['depth'])]) + str(node.name.node_info['type'])),
+                ''.join(['*' for _ in range(node.assign_expr.node_info['depth'])]) + str(
+                    node.assign_expr.node_info['type']),
+                ''.join(['*' for _ in range(node.name.node_info['depth'])]) + str(node.name.node_info['type'])),
                   file=sys.stderr)
 
     def visit_ArrayDecl(self, node: ArrayDecl):
@@ -354,11 +439,13 @@ class Visitor(NodeVisitor):
             params = [x.node_info['type'] for x in
                       ([node.expr2] if not isinstance(node.expr2, ExprList) else node.expr2.list)]
             if len(params) != len(node.expr1.node_info['params']):
-                print("Number of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name,
-                      file=sys.stderr)
+                print(
+                    "Number of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name,
+                    file=sys.stderr)
             elif params != node.expr1.node_info['params']:
-                print("Types of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name,
-                      file=sys.stderr)
+                print(
+                    "Types of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name,
+                    file=sys.stderr)
 
         node.node_info = NodeInfo(node.expr1.node_info)
         node.node_info['func'] = False
@@ -388,17 +475,21 @@ class Visitor(NodeVisitor):
         node.node_info = node.decl.node_info
 
         # Procura filho de node compound que é o Return
-        for i in node.compound.stmt_list:
-            if isinstance(i, Return):
-                if i.node_info['type'] != node.node_info['type']:
-                    print('Type of return statement expression does not match declared return type for function',
-                          file=sys.stderr)
+        if node.compound.stmt_list:
+            for i in node.compound.stmt_list:
+                if isinstance(i, Return):
+                    if i.node_info['type'] != node.node_info['type']:
+                        print('Type of return statement expression does not match declared return type for function',
+                              file=sys.stderr)
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        for d in node.decl:
+            d.node_info['global'] = True
 
     def visit_If(self, node: If):
         node.env = Environment(merge_with=node.env)
@@ -410,7 +501,6 @@ class Visitor(NodeVisitor):
 
         if node.expr.node_info['type'] != BoolType:
             print('Error. If expression must evaluate a BoolType', file=sys.stderr)
-
 
     def visit_ID(self, node: ID):
         name = node.name
@@ -533,7 +623,7 @@ class Visitor(NodeVisitor):
 
 if __name__ == '__main__':
     m = UCParser()
-    ast = m.parse(source=open('teste.c').read(), _=None, debug=False)
+    ast = m.parse(source=open('teste.uc').read(), _=None, debug=False)
     ast.show()
 
     visitor = Visitor()

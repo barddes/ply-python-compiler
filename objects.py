@@ -1,8 +1,6 @@
 import copy
 import sys
 
-# from uc_sema import Environment
-from uc_type import IntType, FloatType, CharType, StringType
 
 
 class Coord(object):
@@ -41,6 +39,7 @@ class NodeInfo(dict):
         if self['func'] == other['func'] and self['array'] == other['array'] and self['type'] == other['type'] and self['depth'] == other['depth']:
             return True
 
+        from uc_sema import CharType, StringType
         if not self['func'] and not other['func'] and self['array'] != other['array'] and (
                 (self['type'] == CharType and other['type'] == StringType) or (
                 self['type'] == StringType and other['type'] == CharType)):
@@ -65,12 +64,13 @@ class Node(object):
     just enough space in each instance to hold a value for each variable.
     Space is saved because __dict__ is not created for each instance.
     """
-    __slots__ = ('node_info', 'env', 'global_env')
+    __slots__ = ('node_info', 'env', 'global_env', 'gen_location')
 
-    def __init__(self, node_info: NodeInfo = None, env=None, global_env=None):
+    def __init__(self, node_info: NodeInfo = None, env=None, global_env=None, gen_location=None):
         self.node_info = node_info
         self.env = env
         self.global_env = global_env
+        self.gen_location = gen_location
 
     def children(self):
         """ A sequence of all children that are Nodes. """
@@ -272,6 +272,7 @@ class Constant(Node):
         elif type == 'char':
             value = "'" + value + "'"
 
+        from uc_sema import IntType, CharType, FloatType, StringType
         self.node_info = NodeInfo({'type': {
             'int': IntType,
             'char': CharType,
@@ -369,6 +370,7 @@ class ExprList(Node):
                 yield 'list[%d]' % i, e
 
     attr_names = ()
+
 
 class For(Node):
     __slots__ = ('p1', 'p2', 'p3', 'statement', 'coord')

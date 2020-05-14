@@ -515,5 +515,5 @@ class UCParser:
 
 if __name__ == '__main__':
     m = UCParser()
-    ast = m.parse(source=open('teste.c').read(), _=None, debug=True)
+    ast = m.parse(source=open('teste.uc').read(), _=None, debug=True)
     ast.show()
