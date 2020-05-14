@@ -348,10 +348,10 @@ class Visitor(NodeVisitor):
             params = [x.node_info['type'] for x in
                       ([node.expr2] if not isinstance(node.expr2, ExprList) else node.expr2.list)]
             if len(params) != len(node.expr1.node_info['params']):
-                print('Number of arguments for call to function 'f' do not match function parameter declaration',
+                print("Number of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name,
                       file=sys.stderr)
             elif params != node.expr1.node_info['params']:
-                print('Types of arguments for call to function 'f' do not match function parameter declaration',
+                print("Types of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name,
                       file=sys.stderr)
 
         node.node_info = NodeInfo(node.expr1.node_info)
