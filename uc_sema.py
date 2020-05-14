@@ -185,7 +185,7 @@ class Visitor(NodeVisitor):
         if op not in expr1.node_info['type'].unary_ops:
             print("Error (unsupported op %s)" % op, file=sys.stderr)
 
-        return expr1.node_info
+        return expr1.node_info['type']
 
     def visit_Program(self, node: Program):
         node.env = self.global_env
