@@ -250,6 +250,9 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
+        if node.expr.node_info['type'] != BoolType:
+            print('Error. Assert expression must evaluate a BoolType', file=sys.stderr)
+
     def visit_Break(self, node: Break):
         for i, d in node.children():
             d.env = node.env
@@ -338,6 +341,9 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
+        if node.p2.node_info['type'] != BoolType:
+            print('Error. For condition must evaluate a BoolType', file=sys.stderr)
+
     def visit_FuncCall(self, node: FuncCall):
         for i, d in node.children():
             d.env = node.env
@@ -401,6 +407,10 @@ class Visitor(NodeVisitor):
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        if node.expr.node_info['type'] != BoolType:
+            print('Error. If expression must evaluate a BoolType', file=sys.stderr)
+
 
     def visit_ID(self, node: ID):
         name = node.name
@@ -518,7 +528,7 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         if node.expr.node_info['type'] != BoolType:
-            print('Erro. While expression evaluate a BoolType', file=sys.stderr)
+            print('Error. While expression must evaluate a BoolType', file=sys.stderr)
 
 
 if __name__ == '__main__':
