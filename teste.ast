@@ -1,0 +1,16 @@
+Program: 
+    FuncDef: 
+        Type: ['int']   @ 2:1
+        Decl: ID(name='main'  )
+            FuncDecl: 
+                VarDecl: 
+                    Type: ['int']   @ 2:1
+        Compound:    @ 2:1
+            Decl: ID(name='a'  )
+                VarDecl: 
+                    Type: ['int']   @ 3:5
+                Constant: int, 0   @ 3:13
+            Decl: ID(name='b'  )
+                VarDecl: 
+                    Type: ['int']   @ 4:5
+                Constant: int, 4   @ 4:13

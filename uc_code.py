@@ -184,6 +184,16 @@ class GenerateCode(NodeVisitor):
         for i, c in node.children():
             self.visit(c)
 
+        # Create a new temporary variable name
+        target = self.new_temp()
+
+        # Make the SSA opcode and append to list of generated instructions
+        inst = ('literal_' + node.type , node.value, target)
+        self.code.append(inst)
+
+        # Save the name of the temporary variable where the value was placed
+        node.gen_location = target
+
     def visit_DeclList(self, node: DeclList):
         for i, c in node.children():
             self.visit(c)
