@@ -274,6 +274,7 @@ class GenerateCode(NodeVisitor):
         for i, c in node.children():
             self.visit(c)
 
+
     def visit_While(self, node: While):
         for i, c in node.children():
             self.visit(c)

@@ -9,8 +9,16 @@ Program:
             Decl: ID(name='a'  )
                 VarDecl: 
                     Type: ['int']   @ 3:5
-                Constant: int, 0   @ 3:13
+                BinaryOp: +   @ 3:13
+                    Constant: int, 2   @ 3:13
+                    BinaryOp: *   @ 3:17
+                        Constant: int, 3   @ 3:17
+                        Constant: int, 4   @ 3:21
             Decl: ID(name='b'  )
                 VarDecl: 
-                    Type: ['int']   @ 4:5
-                Constant: int, 4   @ 4:13
+                    Type: ['float']   @ 4:5
+                BinaryOp: +   @ 4:15
+                    Constant: float, 2.0   @ 4:15
+                    BinaryOp: *   @ 4:21
+                        Constant: float, 3.0   @ 4:21
+                        Constant: float, 4.0   @ 4:27
