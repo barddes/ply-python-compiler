@@ -364,12 +364,25 @@ class GenerateCode(NodeVisitor):
         for i, c in node.children():
             self.visit(c)
 
-        # Visit the expression
-        self.visit(node.expr)
+        if isinstance(node.expr, ID):
+            node_info = node.expr.lookup_envs(node.expr.name)
+            inst = ('print_%s' % node_info['type'].typename, node.expr.gen_location)
+            self.code.append(inst)
+        elif not isinstance(node.expr, ExprList):
+            inst = ('print_%s' % node.expr.node_info['type'], node.expr.gen_location)
+            self.code.append(inst)
 
-        # Create the opcode and append to list
-        inst = ('print_' + node.expr.type.name, node.expr.gen_location)
-        self.code.append(inst)
+        else :
+            for child in node.expr.list:
+                if isinstance(node.expr, ID):
+                    node_info = child.lookup_envs(child.name)
+                    inst = ('print_%s' % node_info['type'].typename, child.gen_location)
+                    self.code.append(inst)
+                else:
+                    inst = ('print_%s' % child.node_info['type'], child.gen_location)
+                    self.code.append(inst)
+
+
 
     def visit_PtrDecl(self, node: PtrDecl):
         for i, c in node.children():
@@ -378,6 +391,17 @@ class GenerateCode(NodeVisitor):
     def visit_Read(self, node: Read):
         for i, c in node.children():
             self.visit(c)
+
+        if isinstance(node.expr, ID):
+            node_info = node.expr.lookup_envs(node.expr.name)
+            inst = ('read_%s' % node_info['type'].typename, node.expr.gen_location)
+            self.code.append(inst)
+
+        if isinstance(node.expr, ExprList):
+            for child in node.expr.list:
+                node_info = child.lookup_envs(child.name)
+                inst = ('read_%s' % node_info['type'].typename, child.gen_location)
+                self.code.append(inst)
 
     def visit_Return(self, node: Return):
         for i, c in node.children():
