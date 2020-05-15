@@ -461,9 +461,9 @@ class FuncDecl(Node):
 
 
 class FuncDef(Node):
-    __slots__ = ('type', 'decl', 'decl_list', 'compound', 'ret_target', 'coord')
+    __slots__ = ('type', 'decl', 'decl_list', 'compound', 'ret_target', 'end_jump', 'coord')
 
-    def __init__(self, type, decl, decl_list, compound, ret_target=None, coord: Coord = None):
+    def __init__(self, type, decl, decl_list, compound, ret_target=None, end_jump=None, coord: Coord = None):
         super().__init__()
         self.type = type if type else Type(['void'])
         self.decl = Decl(decl, type=type)
@@ -471,6 +471,7 @@ class FuncDef(Node):
         self.compound = compound
         self.coord = coord
         self.ret_target = ret_target
+        self.end_jump = end_jump
 
         if self.type:
             self.compound.coord = self.type.coord

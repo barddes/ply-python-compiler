@@ -166,8 +166,13 @@ class GenerateCode(NodeVisitor):
             self.visit(d)
 
     def visit_Assignment(self, node: Assignment):
-        for i, c in node.children():
-            self.visit(c)
+        if node.assign_expr:
+            self.visit(node.assign_expr)
+
+        left_target = node.lookup_envs(node.name.name)['location']
+        right_target = node.assign_expr.gen_location
+
+        self.code.append(('store_%s' % node.name.node_info['type'], right_target, left_target))
 
     def visit_ArrayDecl(self, node: ArrayDecl):
         for i, c in node.children():
@@ -188,6 +193,16 @@ class GenerateCode(NodeVisitor):
     def visit_Cast(self, node: Cast):
         for i, c in node.children():
             self.visit(c)
+
+        var_target = node.expr.gen_location
+        target = self.new_temp()
+
+        if node.type.name[0] == 'float':
+            self.code.append(('sitofp', var_target, target))
+        elif node.type.name[0] == 'int':
+            self.code.append(('fptosi', var_target, target))
+
+        node.gen_location = target
 
     def visit_Compound(self, node: Compound):
         for i, c in node.children():
@@ -234,7 +249,7 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
         if node.init:
-            self.code.append(('store_%s' % node.node_info['type'], node.init.gen_location,node.gen_location))
+            self.code.append(('store_%s' % node.node_info['type'], node.init.gen_location, node.gen_location))
 
     def visit_EmptyStatement(self, node: EmptyStatement):
         for i, c in node.children():
@@ -284,14 +299,14 @@ class GenerateCode(NodeVisitor):
         for a, b, c in zip(params, vars, node.node_info['params']):
             self.code.append(('store_%s' % c, a, b))
 
-        end_jmp = self.new_temp()
+        node.end_jump = self.new_temp()
 
         for i, c in node.children():
             self.visit(c)
 
         final_ret = self.new_temp()
 
-        self.code.append((end_jmp[1:], ))
+        self.code.append((node.end_jump[1:],))
         self.code.append(('load_%s' % node.type.name[0], ret, final_ret))
         self.code.append(('return_%s' % node.type.name[0], final_ret))
 
@@ -345,7 +360,9 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
         if node.value:
-            self.code.append(('store_%s'% node.node_info['type'], node.value.gen_location, node.func_def.ret_target))
+            self.code.append(('store_%s' % node.node_info['type'], node.value.gen_location, node.func_def.ret_target))
+
+        self.code.append(('jump', node.func_def.end_jump))
 
     def visit_Type(self, node: Type):
         for i, c in node.children():

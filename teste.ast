@@ -1,44 +1,36 @@
 Program: 
-    GlobalDecl: 
-        Decl: ID(name='n'  )
-            VarDecl: 
-                Type: ['int']   @ 1:1
-            Constant: int, 3   @ 1:9
     FuncDef: 
-        Type: ['int']   @ 3:1
-        Decl: ID(name='doubleMe'  )
-            FuncDecl: 
-                ParamList: 
-                    Decl: ID(name='x'  )
-                        VarDecl: 
-                            Type: ['int']   @ 3:15
-                VarDecl: 
-                    Type: ['int']   @ 3:1
-        Compound:    @ 3:1
-            Return:    @ 4:5
-                BinaryOp: *   @ 4:12
-                    ID: x   @ 4:12
-                    ID: x   @ 4:16
-    FuncDef: 
-        Type: ['void']   @ 7:1
+        Type: ['int']   @ 1:1
         Decl: ID(name='main'  )
             FuncDecl: 
                 VarDecl: 
-                    Type: ['void']   @ 7:1
-        Compound:    @ 7:1
-            Decl: ID(name='v'  )
+                    Type: ['int']   @ 1:1
+        Compound:    @ 1:1
+            Decl: ID(name='x'  )
                 VarDecl: 
-                    Type: ['int']   @ 8:5
-                ID: n   @ 8:13
-            Assignment: =   @ 9:5
-                ID: v   @ 9:5
-                FuncCall:    @ 9:9
-                    ID: doubleMe   @ 9:9
-                    ID: v   @ 9:19
-            Assert:    @ 10:5
-                BinaryOp: ==   @ 10:12
-                    ID: v   @ 10:12
-                    BinaryOp: *   @ 10:17
-                        ID: n   @ 10:17
-                        ID: n   @ 10:21
-            Return:    @ 11:5
+                    Type: ['int']   @ 2:3
+            Decl: ID(name='y'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:3
+                Constant: int, 3   @ 2:14
+            Decl: ID(name='z'  )
+                VarDecl: 
+                    Type: ['float']   @ 3:3
+                Constant: float, 4.5   @ 3:13
+            Assignment: =   @ 4:3
+                ID: x   @ 4:3
+                BinaryOp: +   @ 4:7
+                    ID: y   @ 4:7
+                    Constant: int, 5   @ 4:11
+            Assignment: =   @ 5:3
+                ID: z   @ 5:3
+                Cast: 
+                    Type: ['float']   @ 5:8
+                    ID: x   @ 5:14
+            Assignment: =   @ 6:3
+                ID: y   @ 6:3
+                Cast: 
+                    Type: ['int']   @ 6:8
+                    ID: z   @ 6:12
+            Return:    @ 7:3
+                Constant: int, 0   @ 7:10
