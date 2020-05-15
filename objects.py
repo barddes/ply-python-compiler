@@ -1,8 +1,6 @@
 import copy
 import sys
 
-
-
 class Coord(object):
     """ Coordinates of a syntactic element. Consists of:
             - Line number
@@ -30,6 +28,7 @@ class NodeInfo(dict):
         self['length'] = None
         self['array'] = False
         self['type'] = None
+        self['index'] = None
         super().__init__(init)
 
     def __eq__(self, other):
@@ -547,11 +546,12 @@ class ID(Node):
 
 
 class InitList(Node):
-    __slots__ = ('list', 'coord')
+    __slots__ = ('list', 'type', 'coord')
 
-    def __init__(self, list, coord: Coord = None):
+    def __init__(self, list, type=None, coord: Coord = None):
         super().__init__()
         self.list = list
+        self.type = type
         self.coord = coord
 
     def __add__(self, other):

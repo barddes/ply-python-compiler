@@ -190,6 +190,7 @@ class Environment(object):
     def __init__(self, merge_with: 'Environment' = None):
         # self.stack = []
         # self.stack.append(self.symtab)
+        self.consts = []
 
         merge_symtable = None if not merge_with else merge_with.symtable
         self.symtable = SymbolTable(merge_with=merge_symtable)
@@ -214,6 +215,24 @@ class Environment(object):
 
     # def scope_level(self):
     #     return len(self.stack)
+
+    def add_global_const(self, const):
+        if isinstance(const, str):
+            return self.add_global_str(const)
+        else:
+            return self.add_global_array(const)
+
+    def unbox_InitList(self, list):
+        return [x.value if type(x) != InitList else self.unbox_InitList(x.list) for x in list]
+
+    def add_global_array(self, array):
+        self.consts.append(self.unbox_InitList(array.list))
+
+    def add_global_str(self, str):
+        if str not in self.consts:
+            self.consts.append(str)
+
+        return self.consts.index(str)
 
     def add_local_var(self, name, info):
         try:
@@ -369,11 +388,7 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_Constant(self, node: Constant):
-
-        for i, d in node.children():
-            d.env = node.env
-            d.global_env = node.global_env
-            self.visit(d)
+        pass
 
     def visit_DeclList(self, node: DeclList):
         for i, d in node.children():
@@ -405,6 +420,12 @@ class Visitor(NodeVisitor):
 
         if node.init and node.init.node_info != node.node_info:
             print('Error.  %s = %s' % (node.node_info['type'], node.init.node_info['type']), file=sys.stderr)
+
+        if node.init and node.init.node_info['type'] == StringType:
+            node.node_info['index'] = node.global_env.add_global_const(node.init.value[1:-1])
+        elif node.init and isinstance(node.decl, ArrayDecl):
+            node.node_info['index'] = node.global_env.add_global_const(node.init)
+
 
     def visit_EmptyStatement(self, node: EmptyStatement):
         for i, d in node.children():
@@ -521,6 +542,10 @@ class Visitor(NodeVisitor):
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        node.type = {
+            'size': max([x.node_info['depth'] for x in node.list])
+        }
 
         # verifica se o vetor possui todos os elementos de mesmo tipo
         type_aux = None

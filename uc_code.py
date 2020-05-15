@@ -91,7 +91,7 @@ class GenerateCode(NodeVisitor):
         # Save the name of the temporary variable where the value was placed
         node.gen_location = target
 
-    def visit_BinaryOp(self, node):
+    def visit_BinaryOp(self, node: BinaryOp):
         # Visit the left and right expressions
         self.visit(node.expr1)
         self.visit(node.expr2)
@@ -106,14 +106,6 @@ class GenerateCode(NodeVisitor):
 
         # Store location of the result on the node
         node.gen_location = target
-
-    def visit_PrintStatement(self, node):
-        # Visit the expression
-        self.visit(node.expr)
-
-        # Create the opcode and append to list
-        inst = ('print_' + node.expr.type.name, node.expr.gen_location)
-        self.code.append(inst)
 
     def visit_VarDeclaration(self, node):
         # allocate on stack memory
@@ -136,7 +128,7 @@ class GenerateCode(NodeVisitor):
         inst = ('store_' + node.value.type.name, node.value.gen_location, node.location)
         self.code.append(inst)
 
-    def visit_UnaryOp(self, node):
+    def visit_UnaryOp(self, node: UnaryOp):
         self.visit(node.expr1)
         target = self.new_temp()
         opcode = self.unary_ops[node.op] + "_" + node.expr1.node_info['type'].typename
@@ -144,13 +136,26 @@ class GenerateCode(NodeVisitor):
         self.code.append(inst)
         node.gen_location = target
 
+    def get_const_type(self, const):
+        if type(const) == list:
+            return self.get_const_type(const[0])
+        return type(const).__name__
+
+    def get_const_dim(self, const):
+        if type(const) == list:
+            return ('_%s' % str(len(const))) + self.get_const_dim(const[0])
+        return ''
+
     def visit_Program(self, node: Program):
+        for i, const in enumerate(node.global_env.consts):
+            if type(const) == list:
+                inst = ('global_%s' % self.get_const_type(const) + self.get_const_dim(const), '@.str.%d' % i, const)
+            else:
+                inst = ('global_string', '@.str.%d' % i, const)
+            self.code.append(inst)
+
         for i, d in node.children():
             self.visit(d)
-
-    # def visit_BinaryOp(self, node: BinaryOp):
-    #     for i, c in node.children():
-    #         self.visit(c)
 
     def visit_Assignment(self, node: Assignment):
         for i, c in node.children():
@@ -240,6 +245,13 @@ class GenerateCode(NodeVisitor):
         for i, c in node.children():
             self.visit(c)
 
+        # Visit the expression
+        self.visit(node.expr)
+
+        # Create the opcode and append to list
+        inst = ('print_' + node.expr.type.name, node.expr.gen_location)
+        self.code.append(inst)
+
     def visit_PtrDecl(self, node: PtrDecl):
         for i, c in node.children():
             self.visit(c)
@@ -255,10 +267,6 @@ class GenerateCode(NodeVisitor):
     def visit_Type(self, node: Type):
         for i, c in node.children():
             self.visit(c)
-
-    # def visit_UnaryOp(self, node: UnaryOp):
-    #     for i, c in node.children():
-    #         self.visit(c)
 
     def visit_VarDecl(self, node: VarDecl):
         for i, c in node.children():
