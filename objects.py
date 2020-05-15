@@ -29,6 +29,7 @@ class NodeInfo(dict):
         self['array'] = False
         self['type'] = None
         self['index'] = None
+        self['location'] = None
         super().__init__(init)
 
     def __eq__(self, other):
@@ -70,6 +71,11 @@ class Node(object):
         self.env = env
         self.global_env = global_env
         self.gen_location = gen_location
+
+    def lookup_envs(self, symbol):
+        if self.env.lookup(symbol):
+            return self.env.lookup(symbol)
+        return self.global_env.lookup(symbol)
 
     def children(self):
         """ A sequence of all children that are Nodes. """
@@ -455,15 +461,16 @@ class FuncDecl(Node):
 
 
 class FuncDef(Node):
-    __slots__ = ('type', 'decl', 'decl_list', 'compound', 'coord')
+    __slots__ = ('type', 'decl', 'decl_list', 'compound', 'ret_target', 'coord')
 
-    def __init__(self, type, decl, decl_list, compound, coord: Coord = None):
+    def __init__(self, type, decl, decl_list, compound, ret_target=None, coord: Coord = None):
         super().__init__()
         self.type = type if type else Type(['void'])
         self.decl = Decl(decl, type=type)
         self.decl_list = decl_list
         self.compound = compound
         self.coord = coord
+        self.ret_target = ret_target
 
         if self.type:
             self.compound.coord = self.type.coord

@@ -191,6 +191,7 @@ class Environment(object):
         # self.stack = []
         # self.stack.append(self.symtab)
         self.consts = []
+        self.vars = []
 
         merge_symtable = None if not merge_with else merge_with.symtable
         self.symtable = SymbolTable(merge_with=merge_symtable)
@@ -233,6 +234,9 @@ class Environment(object):
             self.consts.append(str)
 
         return self.consts.index(str)
+
+    def add_global_var(self, var):
+        self.vars.append(var)
 
     def add_local_var(self, name, info):
         try:
@@ -499,6 +503,7 @@ class Visitor(NodeVisitor):
         if node.compound.stmt_list:
             for i in node.compound.stmt_list:
                 if isinstance(i, Return):
+                    i.func_def = node
                     if i.node_info['type'] != node.node_info['type']:
                         print('Type of return statement expression does not match declared return type for function',
                               file=sys.stderr)
@@ -511,6 +516,9 @@ class Visitor(NodeVisitor):
 
         for d in node.decl:
             d.node_info['global'] = True
+
+        for d in node.decl:
+            self.global_env.add_global_var(d)
 
     def visit_If(self, node: If):
         node.env = Environment(merge_with=node.env)

@@ -1,46 +1,44 @@
 Program: 
+    GlobalDecl: 
+        Decl: ID(name='n'  )
+            VarDecl: 
+                Type: ['int']   @ 1:1
+            Constant: int, 3   @ 1:9
     FuncDef: 
-        Type: ['int']   @ 1:1
+        Type: ['int']   @ 3:1
+        Decl: ID(name='doubleMe'  )
+            FuncDecl: 
+                ParamList: 
+                    Decl: ID(name='x'  )
+                        VarDecl: 
+                            Type: ['int']   @ 3:15
+                VarDecl: 
+                    Type: ['int']   @ 3:1
+        Compound:    @ 3:1
+            Return:    @ 4:5
+                BinaryOp: *   @ 4:12
+                    ID: x   @ 4:12
+                    ID: x   @ 4:16
+    FuncDef: 
+        Type: ['void']   @ 7:1
         Decl: ID(name='main'  )
             FuncDecl: 
                 VarDecl: 
-                    Type: ['int']   @ 1:1
-        Compound:    @ 1:1
-            Decl: ID(name='f'  )
-                ArrayDecl: 
-                    VarDecl: 
-                        Type: ['float']   @ 2:5
-                InitList:    @ 2:18
-                    Constant: float, 1.0   @ 2:18
-                    Constant: float, 2.5   @ 2:23
-                    Constant: float, 5.0   @ 2:28
-            Decl: ID(name='s'  )
-                ArrayDecl: 
-                    VarDecl: 
-                        Type: ['char']   @ 3:5
-                Constant: string, "xpto"   @ 3:16
+                    Type: ['void']   @ 7:1
+        Compound:    @ 7:1
             Decl: ID(name='v'  )
-                ArrayDecl: 
-                    ArrayDecl: 
-                        VarDecl: 
-                            Type: ['int']   @ 4:5
-                InitList:    @ 4:19
-                    InitList:    @ 4:19
-                        Constant: int, 1   @ 4:19
-                        Constant: int, 3   @ 4:21
-                    InitList:    @ 4:26
-                        Constant: int, 2   @ 4:26
-                        Constant: int, 6   @ 4:28
-                    InitList:    @ 4:33
-                        Constant: int, 3   @ 4:33
-                        Constant: int, 9   @ 4:35
-            Decl: ID(name='i'  )
                 VarDecl: 
-                    Type: ['int']   @ 5:5
-                Constant: int, 1   @ 5:13
-            Decl: ID(name='j'  )
-                VarDecl: 
-                    Type: ['int']   @ 5:5
-                Constant: int, 0   @ 5:20
-            Return:    @ 6:5
-                Constant: int, 0   @ 6:12
+                    Type: ['int']   @ 8:5
+                ID: n   @ 8:13
+            Assignment: =   @ 9:5
+                ID: v   @ 9:5
+                FuncCall:    @ 9:9
+                    ID: doubleMe   @ 9:9
+                    ID: v   @ 9:19
+            Assert:    @ 10:5
+                BinaryOp: ==   @ 10:12
+                    ID: v   @ 10:12
+                    BinaryOp: *   @ 10:17
+                        ID: n   @ 10:17
+                        ID: n   @ 10:21
+            Return:    @ 11:5

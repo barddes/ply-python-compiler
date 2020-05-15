@@ -96,7 +96,6 @@ class GenerateCode(NodeVisitor):
         self.visit(node.expr1)
         self.visit(node.expr2)
 
-        # Make a new temporary for storing the result
         target = self.new_temp()
 
         # Create the opcode and append to list
@@ -147,6 +146,13 @@ class GenerateCode(NodeVisitor):
         return ''
 
     def visit_Program(self, node: Program):
+        for var in node.global_env.vars:
+            if var.init:
+                inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name, var.init.value)
+            else:
+                inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name)
+            self.code.append(inst)
+
         for i, const in enumerate(node.global_env.consts):
             if type(const) == list:
                 inst = ('global_%s' % self.get_const_type(const) + self.get_const_dim(const), '@.str.%d' % i, const)
@@ -184,6 +190,8 @@ class GenerateCode(NodeVisitor):
     def visit_Compound(self, node: Compound):
         for i, c in node.children():
             self.visit(c)
+
+        pass
 
     def visit_Constant(self, node: Constant):
         for i, c in node.children():
@@ -238,20 +246,58 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_FuncDef(self, node: FuncDef):
+        self.fname = node.decl.name.name
+
+        self.code.append(('define', '@%s' % node.decl.name.name))
+
+        params = []
+
+        for i in node.node_info['params']:
+            params.append(self.new_temp())
+
+        ret = self.new_temp()
+        node.ret_target = ret
+
+        vars = []
+        if node.decl.decl.init:
+            for i in node.decl.decl.init.list:
+                target = self.new_temp()
+                vars.append(target)
+                self.code.append(('alloc_%s' % i.decl.type.name[0], target))
+
+                node.lookup_envs(i.name.name)['location'] = target
+
+        for a, b, c in zip(params, vars, node.node_info['params']):
+            self.code.append(('store_%s' % c, a, b))
+
+        end_jmp = self.new_temp()
+
         for i, c in node.children():
             self.visit(c)
 
+        final_ret = self.new_temp()
+
+        self.code.append((end_jmp[1:], ))
+        self.code.append(('load_%s' % node.type.name[0], ret, final_ret))
+        self.code.append(('return_%s' % node.type.name[0], final_ret))
+
     def visit_GlobalDecl(self, node: GlobalDecl):
-        for i, c in node.children():
-            self.visit(c)
+        # for i, c in node.children():
+        #     self.visit(c)
+        pass
 
     def visit_If(self, node: If):
         for i, c in node.children():
             self.visit(c)
 
     def visit_ID(self, node: ID):
-        for i, c in node.children():
-            self.visit(c)
+        node_info = node.lookup_envs(node.name)
+
+        target = self.new_temp()
+        inst = ('load_%s' % node_info['type'].typename, node_info['location'], target)
+        self.code.append(inst)
+
+        node.gen_location = target
 
     def visit_InitList(self, node: InitList):
         for i, c in node.children():
@@ -283,6 +329,9 @@ class GenerateCode(NodeVisitor):
     def visit_Return(self, node: Return):
         for i, c in node.children():
             self.visit(c)
+
+        if node.value:
+            self.code.append(('store_%s'% node.node_info['type'], node.value.gen_location, node.func_def.ret_target))
 
     def visit_Type(self, node: Type):
         for i, c in node.children():
