@@ -264,15 +264,27 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_FuncCall(self, node: FuncCall):
+
+        # para um parametro
+        if isinstance(node.expr2, ID):
+            node_info = node.expr2.lookup_envs(node.expr2.name)
+
+            target = self.new_temp()
+            inst = ('load_%s' % node_info['type'].typename, node_info['location'], target)
+            self.code.append(inst)
+
+            inst = ('param_%s' % node_info['type'].typename, target)
+            self.code.append(inst)
+
+        # para mais de um parametro
+        if isinstance(node.expr2, ExprList):
+            pass
+
+
         for i, c in node.children():
             self.visit(c)
-        pass
-        #para mais de um parametro
-        if isinstance(node.expr2, ExprList):
-            print ('ONE')
-        #para um parametro
-        if isinstance(node.expr2, ID):
-            print('TWO')
+
+
 
     def visit_FuncDecl(self, node: FuncDecl):
         for i, c in node.children():
