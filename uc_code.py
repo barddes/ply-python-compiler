@@ -380,12 +380,11 @@ class GenerateCode(NodeVisitor):
 
     def visit_ID(self, node: ID):
         node_info = node.lookup_envs(node.name)
-
-        target = self.new_temp()
-        inst = ('load_%s' % node_info['type'].typename, node_info['location'], target)
-        self.code.append(inst)
-
-        node.gen_location = target
+        if node.node_info['func'] == False:
+            target = self.new_temp()
+            inst = ('load_%s' % node_info['type'].typename, node_info['location'], target)
+            self.code.append(inst)
+            node.gen_location = target
 
     def visit_InitList(self, node: InitList):
         for i, c in node.children():
