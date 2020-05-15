@@ -1,7 +1,7 @@
 from objects import Program, BinaryOp, Assignment, ArrayDecl, ArrayRef, Assert, Break, Cast, Compound, Constant, \
     DeclList, Decl, EmptyStatement, ExprList, For, FuncCall, FuncDecl, FuncDef, GlobalDecl, If, ID, InitList, ParamList, \
     Print, PtrDecl, Read, Return, Type, UnaryOp, VarDecl, While
-from uc_sema import NodeVisitor, StringType, CharType
+from uc_sema import NodeVisitor, StringType, CharType, VoidType
 
 
 class GenerateCode(NodeVisitor):
@@ -152,6 +152,8 @@ class GenerateCode(NodeVisitor):
             else:
                 inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name)
             self.code.append(inst)
+            var.gen_location = '@%s' % var.decl.name.name
+            node.lookup_envs(var.decl.name.name)['location'] = '@%s' % var.decl.name.name
 
         for i, const in enumerate(node.global_env.consts):
             if type(const) == list:
@@ -222,8 +224,17 @@ class GenerateCode(NodeVisitor):
             if node.node_info['type'] == CharType and node.node_info['array']:
                 return
 
+            if not node.gen_location:
+                target = self.new_temp()
+                self.code.append(('alloc_%s' % node.node_info['type'], target))
+                node.gen_location = target
+                node.lookup_envs(node.decl.name.name)['location'] = target
+
         for i, c in node.children():
             self.visit(c)
+
+        if node.init:
+            self.code.append(('store_%s' % node.node_info['type'], node.init.gen_location,node.gen_location))
 
     def visit_EmptyStatement(self, node: EmptyStatement):
         for i, c in node.children():
@@ -255,7 +266,10 @@ class GenerateCode(NodeVisitor):
         for i in node.node_info['params']:
             params.append(self.new_temp())
 
-        ret = self.new_temp()
+        if node.node_info['type'] != VoidType:
+            ret = self.new_temp()
+        else:
+            ret = None
         node.ret_target = ret
 
         vars = []
@@ -264,7 +278,7 @@ class GenerateCode(NodeVisitor):
                 target = self.new_temp()
                 vars.append(target)
                 self.code.append(('alloc_%s' % i.decl.type.name[0], target))
-
+                i.gen_location = target
                 node.lookup_envs(i.name.name)['location'] = target
 
         for a, b, c in zip(params, vars, node.node_info['params']):
