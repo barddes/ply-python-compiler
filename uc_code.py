@@ -1,7 +1,7 @@
 from objects import Program, BinaryOp, Assignment, ArrayDecl, ArrayRef, Assert, Break, Cast, Compound, Constant, \
     DeclList, Decl, EmptyStatement, ExprList, For, FuncCall, FuncDecl, FuncDef, GlobalDecl, If, ID, InitList, ParamList, \
     Print, PtrDecl, Read, Return, Type, UnaryOp, VarDecl, While
-from uc_sema import NodeVisitor
+from uc_sema import NodeVisitor, StringType, CharType
 
 
 class GenerateCode(NodeVisitor):
@@ -193,7 +193,7 @@ class GenerateCode(NodeVisitor):
         target = self.new_temp()
 
         # Make the SSA opcode and append to list of generated instructions
-        inst = ('literal_' + node.type , node.value, target)
+        inst = ('literal_' + node.type, node.value, target)
         self.code.append(inst)
 
         # Save the name of the temporary variable where the value was placed
@@ -204,6 +204,16 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_Decl(self, node: Decl):
+        if isinstance(node.decl, ArrayDecl):
+            return
+
+        if isinstance(node.decl, VarDecl):
+            if node.node_info['type'] == StringType:
+                return
+
+            if node.node_info['type'] == CharType and node.node_info['array']:
+                return
+
         for i, c in node.children():
             self.visit(c)
 
@@ -281,7 +291,6 @@ class GenerateCode(NodeVisitor):
     def visit_VarDecl(self, node: VarDecl):
         for i, c in node.children():
             self.visit(c)
-
 
     def visit_While(self, node: While):
         for i, c in node.children():
