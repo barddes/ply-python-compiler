@@ -1,36 +1,13 @@
 Program: 
     FuncDef: 
-        Type: ['int']   @ 3:1
+        Type: ['void']   @ 3:1
         Decl: ID(name='main'  )
             FuncDecl: 
                 VarDecl: 
-                    Type: ['int']   @ 3:1
+                    Type: ['void']   @ 3:1
         Compound:    @ 3:1
             Decl: ID(name='x'  )
                 VarDecl: 
                     Type: ['int']   @ 4:3
-            Decl: ID(name='y'  )
-                VarDecl: 
-                    Type: ['int']   @ 4:3
-                Constant: int, 3   @ 4:14
-            Decl: ID(name='z'  )
-                VarDecl: 
-                    Type: ['float']   @ 5:3
-                Constant: float, 4.5   @ 5:13
-            Assignment: =   @ 6:3
-                ID: x   @ 6:3
-                BinaryOp: +   @ 6:7
-                    ID: y   @ 6:7
-                    Constant: int, 5   @ 6:11
-            Assignment: =   @ 7:3
-                ID: z   @ 7:3
-                Cast: 
-                    Type: ['float']   @ 7:8
-                    ID: x   @ 7:14
-            Assignment: =   @ 8:3
-                ID: y   @ 8:3
-                Cast: 
-                    Type: ['int']   @ 8:8
-                    ID: z   @ 8:12
-            Return:    @ 9:3
-                Constant: int, 0   @ 9:10
+                Constant: int, 2   @ 4:10
+            Return:    @ 5:3

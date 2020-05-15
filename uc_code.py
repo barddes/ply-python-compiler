@@ -308,7 +308,11 @@ class GenerateCode(NodeVisitor):
 
         self.code.append((node.end_jump[1:],))
         self.code.append(('load_%s' % node.type.name[0], ret, final_ret))
-        self.code.append(('return_%s' % node.type.name[0], final_ret))
+        #[Yuji] Não sei se está certo. 
+        if node.type.name[0] != 'void':
+            self.code.append(('return_%s' % node.type.name[0], final_ret))
+        else:
+            self.code.append(('return_type',))
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         # for i, c in node.children():
