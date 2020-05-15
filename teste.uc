@@ -1,6 +1,12 @@
+int n = 3;
 
-
-void main() {
-  int x =2;
-  return ;
+int doubleMe (int x) {
+    return x * x;
 }
+
+void main () {
+    int v = n;
+    v = doubleMe (v);
+    return;
+}
+

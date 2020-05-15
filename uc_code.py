@@ -266,6 +266,13 @@ class GenerateCode(NodeVisitor):
     def visit_FuncCall(self, node: FuncCall):
         for i, c in node.children():
             self.visit(c)
+        pass
+        #para mais de um parametro
+        if isinstance(node.expr2, ExprList):
+            print ('ONE')
+        #para um parametro
+        if isinstance(node.expr2, ID):
+            print('TWO')
 
     def visit_FuncDecl(self, node: FuncDecl):
         for i, c in node.children():
@@ -308,7 +315,7 @@ class GenerateCode(NodeVisitor):
 
         self.code.append((node.end_jump[1:],))
         self.code.append(('load_%s' % node.type.name[0], ret, final_ret))
-        #[Yuji] Não sei se está certo. 
+        #[Yuji] Não sei se está certo.
         if node.type.name[0] != 'void':
             self.code.append(('return_%s' % node.type.name[0], final_ret))
         else:
