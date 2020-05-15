@@ -12,12 +12,6 @@ Program:
                     Decl: ID(name='x'  )
                         VarDecl: 
                             Type: ['int']   @ 3:15
-                    Decl: ID(name='y'  )
-                        VarDecl: 
-                            Type: ['int']   @ 3:22
-                    Decl: ID(name='z'  )
-                        VarDecl: 
-                            Type: ['int']   @ 3:29
                 VarDecl: 
                     Type: ['int']   @ 3:1
         Compound:    @ 3:1
@@ -40,8 +34,5 @@ Program:
                 ID: v   @ 9:5
                 FuncCall:    @ 9:9
                     ID: doubleMe   @ 9:9
-                    ExprList: 
-                        ID: v   @ 9:19
-                        ID: n   @ 9:22
-                        ID: n   @ 9:25
-            Return:    @ 11:5
+                    ID: v   @ 9:19
+            Return:    @ 10:5

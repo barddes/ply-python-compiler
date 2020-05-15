@@ -264,45 +264,16 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_FuncCall(self, node: FuncCall):
-        #talvez os params tenha que ser definidos em ID, mas nao tenho ctz
-        # para um parametro
-        # if isinstance(node.expr2, ID):
-        #     node_info = node.expr2.lookup_envs(node.expr2.name)
-        #
-        #     # target = self.new_temp()
-        #     # inst = ('load_%s' % node_info['type'].typename, node_info['location'], target)
-        #     # self.code.append(inst)
-        #
-        #     inst = ('param_%s' % node_info['type'].typename, target)
-        #     self.code.append(inst)
-
-        # para mais de um parametro
-        # elif isinstance(node.expr2, ExprList):
-        #     param_list = list()
-        #     target_list = list()
-        #     for child in node.expr2.list:
-        #         node_info = child.lookup_envs(child.name)
-        #         target = self.new_temp()
-        #         inst = ('load_%s' % node_info['type'].typename, node_info['location'], target)
-        #         self.code.append(inst)
-        #         param_list.append('param_%s' % node_info['type'].typename)
-        #         target_list.append(target)
-        #
-        #     param_list.reverse()
-        #     target_list.reverse()
-        #     for child in node.expr2.list:
-        #         inst = (param_list.pop(), target_list.pop())
-        #         self.code.append(inst)
-
 
         for i, c in node.children():
             self.visit(c)
 
+        # para 1 parametro
         if isinstance(node.expr2, ID):
             node_info = node.expr2.lookup_envs(node.expr2.name)
             inst = ('param_%s' % node_info['type'].typename, node.expr2.gen_location)
             self.code.append(inst)
-
+        # para +1 parametro
         if isinstance(node.expr2, ExprList):
             for child in node.expr2.list:
                 node_info = child.lookup_envs(child.name)
@@ -314,10 +285,6 @@ class GenerateCode(NodeVisitor):
         inst = inst = ('call', '@%s' % node.expr1.name, target)
         self.code.append(inst)
         node.gen_location = target
-
-
-
-
 
 
 
@@ -362,11 +329,10 @@ class GenerateCode(NodeVisitor):
 
         self.code.append((node.end_jump[1:],))
         self.code.append(('load_%s' % node.type.name[0], ret, final_ret))
-        #[Yuji] Não sei se está certo.
         if node.type.name[0] != 'void':
             self.code.append(('return_%s' % node.type.name[0], final_ret))
         else:
-            self.code.append(('return_type',))
+            self.code.append(('return_%s' % node.type.name[0],))
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         # for i, c in node.children():
@@ -380,7 +346,7 @@ class GenerateCode(NodeVisitor):
 
     def visit_ID(self, node: ID):
         node_info = node.lookup_envs(node.name)
-        if node.node_info['func'] == False:
+        if not node.node_info['func']:
             target = self.new_temp()
             inst = ('load_%s' % node_info['type'].typename, node_info['location'], target)
             self.code.append(inst)
