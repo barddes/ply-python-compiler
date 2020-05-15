@@ -293,10 +293,10 @@ class GenerateCode(NodeVisitor):
                 inst = (param_list.pop(), target_list.pop())
                 self.code.append(inst)
 
-
-
-
-
+        target = self.new_temp()
+        inst = inst = ('call', '@%s' %node.expr1.name, target)
+        self.code.append(inst)
+        node.gen_location = target
 
 
         for i, c in node.children():
