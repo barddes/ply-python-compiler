@@ -361,6 +361,8 @@ class Visitor(NodeVisitor):
         if node.expr.node_info['type'] != BoolType:
             print('Error. Assert expression must evaluate a BoolType', file=sys.stderr)
 
+        node.error_str = self.global_env.add_global_const('assertion_fail on %d:%d' % (node.coord.line, node.coord.column + len('assert ')))
+
     def visit_Break(self, node: Break):
         for i, d in node.children():
             d.env = node.env
