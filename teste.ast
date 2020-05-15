@@ -1,0 +1,24 @@
+Program: 
+    FuncDef: 
+        Type: ['int']   @ 2:1
+        Decl: ID(name='main'  )
+            FuncDecl: 
+                VarDecl: 
+                    Type: ['int']   @ 2:1
+        Compound:    @ 2:1
+            Decl: ID(name='a'  )
+                VarDecl: 
+                    Type: ['int']   @ 3:5
+                BinaryOp: +   @ 3:13
+                    Constant: int, 2   @ 3:13
+                    BinaryOp: *   @ 3:17
+                        Constant: int, 3   @ 3:17
+                        Constant: int, 4   @ 3:21
+            Decl: ID(name='b'  )
+                VarDecl: 
+                    Type: ['float']   @ 4:5
+                BinaryOp: +   @ 4:15
+                    Constant: float, 2.0   @ 4:15
+                    BinaryOp: *   @ 4:21
+                        Constant: float, 3.0   @ 4:21
+                        Constant: float, 4.0   @ 4:27
