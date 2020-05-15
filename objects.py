@@ -639,6 +639,8 @@ class PtrDecl(Node):
     def children(self):
         if self.value:
             yield 'value', self.value
+        if self.type:
+            yield 'type', self.type
 
     attr_names = ()
 

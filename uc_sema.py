@@ -587,11 +587,31 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
+    def get_ptr_depth(self, node: PtrDecl):
+        if node.value:
+            return 1 + self.get_ptr_depth(node.value)
+        return 1
+
     def visit_PtrDecl(self, node: PtrDecl):
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+        if node.type:
+            node.name = node.type
+
+            node.node_info = NodeInfo({
+                'array': True,
+                'depth': self.get_ptr_depth(node),
+                'type': {
+                    'int': IntType,
+                    'char': CharType,
+                    'float': FloatType,
+                    'string': StringType,
+                    'void': VoidType
+                }[node.type.name[0]]
+            })
 
     def visit_Read(self, node: Read):
         for i, d in node.children():

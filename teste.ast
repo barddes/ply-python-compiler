@@ -1,36 +1,36 @@
 Program: 
     FuncDef: 
-        Type: ['int']   @ 1:1
+        Type: ['int']   @ 3:1
         Decl: ID(name='main'  )
             FuncDecl: 
                 VarDecl: 
-                    Type: ['int']   @ 1:1
-        Compound:    @ 1:1
+                    Type: ['int']   @ 3:1
+        Compound:    @ 3:1
             Decl: ID(name='x'  )
                 VarDecl: 
-                    Type: ['int']   @ 2:3
+                    Type: ['int']   @ 4:3
             Decl: ID(name='y'  )
                 VarDecl: 
-                    Type: ['int']   @ 2:3
-                Constant: int, 3   @ 2:14
+                    Type: ['int']   @ 4:3
+                Constant: int, 3   @ 4:14
             Decl: ID(name='z'  )
                 VarDecl: 
-                    Type: ['float']   @ 3:3
-                Constant: float, 4.5   @ 3:13
-            Assignment: =   @ 4:3
-                ID: x   @ 4:3
-                BinaryOp: +   @ 4:7
-                    ID: y   @ 4:7
-                    Constant: int, 5   @ 4:11
-            Assignment: =   @ 5:3
-                ID: z   @ 5:3
-                Cast: 
-                    Type: ['float']   @ 5:8
-                    ID: x   @ 5:14
+                    Type: ['float']   @ 5:3
+                Constant: float, 4.5   @ 5:13
             Assignment: =   @ 6:3
-                ID: y   @ 6:3
+                ID: x   @ 6:3
+                BinaryOp: +   @ 6:7
+                    ID: y   @ 6:7
+                    Constant: int, 5   @ 6:11
+            Assignment: =   @ 7:3
+                ID: z   @ 7:3
                 Cast: 
-                    Type: ['int']   @ 6:8
-                    ID: z   @ 6:12
-            Return:    @ 7:3
-                Constant: int, 0   @ 7:10
+                    Type: ['float']   @ 7:8
+                    ID: x   @ 7:14
+            Assignment: =   @ 8:3
+                ID: y   @ 8:3
+                Cast: 
+                    Type: ['int']   @ 8:8
+                    ID: z   @ 8:12
+            Return:    @ 9:3
+                Constant: int, 0   @ 9:10

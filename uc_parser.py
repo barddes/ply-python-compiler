@@ -144,7 +144,10 @@ class UCParser:
         """ pointer_opt : TIMES pointer
                         | TIMES empty
         """
-        p[0] = PtrDecl(p[2])
+        if p[2]:
+            p[0] = PtrDecl(p[2])
+        else:
+            p[0] = p[2]
 
     def p_pointer(self, p):
         """ pointer : pointer_opt
@@ -374,6 +377,9 @@ class UCParser:
             p[0] = Decl(decl=p[1], init=EmptyStatement())
         else:
             p[0] = Decl(decl=p[1], init=p[3])
+
+        if type(p[1]) == PtrDecl:
+            p[0].name = p[1].type.name
 
     def p_initializer(self, p):
         """ initializer : assignment_expression
