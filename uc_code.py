@@ -72,8 +72,6 @@ class GenerateCode(NodeVisitor):
         name = "%" + "%d" % (self.versions[self.fname])
         self.versions[self.fname] += 1
 
-        if name == '%1':
-            return self.new_temp()
         return name
 
     # You must implement visit_Nodename methods for all of the other
@@ -203,7 +201,17 @@ class GenerateCode(NodeVisitor):
         if node.assign_expr:
             self.visit(node.assign_expr)
 
-        left_target = node.lookup_envs(node.name.name)['location']
+        if isinstance(node.name, ArrayRef):
+            index = node.lookup_envs(node.name.expr.name)['location']
+            nt = self.new_temp()
+            self.code.append(('load_int', index, nt))
+            source = node.lookup_envs(node.name.post_expr.name)
+            nt2 = self.new_temp()
+            self.code.append(('elem_%s' % source['type'], nt, nt2))
+            left_target = nt2
+        else:
+            left_target = node.lookup_envs(node.name.name)['location']
+
         right_target = node.assign_expr.gen_location
 
         if node.op == '+=':
@@ -291,6 +299,9 @@ class GenerateCode(NodeVisitor):
 
     def visit_Decl(self, node: Decl):
         if isinstance(node.decl, ArrayDecl):
+            if not node.init:
+                target = self.new_temp()
+                self.code.append(('alloc_%s_%d' % (node.type.name[0], node.node_info['length']), target))
             return
 
         if isinstance(node.decl, VarDecl):
@@ -305,6 +316,10 @@ class GenerateCode(NodeVisitor):
                 self.code.append(('alloc_%s' % node.node_info['type'], target))
                 node.gen_location = target
                 node.lookup_envs(node.decl.name.name)['location'] = target
+
+        if isinstance(node.decl, PtrDecl):
+            target = self.new_temp()
+            self.code.append(('alloc_%s%s' % (node.type.name[0], ''.join(['_*' for _ in range(node.decl.node_info['depth'])])), target))
 
         for i, c in node.children():
             self.visit(c)

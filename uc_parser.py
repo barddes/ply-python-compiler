@@ -138,16 +138,14 @@ class UCParser:
             if type(p[0]) == ArrayDecl:
                 p[0] = self.invert_array_decl(p[0])
         else:
-            p[0] = PtrDecl(p[1], p[2])
+            p[1].set_name(p[2])
+            p[0] = p[1]
 
     def p_pointer_opt(self, p):
         """ pointer_opt : TIMES pointer
                         | TIMES empty
         """
-        if p[2]:
-            p[0] = PtrDecl(p[2])
-        else:
-            p[0] = p[2]
+        p[0] = PtrDecl(p[2])
 
     def p_pointer(self, p):
         """ pointer : pointer_opt
@@ -252,7 +250,7 @@ class UCParser:
         if len(p) == 2:
             p[0] = p[1]
         elif len(p) == 3:
-            p[0] = UnaryOp('p'+p[2], p[1])
+            p[0] = UnaryOp('p' + p[2], p[1])
         elif p[2] == '[':
             p[0] = ArrayRef(p[1], p[3])
         elif p[2] == '(':
@@ -378,9 +376,6 @@ class UCParser:
         else:
             p[0] = Decl(decl=p[1], init=p[3])
 
-        if type(p[1]) == PtrDecl:
-            p[0].name = p[1].type.name
-
     def p_initializer(self, p):
         """ initializer : assignment_expression
                         | LBRACE initializer_list RBRACE
@@ -450,7 +445,8 @@ class UCParser:
         if len(p) == 6:
             p[0] = If(expr=p[3], then=p[5], elze=None, coord=self._token_coord(p, 1))
         else:
-            p[0] = If(expr=p[3], then=p[5], elze=p[7], coord=self._token_coord(p, 1), coord_else=self._token_coord(p, 6))
+            p[0] = If(expr=p[3], then=p[5], elze=p[7], coord=self._token_coord(p, 1),
+                      coord_else=self._token_coord(p, 6))
 
     def p_iteration_statement(self, p):
         """ iteration_statement : WHILE LPAREN expression RPAREN statement
@@ -460,7 +456,8 @@ class UCParser:
         if len(p) == 6:
             p[0] = While(expr=p[3], statement=p[5], coord=self._token_coord(p, 1))
         elif len(p) == 9:
-            p[0] = For(p1=DeclList(p[3], coord=self._token_coord(p, 1)), p2=p[4], p3=p[6], statement=p[8], coord=self._token_coord(p, 1))
+            p[0] = For(p1=DeclList(p[3], coord=self._token_coord(p, 1)), p2=p[4], p3=p[6], statement=p[8],
+                       coord=self._token_coord(p, 1))
         else:
             p[0] = For(p1=p[3], p2=p[5], p3=p[7], statement=p[9], coord=self._token_coord(p, 1))
 
@@ -514,7 +511,7 @@ class UCParser:
             if i == len(arrays) - 1:
                 arrays[i].dir_dec = p
             else:
-                arrays[i].dir_dec = arrays[i+1]
+                arrays[i].dir_dec = arrays[i + 1]
 
         return arrays[0]
 

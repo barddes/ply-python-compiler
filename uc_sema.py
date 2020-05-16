@@ -5,9 +5,12 @@ from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, 
     FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node, NodeInfo
 from uc_parser import UCParser
 
+
 def print_error(*args):
     msg = ' '.join([str(x) for x in args])
-    assert False, msg
+    # assert False, msg
+    print(msg, file=sys.stderr)
+
 
 class uCType(object):
     '''
@@ -364,7 +367,8 @@ class Visitor(NodeVisitor):
         if node.expr.node_info['type'] != BoolType:
             print_error('Error. Assert expression must evaluate a BoolType')
 
-        node.error_str = self.global_env.add_global_const('assertion_fail on %d:%d' % (node.coord.line, node.coord.column + len('assert ')))
+        node.error_str = self.global_env.add_global_const(
+            'assertion_fail on %d:%d' % (node.coord.line, node.coord.column + len('assert ')))
 
     def visit_Break(self, node: Break):
         for i, d in node.children():
@@ -435,7 +439,6 @@ class Visitor(NodeVisitor):
         elif node.init and isinstance(node.decl, ArrayDecl):
             node.node_info['index'] = node.global_env.add_global_const(node.init)
 
-
     def visit_EmptyStatement(self, node: EmptyStatement):
         for i, d in node.children():
             d.env = node.env
@@ -469,9 +472,11 @@ class Visitor(NodeVisitor):
             params = [x.node_info['type'] for x in
                       ([node.expr2] if not isinstance(node.expr2, ExprList) else node.expr2.list)]
             if len(params) != len(node.expr1.node_info['params']):
-                print_error("Number of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name)
+                print_error(
+                    "Number of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name)
             elif params != node.expr1.node_info['params']:
-                print_error("Types of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name)
+                print_error(
+                    "Types of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name)
 
         node.node_info = NodeInfo(node.expr1.node_info)
         node.node_info['func'] = False
@@ -506,7 +511,8 @@ class Visitor(NodeVisitor):
                 if isinstance(i, Return):
                     i.func_def = node
                     if i.node_info['type'] != node.node_info['type']:
-                        print_error('Type of return statement expression does not match declared return type for function')
+                        print_error(
+                            'Type of return statement expression does not match declared return type for function')
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         for i, d in node.children():
@@ -587,7 +593,7 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-    def get_ptr_depth(self, node: PtrDecl):
+    def get_ptr_depth(self, node):
         if node.value:
             return 1 + self.get_ptr_depth(node.value)
         return 1
@@ -598,20 +604,18 @@ class Visitor(NodeVisitor):
             d.global_env = node.global_env
             self.visit(d)
 
-        if node.type:
-            node.name = node.type
-
-            node.node_info = NodeInfo({
-                'array': True,
-                'depth': self.get_ptr_depth(node),
-                'type': {
-                    'int': IntType,
-                    'char': CharType,
-                    'float': FloatType,
-                    'string': StringType,
-                    'void': VoidType
-                }[node.type.name[0]]
-            })
+        node.node_info = NodeInfo({
+            'array': True,
+            'depth': self.get_ptr_depth(node),
+            'type': {
+                'int': IntType,
+                'char': CharType,
+                'float': FloatType,
+                'string': StringType,
+                'void': VoidType
+            }[node.type.name[0]]
+        })
+        pass
 
     def visit_Read(self, node: Read):
         for i, d in node.children():
