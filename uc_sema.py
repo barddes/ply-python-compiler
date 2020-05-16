@@ -472,11 +472,9 @@ class Visitor(NodeVisitor):
             params = [x.node_info['type'] for x in
                       ([node.expr2] if not isinstance(node.expr2, ExprList) else node.expr2.list)]
             if len(params) != len(node.expr1.node_info['params']):
-                print_error(
-                    "Number of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name)
+                print_error("Number of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name)
             elif params != node.expr1.node_info['params']:
-                print_error(
-                    "Types of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name)
+                print_error("Types of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name)
 
         node.node_info = NodeInfo(node.expr1.node_info)
         node.node_info['func'] = False
@@ -511,8 +509,7 @@ class Visitor(NodeVisitor):
                 if isinstance(i, Return):
                     i.func_def = node
                     if i.node_info['type'] != node.node_info['type']:
-                        print_error(
-                            'Type of return statement expression does not match declared return type for function')
+                        print_error('Type of return statement expression does not match declared return type for function')
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         for i, d in node.children():
