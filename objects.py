@@ -204,12 +204,13 @@ class ArrayRef(Node):
 
 
 class Assert(Node):
-    __slots__ = ('expr', 'coord')
+    __slots__ = ('expr', 'error_str', 'coord')
 
-    def __init__(self, expr, coord: Coord = None):
+    def __init__(self, expr, error_str=None, coord: Coord = None):
         super().__init__()
         self.expr = expr
         self.coord = coord
+        self.error_str = error_str
 
     def children(self):
         if self.expr:
