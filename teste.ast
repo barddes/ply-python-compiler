@@ -1,42 +1,42 @@
 Program: 
     FuncDef: 
-        Type: ['void']   @ 1:1
+        Type: ['int']   @ 1:1
         Decl: ID(name='main'  )
             FuncDecl: 
                 VarDecl: 
-                    Type: ['void']   @ 1:1
+                    Type: ['int']   @ 1:1
         Compound:    @ 1:1
             Decl: ID(name='i'  )
                 VarDecl: 
-                    Type: ['int']   @ 2:3
+                    Type: ['int']   @ 2:5
             Decl: ID(name='j'  )
                 VarDecl: 
-                    Type: ['int']   @ 2:3
-            Decl: ID(name='r'  )
-                PtrDecl: 
-                    VarDecl: 
-                        Type: ['int']   @ 3:3
-            Decl: ID(name='y'  )
-                ArrayDecl: 
-                    VarDecl: 
-                        Type: ['int']   @ 4:3
-                    Constant: int, 5   @ 4:9
-            Assignment: =   @ 5:3
-                ID: r   @ 5:3
-                UnaryOp: &   @ 5:8
-                    ArrayRef:    @ 5:8
-                        ID: y   @ 5:8
-                        ID: j   @ 5:10
-            Assignment: =   @ 6:3
-                ID: i   @ 6:3
-                ArrayRef:    @ 6:7
-                    ID: y   @ 6:7
-                    ID: j   @ 6:9
-            Assignment: =   @ 7:3
-                ArrayRef:    @ 7:3
-                    ID: y   @ 7:3
-                    ID: i   @ 7:5
-                BinaryOp: +   @ 7:10
-                    ID: i   @ 7:10
-                    ID: j   @ 7:14
-            Return:    @ 8:3
+                    Type: ['int']   @ 2:5
+            Assignment: =   @ 3:5
+                ID: i   @ 3:5
+                Constant: int, 1   @ 3:9
+            Assignment: =   @ 4:5
+                ID: j   @ 4:5
+                Constant: int, 2   @ 4:9
+            For:    @ 5:5
+                DeclList:    @ 5:5
+                    Decl: ID(name='k'  )
+                        VarDecl: 
+                            Type: ['int']   @ 5:10
+                        Constant: int, 1   @ 5:16
+                BinaryOp: <   @ 5:19
+                    ID: k   @ 5:19
+                    Constant: int, 10   @ 5:21
+                UnaryOp: p++   @ 5:25
+                    ID: k   @ 5:25
+                Assignment: +=   @ 6:9
+                    ID: i   @ 6:9
+                    BinaryOp: *   @ 6:14
+                        ID: j   @ 6:14
+                        ID: k   @ 6:18
+            Assert:    @ 7:5
+                BinaryOp: ==   @ 7:12
+                    ID: i   @ 7:12
+                    Constant: int, 91   @ 7:17
+            Return:    @ 8:5
+                Constant: int, 0   @ 8:12

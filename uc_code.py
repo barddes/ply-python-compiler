@@ -240,20 +240,20 @@ class GenerateCode(NodeVisitor):
                     custom_type = ''
                 self.code.append(('store_%s' % (node.name.node_info['type'].typename + custom_type), right_target, left_target))
 
-        if node.op == '+=':
-            pass
+        if node.op in ('+=', '-=', '*=', '/=', '%/'):
+            nt = self.new_temp()
+            op = {
+                '+=': 'add',
+                '-=': 'sub',
+                '*=': 'mul',
+                '/=': 'div',
+                '%=': 'mod'
+            }[node.op]
+            self.code.append(('load_%s' % node.name.node_info['type'], left_target, nt))
+            nt2 = self.new_temp()
+            self.code.append(('%s_%s' % (op, node.name.node_info['type']), nt, node.assign_expr.gen_location, nt2))
+            self.code.append(('store_%s' % node.name.node_info['type'], nt2, left_target))
 
-        if node.op == '-=':
-            pass
-
-        if node.op == '*=':
-            pass
-
-        if node.op == '/=':
-            pass
-
-        if node.op == '*=':
-            pass
 
 
     def visit_ArrayDecl(self, node: ArrayDecl):
@@ -368,8 +368,23 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_For(self, node: For):
-        for i, c in node.children():
-            self.visit(c)
+        if node.p1:
+            self.visit(node.p1)
+
+        begin_loop = self.new_temp()
+        begin_statement = self.new_temp()
+        end_loop = self.new_temp()
+
+        self.code.append((begin_loop[1:],))
+        self.visit(node.p2)
+        self.code.append(('cbranch', node.p2.gen_location, begin_statement, end_loop))
+        self.code.append((begin_statement[1:],))
+        if node.statement:
+            self.visit(node.statement)
+        if node.p3:
+            self.visit(node.p3)
+        self.code.append(('jump', begin_loop))
+        self.code.append((end_loop[1:],))
 
     def visit_FuncCall(self, node: FuncCall):
 
