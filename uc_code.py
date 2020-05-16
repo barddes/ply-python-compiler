@@ -134,7 +134,10 @@ class GenerateCode(NodeVisitor):
         node_t = node.expr1.node_info['type'].typename
 
         if node.op == '&':
-            nt = self.new_temp()
+            if node.assign_left:
+                nt = node.lookup_envs(node.assign_left.name.name)['location']
+            else:
+                nt = self.new_temp()
             self.code.append(('get_%s_*' % node_t, node.expr1.gen_location, nt))
             node.gen_location = nt
             node.node_info = NodeInfo(node.node_info)
@@ -208,6 +211,7 @@ class GenerateCode(NodeVisitor):
 
     def visit_Assignment(self, node: Assignment):
         if node.assign_expr:
+            node.assign_expr.assign_left = node
             self.visit(node.assign_expr)
 
         if isinstance(node.name, ArrayRef):
@@ -224,8 +228,8 @@ class GenerateCode(NodeVisitor):
         right_target = node.assign_expr.gen_location
 
         if node.op == '=':
-            # if node.assign_expr
-            pass
+            if not isinstance(node.assign_expr, UnaryOp) or node.assign_expr.op != '&':
+                self.code.append(('store_%s' % node.name.node_info['type'], right_target, left_target))
 
         if node.op == '+=':
             pass
@@ -242,7 +246,6 @@ class GenerateCode(NodeVisitor):
         if node.op == '*=':
             pass
 
-        self.code.append(('store_%s' % node.name.node_info['type'], right_target, left_target))
 
     def visit_ArrayDecl(self, node: ArrayDecl):
         for i, c in node.children():
