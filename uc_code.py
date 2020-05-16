@@ -229,6 +229,10 @@ class GenerateCode(NodeVisitor):
 
         if node.op == '=':
             if not isinstance(node.assign_expr, UnaryOp) or node.assign_expr.op != '&':
+                if isinstance(node.assign_expr, ArrayRef):
+                    nt = self.new_temp()
+                    self.code.append(('load_%s_*' % node.assign_expr.node_info['type'], node.assign_expr.gen_location, nt))
+                    right_target = nt
                 self.code.append(('store_%s' % node.name.node_info['type'], right_target, left_target))
 
         if node.op == '+=':
@@ -418,7 +422,9 @@ class GenerateCode(NodeVisitor):
             self.code.append(('store_%s' % c, a, b))
 
         if node.decl.name.name == 'main':
-            node.end_jump = '%1'
+            node.end_jump = self.new_temp()
+            while int(node.end_jump[1:]) < 1:
+                node.end_jump = self.new_temp()
         else:
             node.end_jump = self.new_temp()
 
