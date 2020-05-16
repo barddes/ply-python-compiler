@@ -236,8 +236,15 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_ArrayRef(self, node: ArrayRef):
-        for i, c in node.children():
-            self.visit(c)
+        if node.expr:
+            self.visit(node.expr)
+
+        target = self.new_temp()
+        source = node.lookup_envs(node.post_expr.name)['location']
+        self.code.append(('elem_%s' % node.node_info['type'], source, node.expr.gen_location, target))
+        node.gen_location = target
+
+        pass
 
     def visit_Assert(self, node: Assert):
         for i, c in node.children():
@@ -302,6 +309,7 @@ class GenerateCode(NodeVisitor):
             if not node.init:
                 target = self.new_temp()
                 self.code.append(('alloc_%s_%d' % (node.type.name[0], node.node_info['length']), target))
+                node.lookup_envs(node.name.name)['location'] = target
             return
 
         if isinstance(node.decl, VarDecl):
@@ -319,7 +327,8 @@ class GenerateCode(NodeVisitor):
 
         if isinstance(node.decl, PtrDecl):
             target = self.new_temp()
-            self.code.append(('alloc_%s%s' % (node.type.name[0], ''.join(['_*' for _ in range(node.decl.node_info['depth'])])), target))
+            self.code.append(('alloc_%s_*' % node.type.name[0], target))
+            node.lookup_envs(node.name.name)['location'] = target
 
         for i, c in node.children():
             self.visit(c)
@@ -448,7 +457,7 @@ class GenerateCode(NodeVisitor):
             inst = ('print_%s' % node.expr.node_info['type'], node.expr.gen_location)
             self.code.append(inst)
 
-        else :
+        else:
             for child in node.expr.list:
                 if isinstance(node.expr, ID):
                     node_info = child.lookup_envs(child.name)
@@ -457,8 +466,6 @@ class GenerateCode(NodeVisitor):
                 else:
                     inst = ('print_%s' % child.node_info['type'], child.gen_location)
                     self.code.append(inst)
-
-
 
     def visit_PtrDecl(self, node: PtrDecl):
         for i, c in node.children():
