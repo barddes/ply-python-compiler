@@ -650,10 +650,17 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         is_array = False
+        depth = 0
         if node.expr1:
             is_array = node.expr1.node_info['array']
+            depth = node.expr1.node_info['depth']
 
-        node.node_info = NodeInfo({'array': is_array, 'type': self.UnaryOp_check(node)})
+        if node.op == '&':
+            is_array = True
+            depth += 1
+
+
+        node.node_info = NodeInfo({'array': is_array, 'depth': depth, 'type': self.UnaryOp_check(node)})
 
     def visit_VarDecl(self, node: VarDecl):
         for i, d in node.children():

@@ -18,4 +18,4 @@
 ('store_int_*', '%13', '%15')
 ('jump', '%1')
 ('1',)
-('return_void',
+('return_void',)

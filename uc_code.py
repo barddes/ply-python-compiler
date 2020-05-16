@@ -220,7 +220,7 @@ class GenerateCode(NodeVisitor):
             self.code.append(('load_int', index, nt))
             source = node.lookup_envs(node.name.post_expr.name)
             nt2 = self.new_temp()
-            self.code.append(('elem_%s' % source['type'], nt, nt2))
+            self.code.append(('elem_%s' % source['type'], source['location'], nt, nt2))
             left_target = nt2
         else:
             left_target = node.lookup_envs(node.name.name)['location']
@@ -233,7 +233,12 @@ class GenerateCode(NodeVisitor):
                     nt = self.new_temp()
                     self.code.append(('load_%s_*' % node.assign_expr.node_info['type'], node.assign_expr.gen_location, nt))
                     right_target = nt
-                self.code.append(('store_%s' % node.name.node_info['type'], right_target, left_target))
+
+                if isinstance(node.name, ArrayRef):
+                    custom_type = '_*'
+                else:
+                    custom_type = ''
+                self.code.append(('store_%s' % (node.name.node_info['type'].typename + custom_type), right_target, left_target))
 
         if node.op == '+=':
             pass
