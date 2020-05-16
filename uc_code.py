@@ -40,7 +40,7 @@ class GenerateCode(NodeVisitor):
         '>=': 'ge',
         '<=': 'le',
     }
-    #
+
     # assing_opcodes = {
     #     '+=': 'add',
     #     '-=': 'sub',
@@ -71,6 +71,9 @@ class GenerateCode(NodeVisitor):
             self.versions[self.fname] = 0
         name = "%" + "%d" % (self.versions[self.fname])
         self.versions[self.fname] += 1
+
+        if name == '%1':
+            return self.new_temp()
         return name
 
     # You must implement visit_Nodename methods for all of the other
@@ -129,11 +132,42 @@ class GenerateCode(NodeVisitor):
 
     def visit_UnaryOp(self, node: UnaryOp):
         self.visit(node.expr1)
-        target = self.new_temp()
-        opcode = self.unary_ops[node.op] + "_" + node.expr1.node_info['type'].typename
-        inst = (opcode, node.expr1.gen_location)
-        self.code.append(inst)
-        node.gen_location = target
+
+        node_t = node.expr1.node_info['type'].typename
+
+        if node.op == '+':
+            node.gen_location = node.expr1.gen_location
+            return
+
+        if node.op == '-':
+            nt = self.new_temp()
+            self.code.append(('literal_%s' % node_t, 0, nt))
+            nt2 = self.new_temp()
+            self.code.append(('sub_%s' % node_t, nt, node.expr1.gen_location, nt2))
+            node.gen_location = nt2
+            return
+
+        if node.op in ('--', '++'):
+            op = 'add' if node.op == '++' else 'sub'
+            nt = self.new_temp()
+            self.code.append(('literal_%s' % node_t, 1, nt))
+            nt2 = self.new_temp()
+            self.code.append(('%s_%s' % (op, node_t), node.expr1.gen_location, nt, nt2))
+            var_loc = node.lookup_envs(node.expr1.name)['location']
+            self.code.append(('store_%s' % node_t, nt2, var_loc))
+            node.gen_location = nt2
+
+        if node.op in ('p--', 'p++'):
+            op = 'add' if node.op[1:] == '++' else 'sub'
+            nt = self.new_temp()
+            self.code.append(('literal_%s' % node_t, 1, nt))
+            nt2 = self.new_temp()
+            self.code.append(('%s_%s' % (op, node_t), node.expr1.gen_location, nt, nt2))
+            var_loc = node.lookup_envs(node.expr1.name)['location']
+            self.code.append(('store_%s' % node_t, nt2, var_loc))
+            node.gen_location = node.expr1.gen_location
+
+        # {'--', '++', 'p--', 'p++', *, &}
 
     def get_const_type(self, const):
         if type(const) == list:
@@ -172,6 +206,21 @@ class GenerateCode(NodeVisitor):
         left_target = node.lookup_envs(node.name.name)['location']
         right_target = node.assign_expr.gen_location
 
+        if node.op == '+=':
+            pass
+
+        if node.op == '-=':
+            pass
+
+        if node.op == '*=':
+            pass
+
+        if node.op == '/=':
+            pass
+
+        if node.op == '*=':
+            pass
+
         self.code.append(('store_%s' % node.name.node_info['type'], right_target, left_target))
 
     def visit_ArrayDecl(self, node: ArrayDecl):
@@ -185,6 +234,18 @@ class GenerateCode(NodeVisitor):
     def visit_Assert(self, node: Assert):
         for i, c in node.children():
             self.visit(c)
+
+        target_true = self.new_temp()
+        target_false = self.new_temp()
+        target_end = self.new_temp()
+
+        self.code.append(('cbranch', node.expr.gen_location, target_true, target_false))
+        self.code.append((target_true[1:],))
+        self.code.append(('jump', target_end))
+        self.code.append((target_false[1:],))
+        self.code.append(('print_string', '@.str.%d' % node.error_str))
+        self.code.append(('jump', '%1'))
+        self.code.append((target_end[1:],))
 
     def visit_Break(self, node: Break):
         for i, c in node.children():
@@ -286,8 +347,6 @@ class GenerateCode(NodeVisitor):
         self.code.append(inst)
         node.gen_location = target
 
-
-
     def visit_FuncDecl(self, node: FuncDecl):
         for i, c in node.children():
             self.visit(c)
@@ -320,7 +379,10 @@ class GenerateCode(NodeVisitor):
         for a, b, c in zip(params, vars, node.node_info['params']):
             self.code.append(('store_%s' % c, a, b))
 
-        node.end_jump = self.new_temp()
+        if node.decl.name.name == 'main':
+            node.end_jump = '%1'
+        else:
+            node.end_jump = self.new_temp()
 
         for i, c in node.children():
             self.visit(c)
@@ -328,8 +390,8 @@ class GenerateCode(NodeVisitor):
         final_ret = self.new_temp()
 
         self.code.append((node.end_jump[1:],))
-        self.code.append(('load_%s' % node.type.name[0], ret, final_ret))
         if node.type.name[0] != 'void':
+            self.code.append(('load_%s' % node.type.name[0], ret, final_ret))
             self.code.append(('return_%s' % node.type.name[0], final_ret))
         else:
             self.code.append(('return_%s' % node.type.name[0],))
@@ -342,7 +404,6 @@ class GenerateCode(NodeVisitor):
     def visit_If(self, node: If):
         for i, c in node.children():
             self.visit(c)
-
 
     def visit_ID(self, node: ID):
         node_info = node.lookup_envs(node.name)

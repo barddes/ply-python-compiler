@@ -5,6 +5,10 @@ from objects import Decl, While, VarDecl, UnaryOp, Type, Return, Read, Program, 
     FuncDef, GlobalDecl, If, ID, InitList, ParamList, Print, PtrDecl, Node, NodeInfo
 from uc_parser import UCParser
 
+def print_error(*args):
+    msg = ' '.join([str(x) for x in args])
+    assert False, msg
+
 class uCType(object):
     '''
     Class that represents a type in the uC language.  Types
@@ -242,7 +246,7 @@ class Environment(object):
         try:
             self.symtable.add(name, info)
         except Exception as e:
-            print('Error. ' + str(e), file=sys.stderr)
+            print_error('Error. ' + str(e))
 
     # def add_root(self, name, value):
     #     self.root.add(name, value)
@@ -273,11 +277,11 @@ class Visitor(NodeVisitor):
         op = node.op
 
         if expr1.node_info != expr2.node_info:
-            print("Error. ", expr1.node_info['type'].typename, op, expr2.node_info['type'].typename, file=sys.stderr)
+            print_error("Error. ", expr1.node_info['type'].typename, op, expr2.node_info['type'].typename)
 
         # nao tenho certeza se esta certo mas concerta o erro do teste 1
         elif op not in expr1.node_info['type'].binary_ops and op not in expr1.node_info['type'].rel_ops:
-            print("Error (unsupported op %s)" % op, file=sys.stderr)
+            print_error("Error (unsupported op %s)" % op)
 
         if op in expr1.node_info['type'].rel_ops:
             return BoolType
@@ -289,7 +293,7 @@ class Visitor(NodeVisitor):
         op = node.op
 
         if op not in expr1.node_info['type'].unary_ops:
-            print("Error (unsupported op %s)" % op, file=sys.stderr)
+            print_error("Error (unsupported op %s)" % op)
 
         return expr1.node_info['type']
 
@@ -318,11 +322,10 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         if node.name.node_info != node.assign_expr.node_info:
-            print('Error (cannot assign %s to %s)' % (
+            print_error('Error (cannot assign %s to %s)' % (
                 ''.join(['*' for _ in range(node.assign_expr.node_info['depth'])]) + str(
                     node.assign_expr.node_info['type']),
-                ''.join(['*' for _ in range(node.name.node_info['depth'])]) + str(node.name.node_info['type'])),
-                  file=sys.stderr)
+                ''.join(['*' for _ in range(node.name.node_info['depth'])]) + str(node.name.node_info['type'])))
 
     def visit_ArrayDecl(self, node: ArrayDecl):
         for i, d in node.children():
@@ -344,7 +347,7 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         if node.expr.node_info['type'] != IntType:
-            print('Error (array index must be of type int)', file=sys.stderr)
+            print_error('Error (array index must be of type int)')
 
         node.node_info = NodeInfo(node.post_expr.node_info)
         node.node_info['depth'] -= 1
@@ -359,7 +362,9 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         if node.expr.node_info['type'] != BoolType:
-            print('Error. Assert expression must evaluate a BoolType', file=sys.stderr)
+            print_error('Error. Assert expression must evaluate a BoolType')
+
+        node.error_str = self.global_env.add_global_const('assertion_fail on %d:%d' % (node.coord.line, node.coord.column + len('assert ')))
 
     def visit_Break(self, node: Break):
         for i, d in node.children():
@@ -420,10 +425,10 @@ class Visitor(NodeVisitor):
             decl_size = node.decl.const_exp.value
             list_size = len(node.init.list)
             if decl_size != list_size:
-                print("Error (size mismatch on initialization)", file=sys.stderr)
+                print_error("Error (size mismatch on initialization)")
 
         if node.init and node.init.node_info != node.node_info:
-            print('Error.  %s = %s' % (node.node_info['type'], node.init.node_info['type']), file=sys.stderr)
+            print_error('Error.  %s = %s' % (node.node_info['type'], node.init.node_info['type']))
 
         if node.init and node.init.node_info['type'] == StringType:
             node.node_info['index'] = node.global_env.add_global_const(node.init.value[1:-1])
@@ -452,7 +457,7 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         if node.p2.node_info['type'] != BoolType:
-            print('Error. For condition must evaluate a BoolType', file=sys.stderr)
+            print_error('Error. For condition must evaluate a BoolType')
 
     def visit_FuncCall(self, node: FuncCall):
         for i, d in node.children():
@@ -464,13 +469,9 @@ class Visitor(NodeVisitor):
             params = [x.node_info['type'] for x in
                       ([node.expr2] if not isinstance(node.expr2, ExprList) else node.expr2.list)]
             if len(params) != len(node.expr1.node_info['params']):
-                print(
-                    "Number of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name,
-                    file=sys.stderr)
+                print_error("Number of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name)
             elif params != node.expr1.node_info['params']:
-                print(
-                    "Types of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name,
-                    file=sys.stderr)
+                print_error("Types of arguments for call to function '%s' do not match function parameter declaration" % node.expr1.name)
 
         node.node_info = NodeInfo(node.expr1.node_info)
         node.node_info['func'] = False
@@ -505,8 +506,7 @@ class Visitor(NodeVisitor):
                 if isinstance(i, Return):
                     i.func_def = node
                     if i.node_info['type'] != node.node_info['type']:
-                        print('Type of return statement expression does not match declared return type for function',
-                              file=sys.stderr)
+                        print_error('Type of return statement expression does not match declared return type for function')
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         for i, d in node.children():
@@ -529,13 +529,13 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         if node.expr.node_info['type'] != BoolType:
-            print('Error. If expression must evaluate a BoolType', file=sys.stderr)
+            print_error('Error. If expression must evaluate a BoolType')
 
     def visit_ID(self, node: ID):
         name = node.name
 
         if not node.env.lookup(name) and not node.global_env.lookup(name):
-            print("Error. Variable '%s' not defined." % name, file=sys.stderr)
+            print_error("Error. Variable '%s' not defined." % name)
             node.env.add_local_var(name, NodeInfo({
                 'type': AnyType
             }))
@@ -559,7 +559,7 @@ class Visitor(NodeVisitor):
         type_aux = None
         for element in node.list:
             if type_aux and type_aux != element.type:
-                print("Error mismatch type in array's elements", file=sys.stderr)
+                print_error("Error mismatch type in array's elements")
             type_aux = element.type
 
         node.node_info = NodeInfo({
@@ -671,7 +671,7 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         if node.expr.node_info['type'] != BoolType:
-            print('Error. While expression must evaluate a BoolType', file=sys.stderr)
+            print_error('Error. While expression must evaluate a BoolType')
 
 
 if __name__ == '__main__':
