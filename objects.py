@@ -1,6 +1,7 @@
 import copy
 import sys
 
+
 class Coord(object):
     """ Coordinates of a syntactic element. Consists of:
             - Line number
@@ -36,7 +37,8 @@ class NodeInfo(dict):
         if not other:
             return False
 
-        if self['func'] == other['func'] and self['array'] == other['array'] and self['type'] == other['type'] and self['depth'] == other['depth']:
+        if self['func'] == other['func'] and self['array'] == other['array'] and self['type'] == other['type'] and self[
+            'depth'] == other['depth']:
             return True
 
         from uc_sema import CharType, StringType
@@ -324,7 +326,7 @@ class Decl(Node):
         self.coord = coord
 
         if self.decl:
-            self.name = self.decl.name
+            self.name = (self.decl if not isinstance(self.decl, PtrDecl) else self.decl.get_name()).name
 
         if self.type:
             self.set_type(self.type)
@@ -627,21 +629,40 @@ class Program(Node):
 class PtrDecl(Node):
     __slots__ = ('value', 'type', 'name', 'coord')
 
-    def __init__(self, value, type=None, name=None, coord: Coord = None):
+    def __init__(self, value, name=None, type=None, coord: Coord = None):
         super().__init__()
         self.value = value
         self.type = type
-        self.name = name
+        self.name = None
         self.coord = coord
+
+        if name:
+            self.set_name(name)
+
+    def set_name(self, name):
+        if self.value:
+            self.value.set_name(name)
+        else:
+            self.name = name
+
+    def get_name(self):
+        if self.value:
+            return self.value.get_name()
+        return self.name
 
     def set_type(self, t):
         self.type = t
+        if self.value:
+            self.value.set_type(t)
+        else:
+            self.name.set_type(t)
+
 
     def children(self):
         if self.value:
             yield 'value', self.value
-        if self.type:
-            yield 'type', self.type
+        if self.name:
+            yield 'name', self.name
 
     attr_names = ()
 
