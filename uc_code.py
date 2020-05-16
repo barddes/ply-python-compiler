@@ -1,6 +1,6 @@
 from objects import Program, BinaryOp, Assignment, ArrayDecl, ArrayRef, Assert, Break, Cast, Compound, Constant, \
     DeclList, Decl, EmptyStatement, ExprList, For, FuncCall, FuncDecl, FuncDef, GlobalDecl, If, ID, InitList, ParamList, \
-    Print, PtrDecl, Read, Return, Type, UnaryOp, VarDecl, While
+    Print, PtrDecl, Read, Return, Type, UnaryOp, VarDecl, While, NodeInfo
 from uc_sema import NodeVisitor, StringType, CharType, VoidType
 
 
@@ -133,6 +133,15 @@ class GenerateCode(NodeVisitor):
 
         node_t = node.expr1.node_info['type'].typename
 
+        if node.op == '&':
+            nt = self.new_temp()
+            self.code.append(('get_%s_*' % node_t, node.expr1.gen_location, nt))
+            node.gen_location = nt
+            node.node_info = NodeInfo(node.node_info)
+            node.node_info['depth'] += 1
+            node.node_info['array'] = True
+            return
+
         if node.op == '+':
             node.gen_location = node.expr1.gen_location
             return
@@ -214,6 +223,10 @@ class GenerateCode(NodeVisitor):
 
         right_target = node.assign_expr.gen_location
 
+        if node.op == '=':
+            # if node.assign_expr
+            pass
+
         if node.op == '+=':
             pass
 
@@ -243,8 +256,6 @@ class GenerateCode(NodeVisitor):
         source = node.lookup_envs(node.post_expr.name)['location']
         self.code.append(('elem_%s' % node.node_info['type'], source, node.expr.gen_location, target))
         node.gen_location = target
-
-        pass
 
     def visit_Assert(self, node: Assert):
         for i, c in node.children():
