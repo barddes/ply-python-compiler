@@ -608,7 +608,7 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
             if isinstance(d, Constant) and d.type == 'string':
-                d.node_info['index'] = self.global_env.add_global_const('%s ' % d.value[1:-1])
+                d.node_info['index'] = self.global_env.add_global_const(d.value[1:-1])
 
     def get_ptr_depth(self, node):
         if node.value:
