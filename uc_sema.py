@@ -595,10 +595,20 @@ class Visitor(NodeVisitor):
         pass
 
     def visit_Print(self, node: Print):
-        for i, d in node.children():
+        params = []
+
+        if isinstance(node.expr, ExprList):
+            params = node.expr.list
+        elif node.expr:
+            params = [node.expr]
+
+        for d in params:
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+
+            if isinstance(d, Constant) and d.type == 'string':
+                d.node_info['index'] = self.global_env.add_global_const('%s ' % d.value[1:-1])
 
     def get_ptr_depth(self, node):
         if node.value:

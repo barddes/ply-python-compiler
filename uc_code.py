@@ -260,9 +260,29 @@ class GenerateCode(NodeVisitor):
         for i, c in node.children():
             self.visit(c)
 
+    def visit_InnerArrayRef(self, node, list):
+        if isinstance(node.post_expr, ArrayRef):
+            self.visit_InnerArrayRef(node.post_expr, list[0])
+        else:
+            nt = self.new_temp()
+            self.code.append(('literal_int', len(list), nt))
+            nt2 = self.new_temp()
+            self.code.append(('load_int', node.lookup_envs(node.expr.name)['location'], nt2))
+            nt3 = self.new_temp()
+            self.code.append(('mul_int', nt, nt2, nt3))
+            node.gen_location = nt3
+
     def visit_ArrayRef(self, node: ArrayRef):
+        if isinstance(node.post_expr, ArrayRef):
+            self.visit_InnerArrayRef(node, node.node_info['params'])
+
         if node.expr:
             self.visit(node.expr)
+
+        if isinstance(node.post_expr, ArrayRef):
+            target = self.new_temp()
+            self.code.append(('add_int', node.post_expr.gen_location, node.expr.gen_location, target))
+            node.expr.gen_location = target
 
         target = self.new_temp()
         post_ex = node.post_expr
@@ -499,26 +519,31 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_Print(self, node: Print):
-        for i, c in node.children():
-            self.visit(c)
-
-        if isinstance(node.expr, ID):
-            node_info = node.expr.lookup_envs(node.expr.name)
-            inst = ('print_%s' % node_info['type'].typename, node.expr.gen_location)
-            self.code.append(inst)
-        elif not isinstance(node.expr, ExprList):
-            inst = ('print_%s' % node.expr.node_info['type'], node.expr.gen_location)
-            self.code.append(inst)
-
+        if isinstance(node.expr, ExprList):
+            visit = node.expr.list
         else:
-            for child in node.expr.list:
-                if isinstance(node.expr, ID):
-                    node_info = child.lookup_envs(child.name)
-                    inst = ('print_%s' % node_info['type'].typename, child.gen_location)
-                    self.code.append(inst)
+            visit = [node.expr]
+
+        for a, i in enumerate(visit):
+            if isinstance(i, ArrayRef):
+                self.visit(i)
+                target = self.new_temp()
+                self.code.append(('load_%s_*' % i.node_info['type'], i.gen_location, target))
+                self.code.append(('print_%s' % i.node_info['type'], target))
+                pass
+
+            elif isinstance(i, ID):
+                self.visit(i)
+                node_info = node.expr.lookup_envs(node.expr.name)
+                self.code.append(('print_%s' % node_info['type'].typename, node.expr.gen_location))
+
+            elif isinstance(i, Constant):
+                if i.type != 'string':
+                    self.visit(i)
+                    self.code.append(('print_%s' % i.type, i.gen_location))
                 else:
-                    inst = ('print_%s' % child.node_info['type'], child.gen_location)
-                    self.code.append(inst)
+                    self.code.append(('print_string', '@.str.%d' % i.node_info['index']))
+
 
     def visit_PtrDecl(self, node: PtrDecl):
         for i, c in node.children():
