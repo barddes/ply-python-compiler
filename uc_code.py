@@ -404,12 +404,12 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_For(self, node: For):
-        if node.p1:
-            self.visit(node.p1)
-
         begin_loop = self.new_temp()
         begin_statement = self.new_temp()
         end_loop = self.new_temp()
+
+        if node.p1:
+            self.visit(node.p1)
 
         self.code.append((begin_loop[1:],))
         self.visit(node.p2)
@@ -502,8 +502,30 @@ class GenerateCode(NodeVisitor):
         pass
 
     def visit_If(self, node: If):
-        for i, c in node.children():
-            self.visit(c)
+        # for i, c in node.children():
+        #     self.visit(c)
+
+        if node.expr:
+            self.visit(node.expr)
+
+        begin_if = self.new_temp()
+        end_if = self.new_temp()
+        if node.elze:
+            end_elze = self.new_temp()
+
+        self.code.append(('cbranch', node.expr.gen_location, begin_if, end_if))
+        if node.then:
+            self.code.append((begin_if[1:],))
+            self.visit(node.then)
+
+        if node.elze:
+            self.code.append(('jump', end_elze))
+
+        self.code.append((end_if[1:],))
+
+        if node.elze:
+            self.visit(node.elze)
+            self.code.append((end_elze[1:],))
 
     def visit_ID(self, node: ID):
         node_info = node.lookup_envs(node.name)
