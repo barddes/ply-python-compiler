@@ -231,14 +231,16 @@ class GenerateCode(NodeVisitor):
             if not isinstance(node.assign_expr, UnaryOp) or node.assign_expr.op != '&':
                 if isinstance(node.assign_expr, ArrayRef):
                     nt = self.new_temp()
-                    self.code.append(('load_%s_*' % node.assign_expr.node_info['type'], node.assign_expr.gen_location, nt))
+                    self.code.append(
+                        ('load_%s_*' % node.assign_expr.node_info['type'], node.assign_expr.gen_location, nt))
                     right_target = nt
 
                 if isinstance(node.name, ArrayRef):
                     custom_type = '_*'
                 else:
                     custom_type = ''
-                self.code.append(('store_%s' % (node.name.node_info['type'].typename + custom_type), right_target, left_target))
+                self.code.append(
+                    ('store_%s' % (node.name.node_info['type'].typename + custom_type), right_target, left_target))
 
         if node.op in ('+=', '-=', '*=', '/=', '%/'):
             nt = self.new_temp()
@@ -254,8 +256,6 @@ class GenerateCode(NodeVisitor):
             self.code.append(('%s_%s' % (op, node.name.node_info['type']), nt, node.assign_expr.gen_location, nt2))
             self.code.append(('store_%s' % node.name.node_info['type'], nt2, left_target))
 
-
-
     def visit_ArrayDecl(self, node: ArrayDecl):
         for i, c in node.children():
             self.visit(c)
@@ -265,7 +265,10 @@ class GenerateCode(NodeVisitor):
             self.visit(node.expr)
 
         target = self.new_temp()
-        source = node.lookup_envs(node.post_expr.name)['location']
+        post_ex = node.post_expr
+        while not isinstance(post_ex, ID):
+            post_ex = post_ex.post_expr
+        source = node.lookup_envs(post_ex.name)['location']
         self.code.append(('elem_%s' % node.node_info['type'], source, node.expr.gen_location, target))
         node.gen_location = target
 
@@ -327,12 +330,22 @@ class GenerateCode(NodeVisitor):
         for i, c in node.children():
             self.visit(c)
 
+    def array_get_dim(self, l):
+        if len(l) > 0 and type(l[0]) == list:
+            return [len(l)] + self.array_get_dim(l[0])
+        return [len(l)]
+
     def visit_Decl(self, node: Decl):
         if isinstance(node.decl, ArrayDecl):
-            if not node.init:
-                target = self.new_temp()
-                self.code.append(('alloc_%s_%d' % (node.type.name[0], node.node_info['length']), target))
-                node.lookup_envs(node.name.name)['location'] = target
+            target = self.new_temp()
+            self.code.append(('alloc_%s_%s' % (
+                node.type.name[0], '_'.join([str(x) for x in self.array_get_dim(node.node_info['params'])])), target))
+            node.lookup_envs(node.name.name)['location'] = target
+
+            if node.init:
+                self.code.append(('store_%s_%s' % (
+                    node.type.name[0], '_'.join([str(x) for x in self.array_get_dim(node.node_info['params'])])),
+                                  '@.str.%d' % node.decl.node_info['index'], target))
             return
 
         if isinstance(node.decl, VarDecl):

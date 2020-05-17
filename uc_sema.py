@@ -235,6 +235,7 @@ class Environment(object):
 
     def add_global_array(self, array):
         self.consts.append(self.unbox_InitList(array.list))
+        return len(self.consts) - 1
 
     def add_global_str(self, str):
         if str not in self.consts:
@@ -435,9 +436,15 @@ class Visitor(NodeVisitor):
             print_error('Error.  %s = %s' % (node.node_info['type'], node.init.node_info['type']))
 
         if node.init and node.init.node_info['type'] == StringType:
-            node.node_info['index'] = node.global_env.add_global_const(node.init.value[1:-1])
+            node.lookup_envs(node.decl.dir_dec.name.name)['location'] = \
+                node.node_info['index'] = node.global_env.add_global_const(node.init.value[1:-1])
+            node.lookup_envs(node.decl.dir_dec.name.name)['params'] = node.init.value[1:-1]
+
         elif node.init and isinstance(node.decl, ArrayDecl):
-            node.node_info['index'] = node.global_env.add_global_const(node.init)
+            node.lookup_envs(node.decl.dir_dec.name.name)['location'] = \
+                node.node_info['index'] = node.global_env.add_global_const(node.init)
+            node.lookup_envs(node.decl.dir_dec.name.name)['params'] = node.global_env.unbox_InitList(node.init.list)
+        pass
 
     def visit_EmptyStatement(self, node: EmptyStatement):
         for i, d in node.children():
