@@ -97,6 +97,16 @@ class GenerateCode(NodeVisitor):
         self.visit(node.expr1)
         self.visit(node.expr2)
 
+        if isinstance(node.expr1, ArrayRef):
+            nt = self.new_temp()
+            self.code.append(('load_%s_*' % node.expr1.node_info['type'], node.expr1.gen_location, nt))
+            node.expr1.gen_location = nt
+
+        if isinstance(node.expr2, ArrayRef):
+            nt = self.new_temp()
+            self.code.append(('load_%s_*' % node.expr2.node_info['type'], node.expr2.gen_location, nt))
+            node.expr2.gen_location = nt
+
         target = self.new_temp()
 
         # Create the opcode and append to list
@@ -505,13 +515,12 @@ class GenerateCode(NodeVisitor):
         # for i, c in node.children():
         #     self.visit(c)
 
-        if node.expr:
-            self.visit(node.expr)
-
         begin_if = self.new_temp()
         end_if = self.new_temp()
-        if node.elze:
-            end_elze = self.new_temp()
+        end_elze = self.new_temp()
+
+        if node.expr:
+            self.visit(node.expr)
 
         self.code.append(('cbranch', node.expr.gen_location, begin_if, end_if))
         if node.then:
