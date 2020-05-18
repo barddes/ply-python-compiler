@@ -607,6 +607,10 @@ class GenerateCode(NodeVisitor):
                 else:
                     self.code.append(('print_string', '@.str.%d' % i.node_info['index']))
 
+            else:
+                self.visit(i)
+                self.code.append(('print_%s' % i.node_info['type'], i.gen_location))
+
 
     def visit_PtrDecl(self, node: PtrDecl):
         for i, c in node.children():
