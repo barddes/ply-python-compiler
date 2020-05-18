@@ -236,6 +236,7 @@ class GenerateCode(NodeVisitor):
         else:
             left_target = node.lookup_envs(node.name.name)['location']
 
+
         right_target = node.assign_expr.gen_location
 
         if node.op == '=':

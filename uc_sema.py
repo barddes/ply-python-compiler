@@ -194,11 +194,17 @@ class SymbolTable(dict):
 
 
 class Environment(object):
-    def __init__(self, merge_with: 'Environment' = None):
+    def __init__(self, merge_with: 'Environment' = None, func_def=None):
         # self.stack = []
         # self.stack.append(self.symtab)
         self.consts = []
         self.vars = []
+
+        if merge_with:
+            self.func_def = merge_with.func_def
+
+        if func_def:
+            self.func_def = func_def
 
         merge_symtable = None if not merge_with else merge_with.symtable
         self.symtable = SymbolTable(merge_with=merge_symtable)
@@ -417,6 +423,8 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
         name = node.name.name
+        if isinstance(name, VarDecl):
+            name = name.name
         info = node.decl.node_info
 
         if info['func']:
@@ -503,23 +511,31 @@ class Visitor(NodeVisitor):
             node.node_info['params'] = []
 
     def visit_FuncDef(self, node: FuncDef):
-        node.env = Environment()
+        node.env = Environment(func_def=node)
 
-        for i, d in node.children():
-            d.env = node.env
-            d.global_env = node.global_env
-            self.visit(d)
+        if node.type:
+            node.type.env = node.env
+            node.type.global_env = node.global_env
+            self.visit(node.type)
+
+        if node.decl:
+            node.decl.env = node.env
+            node.decl.global_env = node.global_env
+            self.visit(node.decl)
 
         node.node_info = node.decl.node_info
 
-        # Procura filho de node compound que é o Return
-        if node.compound.stmt_list:
-            for i in node.compound.stmt_list:
-                if isinstance(i, Return):
-                    i.func_def = node
-                    if i.node_info['type'] != node.node_info['type']:
-                        print_error(
-                            'Type of return statement expression does not match declared return type for function')
+        if node.decl_list:
+            node.decl_list.env = node.env
+            node.decl_list.global_env = node.global_env
+            self.visit(node.decl_list)
+
+        if node.compound:
+            node.compound.env = node.env
+            node.compound.global_env = node.global_env
+            self.visit(node.compound)
+
+
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         for i, d in node.children():
@@ -651,6 +667,12 @@ class Visitor(NodeVisitor):
             node.node_info = NodeInfo({
                 'type': VoidType
             })
+
+        node.func_def = node.env.func_def
+        if node.node_info['type'] != node.func_def.node_info['type']:
+            print_error(
+                'Type of return statement expression does not match declared return type for function')
+
 
     def visit_Type(self, node: Type):
         node.node_info = NodeInfo({
