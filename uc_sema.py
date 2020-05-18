@@ -8,8 +8,8 @@ from uc_parser import UCParser
 
 def print_error(*args):
     msg = ' '.join([str(x) for x in args])
-    # assert False, msg
-    print(msg, file=sys.stderr)
+    assert False, msg
+    # print(msg, file=sys.stderr)
 
 
 class uCType(object):

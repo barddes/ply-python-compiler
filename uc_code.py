@@ -434,22 +434,51 @@ class GenerateCode(NodeVisitor):
         self.code.append((end_loop[1:],))
 
     def visit_FuncCall(self, node: FuncCall):
+        self.visit(node.expr1)
 
-        for i, c in node.children():
-            self.visit(c)
-
-        # para 1 parametro
-        if isinstance(node.expr2, ID):
-            node_info = node.expr2.lookup_envs(node.expr2.name)
-            inst = ('param_%s' % node_info['type'].typename, node.expr2.gen_location)
-            self.code.append(inst)
-        # para +1 parametro
         if isinstance(node.expr2, ExprList):
-            for child in node.expr2.list:
-                node_info = child.lookup_envs(child.name)
+            visit = node.expr2.list
+        else:
+            visit = [node.expr2]
+
+        for a, i in enumerate(visit):
+            if isinstance(i, ArrayRef):
+                self.visit(i)
                 target = self.new_temp()
-                inst = inst = ('param_%s' % node_info['type'].typename, child.gen_location)
-                self.code.append(inst)
+                self.code.append(('load_%s_*' % i.node_info['type'], i.gen_location, target))
+                self.code.append(('param_%s' % i.node_info['type'], target))
+                pass
+
+            elif isinstance(i, ID):
+                self.visit(i)
+                self.code.append(('param_%s' % i.node_info['type'], i.gen_location))
+
+            elif isinstance(i, Constant):
+                if i.type != 'string':
+                    self.visit(i)
+                    self.code.append(('param_%s' % i.type, i.gen_location))
+                else:
+                    self.code.append(('param_string', '@.str.%d' % i.node_info['index']))
+
+            else:
+                self.visit(i)
+                self.code.append(('param_%s' % i.node_info['type'], i.gen_location))
+
+
+
+        # if node.expr2:
+        #     # para 1 parametro
+        #     if not isinstance(node.expr2, ExprList):
+        #         node_info = node.expr2.lookup_envs(node.expr2.name)
+        #         inst = ('param_%s' % node_info['type'].typename, node.expr2.gen_location)
+        #         self.code.append(inst)
+        #     # para +1 parametro
+        #     else:
+        #         for child in node.expr2.list:
+        #             node_info = child.lookup_envs(child.name)
+        #             target = self.new_temp()
+        #             inst = inst = ('param_%s' % node_info['type'].typename, child.gen_location)
+        #             self.code.append(inst)
 
         target = self.new_temp()
         inst = inst = ('call', '@%s' % node.expr1.name, target)
