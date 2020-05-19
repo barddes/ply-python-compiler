@@ -1,18 +1,14 @@
-int z = 3, t =4;
+/* Palindrome numbers: */
 
-int g (int t) {
- int x;
- t *= 2;
- x = 2*t;
- z = x+1;
- return x;
-}
-
-int main(){
-    int i, j, k;
-    i = g(t);
-    j = g(z);
-    k = g(t+z);
-    assert i == 16 && j == 68 && k == 292;
+int main() {
+    int n,t, reverse = 0;
+    n = 12321;
+    t = n;
+    while (t != 0) {
+        reverse = reverse * 10;
+        reverse = reverse + t % 10;
+        t = t / 10;
+    }
+    assert n == reverse;
     return 0;
 }

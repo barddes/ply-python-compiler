@@ -1,86 +1,52 @@
 Program: 
-    GlobalDecl: 
-        Decl: ID(name='z'  )
-            VarDecl: 
-                Type: ['int']   @ 1:1
-            Constant: int, 3   @ 1:9
-        Decl: ID(name='t'  )
-            VarDecl: 
-                Type: ['int']   @ 1:1
-            Constant: int, 4   @ 1:15
     FuncDef: 
         Type: ['int']   @ 3:1
-        Decl: ID(name='g'  )
-            FuncDecl: 
-                ParamList: 
-                    Decl: ID(name='t'  )
-                        VarDecl: 
-                            Type: ['int']   @ 3:8
-                VarDecl: 
-                    Type: ['int']   @ 3:1
-        Compound:    @ 3:1
-            Decl: ID(name='x'  )
-                VarDecl: 
-                    Type: ['int']   @ 4:2
-            Assignment: *=   @ 5:2
-                ID: t   @ 5:2
-                Constant: int, 2   @ 5:7
-            Assignment: =   @ 6:2
-                ID: x   @ 6:2
-                BinaryOp: *   @ 6:6
-                    Constant: int, 2   @ 6:6
-                    ID: t   @ 6:8
-            Assignment: =   @ 7:2
-                ID: z   @ 7:2
-                BinaryOp: +   @ 7:6
-                    ID: x   @ 7:6
-                    Constant: int, 1   @ 7:8
-            Return:    @ 8:2
-                ID: x   @ 8:9
-    FuncDef: 
-        Type: ['int']   @ 11:1
         Decl: ID(name='main'  )
             FuncDecl: 
                 VarDecl: 
-                    Type: ['int']   @ 11:1
-        Compound:    @ 11:1
-            Decl: ID(name='i'  )
+                    Type: ['int']   @ 3:1
+        Compound:    @ 3:1
+            Decl: ID(name='n'  )
                 VarDecl: 
-                    Type: ['int']   @ 12:5
-            Decl: ID(name='j'  )
+                    Type: ['int']   @ 4:5
+            Decl: ID(name='t'  )
                 VarDecl: 
-                    Type: ['int']   @ 12:5
-            Decl: ID(name='k'  )
+                    Type: ['int']   @ 4:5
+            Decl: ID(name='reverse'  )
                 VarDecl: 
-                    Type: ['int']   @ 12:5
-            Assignment: =   @ 13:5
-                ID: i   @ 13:5
-                FuncCall:    @ 13:9
-                    ID: g   @ 13:9
-                    ID: t   @ 13:11
-            Assignment: =   @ 14:5
-                ID: j   @ 14:5
-                FuncCall:    @ 14:9
-                    ID: g   @ 14:9
-                    ID: z   @ 14:11
-            Assignment: =   @ 15:5
-                ID: k   @ 15:5
-                FuncCall:    @ 15:9
-                    ID: g   @ 15:9
-                    BinaryOp: +   @ 15:11
-                        ID: t   @ 15:11
-                        ID: z   @ 15:13
-            Assert:    @ 16:5
-                BinaryOp: &&   @ 16:12
-                    BinaryOp: &&   @ 16:12
-                        BinaryOp: ==   @ 16:12
-                            ID: i   @ 16:12
-                            Constant: int, 16   @ 16:17
-                        BinaryOp: ==   @ 16:23
-                            ID: j   @ 16:23
-                            Constant: int, 68   @ 16:28
-                    BinaryOp: ==   @ 16:34
-                        ID: k   @ 16:34
-                        Constant: int, 292   @ 16:39
-            Return:    @ 17:5
-                Constant: int, 0   @ 17:12
+                    Type: ['int']   @ 4:5
+                Constant: int, 0   @ 4:24
+            Assignment: =   @ 5:5
+                ID: n   @ 5:5
+                Constant: int, 12321   @ 5:9
+            Assignment: =   @ 6:5
+                ID: t   @ 6:5
+                ID: n   @ 6:9
+            While:    @ 7:5
+                BinaryOp: !=   @ 7:12
+                    ID: t   @ 7:12
+                    Constant: int, 0   @ 7:17
+                Compound:    @ 7:1
+                    Assignment: =   @ 8:9
+                        ID: reverse   @ 8:9
+                        BinaryOp: *   @ 8:19
+                            ID: reverse   @ 8:19
+                            Constant: int, 10   @ 8:29
+                    Assignment: =   @ 9:9
+                        ID: reverse   @ 9:9
+                        BinaryOp: +   @ 9:19
+                            ID: reverse   @ 9:19
+                            BinaryOp: %   @ 9:29
+                                ID: t   @ 9:29
+                                Constant: int, 10   @ 9:33
+                    Assignment: =   @ 10:9
+                        ID: t   @ 10:9
+                        BinaryOp: /   @ 10:13
+                            ID: t   @ 10:13
+                            Constant: int, 10   @ 10:17
+            Assert:    @ 12:5
+                BinaryOp: ==   @ 12:12
+                    ID: n   @ 12:12
+                    ID: reverse   @ 12:17
+            Return:    @ 13:5
+                Constant: int, 0   @ 13:12

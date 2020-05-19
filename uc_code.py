@@ -651,5 +651,22 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_While(self, node: While):
-        for i, c in node.children():
-            self.visit(c)
+
+        begin_loop = self.new_temp()
+        begin_statement = self.new_temp()
+        end_loop = self.new_temp()
+
+        self.code.append((begin_loop[1:],))
+        self.visit(node.expr)
+        self.code.append(('cbranch', node.expr.gen_location, begin_statement, end_loop))
+        self.code.append((begin_statement[1:],))
+        if node.statement:
+            self.visit(node.statement)
+        self.code.append(('jump', begin_loop))
+        self.code.append((end_loop[1:],))
+
+
+
+
+
+
