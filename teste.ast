@@ -1,40 +1,10 @@
 Program: 
-    FuncDef: 
-        Type: ['int']   @ 1:1
-        Decl: ID(name='main'  )
-            FuncDecl: 
+    GlobalDecl: 
+        Decl: ID(name='a'  )
+            ArrayDecl: 
                 VarDecl: 
                     Type: ['int']   @ 1:1
-        Compound:    @ 1:1
-            Decl: ID(name='a'  )
-                VarDecl: 
-                    Type: ['int']   @ 2:5
-                Constant: int, 1   @ 2:13
-            Decl: ID(name='b'  )
-                VarDecl: 
-                    Type: ['int']   @ 2:5
-                Constant: int, 0   @ 2:20
-            If:    @ 4:5
-                ExprList: 
-                    BinaryOp: ==   @ 4:8
-                        ID: a   @ 4:8
-                        ID: a   @ 4:13
-                    BinaryOp: ==   @ 4:16
-                        ID: b   @ 4:16
-                        ID: a   @ 4:21
-                Print:    @ 5:8
-                    Constant: string, "success\n"   @ 5:14
-                Print:    @ 7:8
-                    Constant: string, "fail\n"   @ 7:14
-            If:    @ 9:5
-                ExprList: 
-                    BinaryOp: ==   @ 9:8
-                        ID: b   @ 9:8
-                        ID: a   @ 9:13
-                    BinaryOp: ==   @ 9:16
-                        ID: a   @ 9:16
-                        ID: a   @ 9:21
-                Print:    @ 10:8
-                    Constant: string, "success\n"   @ 10:14
-                Print:    @ 12:8
-                    Constant: string, "fail"   @ 12:14
+            InitList:    @ 1:12
+                Constant: int, 1   @ 1:12
+                Constant: int, 2   @ 1:14
+                Constant: int, 3   @ 1:16

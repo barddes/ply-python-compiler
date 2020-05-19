@@ -202,9 +202,15 @@ class GenerateCode(NodeVisitor):
     def visit_Program(self, node: Program):
         for var in node.global_env.vars:
             if var.init:
-                inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name, var.init.value)
+                if isinstance(var.init, InitList):
+                    inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name, node.env.unbox_InitList(var.init.list))
+                    if node.env.unbox_InitList(var.init.list) in node.global_env.consts:
+                        node.global_env.consts.remove(node.env.unbox_InitList(var.init.list))
+                else:
+                    inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name, var.init.value)
             else:
                 inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name)
+
             self.code.append(inst)
             var.gen_location = '@%s' % var.decl.name.name
             node.lookup_envs(var.decl.name.name)['location'] = '@%s' % var.decl.name.name
