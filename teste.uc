@@ -1,14 +1,18 @@
-/* Palindrome numbers: */
+/* Compute GCD of two integers */
 
-int main() {
-    int n,t, reverse = 0;
-    n = 12321;
-    t = n;
-    while (t != 0) {
-        reverse = reverse * 10;
-        reverse = reverse + t % 10;
-        t = t / 10;
+int gcd (int x, int y) {
+    int g = y;
+    while (x > 0) {
+        g = x;
+	    x = y - (y/x) * x;
+	    y = g;
     }
-    assert n == reverse;
-    return 0;
+    return g;
+}
+
+void main() {
+    int a = 198, b;
+    b = 36;
+    assert gcd(a, b) == 18;
+    return;
 }
