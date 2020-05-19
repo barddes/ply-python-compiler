@@ -411,8 +411,13 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_ExprList(self, node: ExprList):
+        children = []
         for i, c in node.children():
             self.visit(c)
+            children.append(c)
+
+        node.node_info = children[-1].node_info
+        node.gen_location = children[-1].gen_location
 
     def visit_For(self, node: For):
         begin_loop = self.new_temp()

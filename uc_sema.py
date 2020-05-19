@@ -461,10 +461,15 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_ExprList(self, node: ExprList):
+        children = []
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
             self.visit(d)
+            children.append(d)
+
+        node.node_info = children[-1].node_info
 
     def visit_For(self, node: For):
         node.env = Environment(merge_with=node.env)

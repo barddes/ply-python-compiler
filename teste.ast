@@ -1,67 +1,40 @@
 Program: 
     FuncDef: 
-        Type: ['int']   @ 3:1
-        Decl: ID(name='gcd'  )
-            FuncDecl: 
-                ParamList: 
-                    Decl: ID(name='x'  )
-                        VarDecl: 
-                            Type: ['int']   @ 3:10
-                    Decl: ID(name='y'  )
-                        VarDecl: 
-                            Type: ['int']   @ 3:17
-                VarDecl: 
-                    Type: ['int']   @ 3:1
-        Compound:    @ 3:1
-            Decl: ID(name='g'  )
-                VarDecl: 
-                    Type: ['int']   @ 4:5
-                ID: y   @ 4:13
-            While:    @ 5:5
-                BinaryOp: >   @ 5:12
-                    ID: x   @ 5:12
-                    Constant: int, 0   @ 5:16
-                Compound:    @ 5:1
-                    Assignment: =   @ 6:9
-                        ID: g   @ 6:9
-                        ID: x   @ 6:13
-                    Assignment: =   @ 7:6
-                        ID: x   @ 7:6
-                        BinaryOp: -   @ 7:10
-                            ID: y   @ 7:10
-                            BinaryOp: *   @ 7:15
-                                BinaryOp: /   @ 7:15
-                                    ID: y   @ 7:15
-                                    ID: x   @ 7:17
-                                ID: x   @ 7:22
-                    Assignment: =   @ 8:6
-                        ID: y   @ 8:6
-                        ID: g   @ 8:10
-            Return:    @ 10:5
-                ID: g   @ 10:12
-    FuncDef: 
-        Type: ['void']   @ 13:1
+        Type: ['int']   @ 1:1
         Decl: ID(name='main'  )
             FuncDecl: 
                 VarDecl: 
-                    Type: ['void']   @ 13:1
-        Compound:    @ 13:1
+                    Type: ['int']   @ 1:1
+        Compound:    @ 1:1
             Decl: ID(name='a'  )
                 VarDecl: 
-                    Type: ['int']   @ 14:5
-                Constant: int, 198   @ 14:13
+                    Type: ['int']   @ 2:5
+                Constant: int, 1   @ 2:13
             Decl: ID(name='b'  )
                 VarDecl: 
-                    Type: ['int']   @ 14:5
-            Assignment: =   @ 15:5
-                ID: b   @ 15:5
-                Constant: int, 36   @ 15:9
-            Assert:    @ 16:5
-                BinaryOp: ==   @ 16:12
-                    FuncCall:    @ 16:12
-                        ID: gcd   @ 16:12
-                        ExprList: 
-                            ID: a   @ 16:16
-                            ID: b   @ 16:19
-                    Constant: int, 18   @ 16:25
-            Return:    @ 17:5
+                    Type: ['int']   @ 2:5
+                Constant: int, 0   @ 2:20
+            If:    @ 4:5
+                ExprList: 
+                    BinaryOp: ==   @ 4:8
+                        ID: a   @ 4:8
+                        ID: a   @ 4:13
+                    BinaryOp: ==   @ 4:16
+                        ID: b   @ 4:16
+                        ID: a   @ 4:21
+                Print:    @ 5:8
+                    Constant: string, "success\n"   @ 5:14
+                Print:    @ 7:8
+                    Constant: string, "fail\n"   @ 7:14
+            If:    @ 9:5
+                ExprList: 
+                    BinaryOp: ==   @ 9:8
+                        ID: b   @ 9:8
+                        ID: a   @ 9:13
+                    BinaryOp: ==   @ 9:16
+                        ID: a   @ 9:16
+                        ID: a   @ 9:21
+                Print:    @ 10:8
+                    Constant: string, "success\n"   @ 10:14
+                Print:    @ 12:8
+                    Constant: string, "fail"   @ 12:14
