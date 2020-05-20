@@ -1,11 +1,12 @@
-int a(int b, int v);
+int n = 3;
 
-int main() {
-    print(a(7, 3));
-    return a(0, 3);
+int doubleMe (int x) {
+    return x * x;
 }
 
-
-int a(int b) {
-    return b;
+void main () {
+    int v = n;
+    v = doubleMe (v);
+    assert v == n * n;
+    return 0;
 }

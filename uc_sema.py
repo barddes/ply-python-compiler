@@ -443,6 +443,11 @@ class Visitor(NodeVisitor):
 
         if info['func'] and name not in list(map(lambda x: x['name'], node.global_env.functions)):
             node.global_env.add_local_var(name, info)
+
+            node.global_env.functions.append({
+                'name': node.decl.name.name,
+                'node': node
+            })
         node.env.add_local_var(name, info)
 
         node.node_info = info
@@ -517,11 +522,6 @@ class Visitor(NodeVisitor):
         node.node_info['params'] = None
 
     def visit_FuncDecl(self, node: FuncDecl):
-        node.global_env.functions.append({
-            'name': node.decl.name.name,
-            'node': node
-        })
-
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
