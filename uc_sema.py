@@ -8,8 +8,8 @@ from uc_parser import UCParser
 
 def print_error(*args):
     msg = ' '.join([str(x) for x in args])
-    assert False, msg
-    # print(msg, file=sys.stderr)
+    # assert False, msg
+    print(msg, file=sys.stderr)
 
 
 class uCType(object):
@@ -199,6 +199,7 @@ class Environment(object):
         # self.stack.append(self.symtab)
         self.consts = []
         self.vars = []
+        self.functions = []
 
         if merge_with:
             self.func_def = merge_with.func_def
@@ -417,17 +418,30 @@ class Visitor(NodeVisitor):
             self.visit(d)
 
     def visit_Decl(self, node: Decl):
-        for i, d in node.children():
-            d.env = node.env
-            d.global_env = node.global_env
-            self.visit(d)
+        if node.decl:
+            func_names = list(map(lambda x: x['name'], node.global_env.functions))
+            if node.decl.name.name in func_names:
+                if not self.compare_func_decl(node.decl,
+                                              node.global_env.functions[func_names.index(node.decl.name.name)]['node']):
+                    print_error('Error. function definition does not match the function declaration')
+                else:
+                    node.decl = node.global_env.functions[func_names.index(node.decl.name.name)]['node']
+            else:
+                node.decl.env = node.env
+                node.decl.global_env = node.global_env
+                self.visit(node.decl)
+
+        if node.init:
+            node.init.env = node.env
+            node.init.global_env = node.global_env
+            self.visit(node.init)
 
         name = node.name.name
         if isinstance(name, VarDecl):
             name = name.name
         info = node.decl.node_info
 
-        if info['func']:
+        if info['func'] and name not in list(map(lambda x: x['name'], node.global_env.functions)):
             node.global_env.add_local_var(name, info)
         node.env.add_local_var(name, info)
 
@@ -503,6 +517,11 @@ class Visitor(NodeVisitor):
         node.node_info['params'] = None
 
     def visit_FuncDecl(self, node: FuncDecl):
+        node.global_env.functions.append({
+            'name': node.decl.name.name,
+            'node': node
+        })
+
         for i, d in node.children():
             d.env = node.env
             d.global_env = node.global_env
@@ -726,6 +745,31 @@ class Visitor(NodeVisitor):
 
         if node.expr.node_info['type'] != BoolType:
             print_error('Error. While expression must evaluate a BoolType')
+
+    def compare_func_decl(self, decl1, decl2):
+        try:
+            if decl1.decl.name.name != decl2.decl.name.name:
+                return False
+
+            if decl1.type.name[0] != decl2.type.name[0]:
+                return False
+
+            param1 = list(map(lambda x: {
+                'name': x.decl.name.name,
+                'type': x.decl.type.name[0]
+            }, decl1.init.list))
+
+            param2 = list(map(lambda x: {
+                'name': x.decl.name.name,
+                'type': x.decl.type.name[0]
+            }, decl2.init.list))
+
+            if param1 != param2:
+                return False
+
+            return True
+        except:
+            return False
 
 
 if __name__ == '__main__':
