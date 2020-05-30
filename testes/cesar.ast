@@ -1,21 +1,6 @@
-Program: 
-    FuncDef: 
-        Type: [type[int]]   @ 1:1
-        Decl: ID(name'main'  )
-            FuncDecl: 
-                VarDecl: ID(name'main'  )
-                    Type: [type[int]]   @ 1:1
-        Compound:    @ 1:12
-            Decl: ID(name'r'  )   @ 2:9
-                PtrDecl: *   @ 2:9
-                    PtrDecl: *   @ 2:8
-                        VarDecl: ID(name'r'  )
-                            Type: [type[ptr], type[ptr], type[int]]   @ 2:4
-            Decl: ID(name'cesar'  )   @ 3:10
-                PtrDecl: *   @ 3:10
-                    PtrDecl: *   @ 3:9
-                        PtrDecl: *   @ 3:8
-                            VarDecl: ID(name'cesar'  )
-                                Type: [type[ptr], type[ptr], type[ptr], type[int]]   @ 3:4
-            Return:    @ 5:4
-                Constant: int, 0   @ 5:11
+Func
+If
+While
+Assert
+Break
+For

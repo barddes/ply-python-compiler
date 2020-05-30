@@ -4,6 +4,59 @@ from objects import Program, BinaryOp, Assignment, ArrayDecl, ArrayRef, Assert, 
 from uc_sema import NodeVisitor, StringType, CharType, VoidType
 
 
+# An example of how to create basic blocks
+
+class Block(object):
+    def __init__(self, label):
+        self.label = label  # Label that identifies the block
+        self.instructions = []  # Instructions in the block
+        self.predecessors = []  # List of predecessors
+        self.next_block = None  # Link to the next block
+
+    def append(self, instr):
+        self.instructions.append(instr)
+
+    def __iter__(self):
+        return iter(self.instructions)
+
+
+class BasicBlock(Block):
+    '''
+    Class for a simple basic block.  Control flow unconditionally
+    flows to the next block.
+    '''
+
+    def __init__(self, label):
+        super(BasicBlock, self).__init__(label)
+        self.branch = None  # Not necessary the same as next_block in the linked list
+
+
+class ConditionBlock(Block):
+    """
+    Class for a block representing an conditional statement.
+    There are two branches to handle each possibility.
+    """
+
+    def __init__(self, label):
+        super(ConditionBlock, self).__init__(label)
+        self.taken = None
+        self.fall_through = None
+
+
+class BlockVisitor(object):
+    '''
+    Class for visiting basic blocks.  Define a subclass and define
+    methods such as visit_BasicBlock or visit_IfBlock to implement
+    custom processing (similar to ASTs).
+    '''
+
+    def visit(self, block):
+        while isinstance(block, Block):
+            name = "visit_%s" % type(block).__name__
+            if hasattr(self, name):
+                getattr(self, name)(block)
+            block = block.next_block
+
 class GenerateCode(NodeVisitor):
     unary_ops = {
         '+': '',
@@ -169,8 +222,6 @@ class GenerateCode(NodeVisitor):
             var_loc = node.lookup_envs(node.expr1.name)['location']
             self.code.append(('store_%s' % node_t, nt2, var_loc))
             node.gen_location = node.expr1.gen_location
-
-        # {'--', '++', 'p--', 'p++', *, &}
 
     def get_const_type(self, const):
         if type(const) == list:
