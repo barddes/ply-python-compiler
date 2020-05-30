@@ -1,12 +1,18 @@
-int n = 3;
+int z = 3, t =4;
 
-int doubleMe (int x) {
-    return x * x;
+int g (int t) {
+ int x;
+ t *= 2;
+ x = 2*t;
+ z = x+1;
+ return x;
 }
 
-void main () {
-    int v = n;
-    v = doubleMe (v);
-    assert v == n * n;
+int main(){
+    int i, j, k;
+    i = g(t);
+    j = g(z);
+    k = g(t+z);
+    assert i == 16 && j == 68 && k == 292;
     return 0;
 }
