@@ -66,7 +66,7 @@ class Node(object):
     just enough space in each instance to hold a value for each variable.
     Space is saved because __dict__ is not created for each instance.
     """
-    __slots__ = ('node_info', 'env', 'global_env', 'gen_location', 'assign_left')
+    __slots__ = ('node_info', 'env', 'global_env', 'gen_location', 'assign_left', 'cfg')
 
     def __init__(self, node_info: NodeInfo = None, env=None, global_env=None, gen_location=None):
         self.node_info = node_info
@@ -74,6 +74,7 @@ class Node(object):
         self.global_env = global_env
         self.gen_location = gen_location
         self.assign_left = None
+        self.cfg = None
 
     def lookup_envs(self, symbol):
         if self.env.lookup(symbol):
