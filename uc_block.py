@@ -595,12 +595,16 @@ class GenerateCode(NodeVisitor):
 
         final_ret = self.new_temp()
 
-        self.current_block.append((node.end_jump[1:],))
+        self.ret_block.append((node.end_jump[1:],))
         if node.type.name[0] != 'void':
-            self.current_block.append(('load_%s' % node.type.name[0], ret, final_ret))
-            self.current_block.append(('return_%s' % node.type.name[0], final_ret))
+            self.ret_block.append(('load_%s' % node.type.name[0], ret, final_ret))
+            self.ret_block.append(('return_%s' % node.type.name[0], final_ret))
         else:
-            self.current_block.append(('return_%s' % node.type.name[0],))
+            self.ret_block.append(('return_%s' % node.type.name[0],))
+
+        self.current_block.next_block = self.ret_block
+
+
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         pass
