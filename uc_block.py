@@ -604,8 +604,6 @@ class GenerateCode(NodeVisitor):
 
         self.current_block.next_block = self.ret_block
 
-
-
     def visit_GlobalDecl(self, node: GlobalDecl):
         pass
 
@@ -614,22 +612,40 @@ class GenerateCode(NodeVisitor):
         end_if = self.new_temp()
         end_elze = self.new_temp()
 
+        conditional_block = ConditionBlock('if')
+        self.current_block.next = conditional_block
+        self.current_block = conditional_block
+
+        current_block = self.current_block
+        if_block = BasicBlock(self.make_label('if.then'))
+        else_block = BasicBlock(self.make_label('if.else'))
+        end_block = BasicBlock(self.make_label('if.end'))
+
         if node.expr:
             self.visit(node.expr)
 
         self.current_block.append(('cbranch', node.expr.gen_location, begin_if, end_if))
         if node.then:
+            conditional_block.taken = if_block
+            self.current_block = if_block
             self.current_block.append((begin_if[1:],))
             self.visit(node.then)
 
-        if node.elze:
-            self.current_block.append(('jump', end_elze))
+            if node.elze:
+                self.current_block.append(('jump', end_elze))
 
         self.current_block.append((end_if[1:],))
 
         if node.elze:
+            conditional_block.fall_through = else_block
+            self.current_block = else_block
             self.visit(node.elze)
             self.current_block.append((end_elze[1:],))
+
+        current_block.next = if_block
+        if_block.next_block = else_block
+        else_block.next_block = end_block
+        self.current_block = end_block
 
     def visit_ID(self, node: ID):
         node_info = node.lookup_envs(node.name)
