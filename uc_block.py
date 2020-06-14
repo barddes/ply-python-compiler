@@ -608,52 +608,52 @@ class GenerateCode(NodeVisitor):
         node.gen_location = children[-1].gen_location
 
     def visit_For(self, node: For):
-        begin_loop = self.make_label('for.cond')
-        begin_statement = self.make_label('for.body')
-        end_loop = self.make_label('for.end')
+        cond_label = self.make_label('for.cond')
+        inc_label = self.make_label('for.inc')
+        body_label = self.make_label('for.body')
+        end_label = self.make_label('for.end')
 
         current_block = self.current_block
-        condition_block = ConditionBlock(begin_loop)
-        body_block = BasicBlock(begin_statement)
-        end_block = BasicBlock(end_loop)
+        condition_block = ConditionBlock(cond_label)
+        inc_block = BasicBlock(inc_label)
+        body_block = BasicBlock(body_label)
+        end_block = BasicBlock(end_label)
 
         self.loop_stack.append({
-            'target': end_loop,
+            'target': end_label,
             'block': end_block
         })
-
-        current_block.next_block = condition_block
-        condition_block.next_block = body_block
-        body_block.next_block = end_block
-
-        condition_block.predecessors.append(current_block)
-        condition_block.predecessors.append(body_block)
-        body_block.predecessors.append(condition_block)
-        end_block.predecessors.append(condition_block)
 
         if node.p1:
             self.visit(node.p1)
 
+        self.current_block.next_block = condition_block
         self.current_block.branch = condition_block
         self.current_block = condition_block
-        self.current_block.append((begin_loop[1:],))
+        self.current_block.append((cond_label[1:],))
         self.visit(node.p2)
-        self.current_block.append(('cbranch', node.p2.gen_location, begin_statement, end_loop))
+        self.current_block.append(('cbranch', node.p2.gen_location, body_label, end_label))
         self.current_block.taken = body_block
         self.current_block.fall_through = end_block
 
+        self.current_block.next_block = body_block
         self.current_block = body_block
-        self.current_block.append((begin_statement[1:],))
+        self.current_block.append((body_label[1:],))
         if node.statement:
             self.visit(node.statement)
+        self.current_block.append(('jump', inc_label))
+
+        self.current_block.next_block = inc_block
+        self.current_block.branch = inc_block
+        self.current_block = inc_block
         if node.p3:
             self.visit(node.p3)
-        self.current_block.append(('jump', begin_loop))
+        self.current_block.append(('jump', cond_label))
         self.current_block.branch = condition_block
 
         self.current_block.next_block = end_block
         self.current_block = end_block
-        self.current_block.append((end_loop[1:],))
+        self.current_block.append((end_label[1:],))
 
         self.loop_stack.pop(-1)
 

@@ -6,45 +6,38 @@ Program:
                 VarDecl: 
                     Type: ['int']   @ 1:1
         Compound:    @ 1:1
+            Decl: ID(name='i'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
+                Constant: int, 3   @ 2:13
             Decl: ID(name='n'  )
                 VarDecl: 
                     Type: ['int']   @ 2:5
-                Constant: int, 1   @ 2:13
-            Decl: ID(name='reverse'  )
-                VarDecl: 
-                    Type: ['int']   @ 2:5
-                Constant: int, 0   @ 2:26
-            Decl: ID(name='rem'  )
-                VarDecl: 
-                    Type: ['int']   @ 2:5
-            Assignment: +=   @ 3:5
-                ID: n   @ 3:5
-                Constant: int, 17327   @ 3:10
-            While:    @ 4:5
-                BinaryOp: >   @ 4:12
-                    ID: n   @ 4:12
-                    Constant: int, 0   @ 4:16
-                Compound:    @ 4:1
-                    Assignment: =   @ 5:9
-                        ID: rem   @ 5:9
-                        BinaryOp: %   @ 5:15
-                            ID: n   @ 5:15
-                            Constant: int, 10   @ 5:19
-                    Assignment: =   @ 6:9
-                        ID: reverse   @ 6:9
-                        BinaryOp: +   @ 6:19
-                            BinaryOp: *   @ 6:19
-                                ID: reverse   @ 6:19
-                                Constant: int, 10   @ 6:29
-                            ID: rem   @ 6:34
-                    Assignment: =   @ 7:9
-                        ID: n   @ 7:9
-                        BinaryOp: /   @ 7:13
-                            ID: n   @ 7:13
-                            Constant: int, 10   @ 7:17
-            Assert:    @ 9:5
-                BinaryOp: ==   @ 9:12
-                    ID: reverse   @ 9:12
-                    Constant: int, 82371   @ 9:23
-            Return:    @ 10:5
-                Constant: int, 0   @ 10:12
+                Constant: int, 6   @ 2:20
+            For:    @ 3:5
+                DeclList:    @ 3:5
+                    Decl: ID(name='k'  )
+                        VarDecl: 
+                            Type: ['int']   @ 3:10
+                        Constant: int, 1   @ 3:18
+                BinaryOp: <   @ 3:21
+                    ID: k   @ 3:21
+                    ID: n   @ 3:25
+                UnaryOp: p++   @ 3:28
+                    ID: k   @ 3:28
+                Compound:    @ 3:1
+                    If:    @ 4:9
+                        BinaryOp: >=   @ 4:13
+                            ID: i   @ 4:13
+                            ID: n   @ 4:18
+                        Compound:    @ 4:1
+                            Break: 
+                        Compound:    @ 7:1
+                            UnaryOp: p++   @ 8:13
+                                ID: i   @ 8:13
+            Assert:    @ 11:5
+                BinaryOp: ==   @ 11:12
+                    ID: i   @ 11:12
+                    ID: n   @ 11:17
+            Return:    @ 12:5
+                Constant: int, 0   @ 12:12

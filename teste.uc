@@ -1,11 +1,13 @@
 int main() {
-    int n = 1, reverse = 0, rem;
-    n += 17327;
-    while (n > 0) {
-        rem = n % 10;
-        reverse = reverse * 10 + rem;
-        n = n / 10;
+    int i = 3, n = 6;
+    for (int k = 1; k < n; k++) {
+        if (i >= n) {
+            break;
+        }
+        else {
+            i++;
+        }
     }
-    assert reverse == 82371;
+    assert i == n;
     return 0;
 }
