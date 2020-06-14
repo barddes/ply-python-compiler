@@ -792,65 +792,58 @@ class GenerateCode(NodeVisitor):
         pass
 
     def visit_If(self, node: If):
-        begin_if = self.make_label('if.then')
-        if node.elze:
-            begin_else = self.make_label('if.else')
-        end_if = self.make_label('if.end')
-
         self.changeCurrentBlock()
 
+        then_label = self.make_label('if.then')
+        then_block = BasicBlock(then_label)
+
+        if node.elze:
+            else_label = self.make_label('if.else')
+            else_block = BasicBlock(else_label)
+
+        end_label = self.make_label('if.end')
+        end_block = BasicBlock(end_label)
+
         current_block = self.current_block
-
-        if_block = BasicBlock(begin_if)
-        if node.elze:
-            else_block = BasicBlock(begin_else)
-        end_block = BasicBlock(end_if)
-
-        if_block.predecessors.append(current_block)
-        if node.elze:
-            else_block.predecessors.append(current_block)
-            end_block.predecessors.append(else_block)
-        else:
-            end_block.predecessors.append(current_block)
-        end_block.predecessors.append(if_block)
-
-        current_block.next_block = if_block
-        if node.elze:
-            if_block.next_block = else_block
-            else_block.next_block = end_block
-        else:
-            if_block.next_block = end_block
 
         if node.expr:
             self.visit(node.expr)
 
         if node.elze:
-            self.current_block.append(('cbranch', node.expr.gen_location, begin_if, begin_else))
+            self.current_block.append(('cbranch', node.expr.gen_location, then_label, else_label))
             self.current_block.fall_through = else_block
         else:
-            self.current_block.append(('cbranch', node.expr.gen_location, begin_if, end_if))
+            self.current_block.append(('cbranch', node.expr.gen_location, then_label, end_label))
             self.current_block.fall_through = end_block
-        self.current_block.taken = if_block
+
+        self.current_block.taken = then_block
 
         if node.then:
-            self.current_block = if_block
-            self.current_block.append((begin_if[1:],))
+            self.current_block.next_block = then_block
+            then_block.predecessors.append(current_block)
+            self.current_block = then_block
+            self.current_block.append((then_label[1:],))
             self.current_block.branch = end_block
             self.visit(node.then)
 
             if node.elze and self.current_block.instructions[-1][0] != 'jump':
-                self.current_block.append(('jump', end_if))
+                self.current_block.append(('jump', end_label))
 
         if node.elze:
+            self.current_block.next_block = else_block
+            else_block.predecessors.append(current_block)
             self.current_block = else_block
-            self.current_block.append((end_if[1:],))
+            self.current_block.append((end_label[1:],))
             self.current_block.branch = end_block
             self.visit(node.elze)
         else:
+            end_block.predecessors.append(self.current_block)
             current_block.fall_through = end_block
 
+        self.current_block.next_block = end_block
+        end_block.predecessors.append(self.current_block)
         self.current_block = end_block
-        self.current_block.append((end_if[1:],))
+        self.current_block.append((end_label[1:],))
 
 
     def visit_ID(self, node: ID):

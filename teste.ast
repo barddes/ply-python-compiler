@@ -6,29 +6,38 @@ Program:
                 VarDecl: 
                     Type: ['int']   @ 1:1
         Compound:    @ 1:1
-            Decl: ID(name='x'  )
+            Decl: ID(name='i'  )
                 VarDecl: 
                     Type: ['int']   @ 2:5
-            Decl: ID(name='y'  )
+                Constant: int, 3   @ 2:13
+            Decl: ID(name='n'  )
                 VarDecl: 
                     Type: ['int']   @ 2:5
-            Assignment: =   @ 3:5
-                ID: x   @ 3:5
-                Constant: int, 1   @ 3:9
-            Assignment: =   @ 4:5
-                ID: y   @ 4:5
-                Constant: int, 1   @ 4:9
-            Print:    @ 5:5
-                ID: x   @ 5:11
-            If:    @ 6:5
-                BinaryOp: >   @ 6:9
-                    ID: y   @ 6:9
-                    Constant: int, 1   @ 6:13
-                Compound:    @ 6:1
-                    Assignment: =   @ 7:9
-                        ID: x   @ 7:9
-                        Constant: int, 2   @ 7:13
-            Print:    @ 9:5
-                ID: x   @ 9:11
-            Return:    @ 10:5
-                Constant: int, 0   @ 10:12
+                Constant: int, 6   @ 2:20
+            For:    @ 3:5
+                DeclList:    @ 3:5
+                    Decl: ID(name='k'  )
+                        VarDecl: 
+                            Type: ['int']   @ 3:10
+                        Constant: int, 1   @ 3:18
+                BinaryOp: <   @ 3:21
+                    ID: k   @ 3:21
+                    ID: n   @ 3:25
+                UnaryOp: p++   @ 3:28
+                    ID: k   @ 3:28
+                Compound:    @ 3:1
+                    If:    @ 4:9
+                        BinaryOp: >=   @ 4:13
+                            ID: i   @ 4:13
+                            ID: n   @ 4:18
+                        Compound:    @ 4:1
+                            Break: 
+                        Compound:    @ 7:1
+                            UnaryOp: p++   @ 8:13
+                                ID: i   @ 8:13
+            Assert:    @ 11:5
+                BinaryOp: ==   @ 11:12
+                    ID: i   @ 11:12
+                    ID: n   @ 11:17
+            Return:    @ 12:5
+                Constant: int, 0   @ 12:12

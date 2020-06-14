@@ -1,11 +1,13 @@
-int main () {
-    int x, y;
-    x = 1;
-    y = 1;
-    print(x);
-    if (y > 1) {
-        x = 2;
+int main() {
+    int i = 3, n = 6;
+    for (int k = 1; k < n; k++) {
+        if (i >= n) {
+            break;
+        }
+        else {
+            i++;
+        }
     }
-    print(x);
+    assert i == n;
     return 0;
 }
