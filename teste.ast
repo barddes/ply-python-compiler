@@ -19,6 +19,11 @@ Program:
                         VarDecl: 
                             Type: ['int']   @ 3:9
                         Constant: int, 0   @ 3:17
-            Assignment: =   @ 5:5
-                ID: b   @ 5:5
-                Constant: int, 2   @ 5:9
+                Compound:    @ 5:1
+                    Decl: ID(name='b'  )
+                        VarDecl: 
+                            Type: ['int']   @ 6:9
+                        Constant: int, 0   @ 6:17
+            Assignment: =   @ 8:5
+                ID: b   @ 8:5
+                Constant: int, 2   @ 8:9
