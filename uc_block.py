@@ -931,37 +931,41 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_While(self, node: While):
-        begin_loop = self.make_label('while.cond')
-        begin_statement = self.make_label('while.body')
-        end_loop = self.make_label('while.end')
+        cond_label = self.make_label('while.cond')
+        body_label = self.make_label('while.body')
+        end_label = self.make_label('while.end')
 
         current_block = self.current_block
-        condition_block = ConditionBlock(begin_loop)
-        body_block = BasicBlock(begin_statement)
-        end_block = BasicBlock(end_loop)
+        condition_block = ConditionBlock(cond_label)
+        body_block = BasicBlock(body_label)
+        end_block = BasicBlock(end_label)
 
         self.loop_stack.append({
-            'target': end_loop,
+            'target': end_label,
             'block': end_block
         })
 
         self.current_block.branch = condition_block
+        condition_block.predecessors.append(self.current_block)
         self.current_block = condition_block
-        self.current_block.append((begin_loop[1:],))
+        self.current_block.append((cond_label[1:],))
         self.visit(node.expr)
-        self.current_block.append(('cbranch', node.expr.gen_location, begin_statement, end_loop))
+        self.current_block.append(('cbranch', node.expr.gen_location, body_label, end_label))
+        body_block.predecessors.append(self.current_block)
+        end_block.predecessors.append(self.current_block)
         self.current_block.taken = body_block
         self.current_block.fall_through = end_block
 
         if node.statement:
             self.current_block = body_block
             self.current_block.branch = condition_block
-            self.current_block.append((begin_statement[1:],))
+            self.current_block.append((body_label[1:],))
             self.visit(node.statement)
-            self.current_block.append(('jump', begin_loop))
+            self.current_block.append(('jump', cond_label))
+            condition_block.predecessors.append(self.current_block)
 
         self.current_block = end_block
-        self.current_block.append((end_loop[1:],))
+        self.current_block.append((end_label[1:],))
 
         current_block.next_block = condition_block
         condition_block.next_block = body_block
