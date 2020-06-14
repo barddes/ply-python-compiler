@@ -613,7 +613,6 @@ class GenerateCode(NodeVisitor):
         body_label = self.make_label('for.body')
         end_label = self.make_label('for.end')
 
-        current_block = self.current_block
         condition_block = ConditionBlock(cond_label)
         inc_block = BasicBlock(inc_label)
         body_block = BasicBlock(body_label)
