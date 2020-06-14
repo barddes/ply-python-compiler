@@ -1,11 +1,15 @@
 int main() {
-    int n = 1, reverse = 0, rem;
-    n += 17327;
-    while (n > 0) {
-        rem = n % 10;
-        reverse = reverse * 10 + rem;
-        n = n / 10;
+    int x =2, y, z;
+    y = ++x;
+    z = x++;
+    assert y == 3 && z == 3;
+    if(x==x){
+        print(x);
+        for(int k = 0; k < 10; k++)
+            print(k);
     }
-    assert reverse == 82371;
+    else{
+        print(y);
+    }
     return 0;
 }

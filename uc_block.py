@@ -825,9 +825,11 @@ class GenerateCode(NodeVisitor):
             self.current_block.append((then_label[1:],))
             self.current_block.branch = end_block
             self.visit(node.then)
+            # end_block.predecessors.append(self.current_block)
 
             if node.elze and self.current_block.instructions[-1][0] != 'jump':
                 self.current_block.append(('jump', end_label))
+                self.current_block.branch = end_block
 
         if node.elze:
             self.current_block.next_block = else_block
