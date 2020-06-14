@@ -592,14 +592,19 @@ class GenerateCode(NodeVisitor):
         node.gen_location = children[-1].gen_location
 
     def visit_For(self, node: For):
-        begin_loop = self.new_temp()
-        begin_statement = self.new_temp()
-        end_loop = self.new_temp()
+
+        label_begin_loop = self.new_temp()
+        label_begin_statement = self.new_temp()
+        label_end_loop = self.new_temp()
+
+        begin_loop = label_begin_loop
+        begin_statement = label_begin_statement
+        end_loop = label_end_loop
 
         current_block = self.current_block
-        condition_block = ConditionBlock(self.make_label('for.cond'))
-        body_block = BasicBlock(self.make_label('for.body'))
-        end_block = BasicBlock(self.make_label('for.end'))
+        condition_block = ConditionBlock(label_begin_statement)
+        body_block = BasicBlock(label_begin_loop)
+        end_block = BasicBlock(label_end_loop)
 
         self.loop_stack.append({
             'target': end_loop,
@@ -737,18 +742,21 @@ class GenerateCode(NodeVisitor):
 
     def visit_If(self, node: If):
         label_begin_if = self.make_label('if.then')
+        label_end_if = self.make_label('if.else')
+        label_end_elze = self.make_label('if.end')
+
 
         begin_if = label_begin_if
-        end_if = self.new_temp()
-        end_elze = self.new_temp()
+        end_if = label_end_if
+        end_elze = label_end_elze
 
         self.changeCurrentBlock()
 
         current_block = self.current_block
 
         if_block = BasicBlock(label_begin_if)
-        else_block = BasicBlock(self.make_label('if.else'))
-        end_block = BasicBlock(self.make_label('if.end'))
+        else_block = BasicBlock(label_end_if)
+        end_block = BasicBlock(label_end_elze)
 
         if_block.predecessors.append(current_block)
         else_block.predecessors.append(current_block)
@@ -871,14 +879,20 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_While(self, node: While):
-        begin_loop = self.new_temp()
-        begin_statement = self.new_temp()
-        end_loop = self.new_temp()
+
+        label_begin_loop = self.make_label('while.body')
+        label_begin_statement = self.make_label('while.cond')
+        label_end_loop = self.make_label('while.end')
+
+        begin_loop = label_begin_loop
+        begin_statement = label_begin_statement
+        end_loop = label_end_loop
+
 
         current_block = self.current_block
-        condition_block = ConditionBlock(self.make_label('while.cond'))
-        body_block = BasicBlock(self.make_label('while.body'))
-        end_block = BasicBlock(self.make_label('while.end'))
+        condition_block = ConditionBlock(label_begin_statement)
+        body_block = BasicBlock(label_begin_loop)
+        end_block = BasicBlock(label_end_loop)
 
         self.loop_stack.append({
             'target': end_loop,
