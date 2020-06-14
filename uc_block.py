@@ -13,14 +13,25 @@ class Block(object):
         self.label = label  # Label that identifies the block
         self.instructions = []  # Instructions in the block
         self.predecessors = []  # List of predecessors
-        self.next_block = None  # Link to the next block
+        self._next_block = None  # Link to the next block
         self.nodes = []
+        self.prev_block = None
 
     def append(self, instr):
         self.instructions.append(instr)
 
     def __iter__(self):
         return iter(self.instructions)
+
+    @property
+    def next_block(self):
+        return self._next_block
+
+    @next_block.setter
+    def next_block(self, block):
+        self._next_block = block
+        if block:
+            block.prev_block = self
 
 
 class BasicBlock(Block):
@@ -205,6 +216,9 @@ class GenerateCode(NodeVisitor):
         new_block.instructions = current_block.instructions
         new_block.predecessors = current_block.predecessors
         new_block.next_block = current_block.next_block
+
+        if current_block.prev_block:
+            current_block.prev_block.next_block = new_block
 
         for b in current_block.predecessors:
             if isinstance(b, BasicBlock):
@@ -488,6 +502,7 @@ class GenerateCode(NodeVisitor):
         self.current_block.append((target_false[1:],))
         self.current_block.append(('print_string', '@.str.%d' % node.error_str))
         self.current_block.append(('jump', self.ret_block.label))
+        self.current_block.branch = self.ret_block
 
         self.current_block = true_block
         self.current_block.append((target_end[1:],))
