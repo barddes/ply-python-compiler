@@ -809,7 +809,7 @@ class GenerateCode(NodeVisitor):
             self.current_block.branch = end_block
             self.visit(node.then)
 
-            if node.elze:
+            if node.elze and self.current_block.instructions[-1][0] != 'jump':
                 self.current_block.append(('jump', end_if))
 
         if node.elze:

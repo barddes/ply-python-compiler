@@ -1,44 +1,86 @@
 Program: 
-    GlobalDecl: 
-        Decl: ID(name='v'  )
-            ArrayDecl: 
+    FuncDef: 
+        Type: ['int']   @ 1:1
+        Decl: ID(name='f'  )
+            FuncDecl: 
+                ParamList: 
+                    Decl: ID(name='n'  )
+                        VarDecl: 
+                            Type: ['int']   @ 1:7
+                    Decl: ID(name='k'  )
+                        VarDecl: 
+                            Type: ['int']   @ 1:14
                 VarDecl: 
                     Type: ['int']   @ 1:1
-            InitList:    @ 1:12
-                Constant: int, 1   @ 1:12
-                Constant: int, 2   @ 1:15
-                Constant: int, 3   @ 1:18
-                Constant: int, 4   @ 1:21
+        Compound:    @ 1:1
+            Decl: ID(name='p'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
+            Decl: ID(name='q'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
+            Decl: ID(name='t'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
+            If:    @ 3:5
+                BinaryOp: <   @ 3:9
+                    ID: n   @ 3:9
+                    Constant: int, 2   @ 3:13
+                Compound:    @ 3:1
+                    Assignment: =   @ 4:9
+                        ID: k   @ 4:9
+                        Constant: int, 0   @ 4:13
+                    Return:    @ 5:9
+                        ID: n   @ 5:16
+                Compound:    @ 7:1
+                    Assignment: =   @ 8:9
+                        ID: t   @ 8:9
+                        BinaryOp: +   @ 8:13
+                            FuncCall:    @ 8:13
+                                ID: f   @ 8:13
+                                ExprList: 
+                                    BinaryOp: -   @ 8:15
+                                        ID: n   @ 8:15
+                                        Constant: int, 1   @ 8:17
+                                    ID: p   @ 8:20
+                            FuncCall:    @ 8:25
+                                ID: f   @ 8:25
+                                ExprList: 
+                                    BinaryOp: -   @ 8:27
+                                        ID: n   @ 8:27
+                                        Constant: int, 2   @ 8:29
+                                    ID: q   @ 8:32
+                    Assignment: =   @ 9:9
+                        ID: k   @ 9:9
+                        BinaryOp: +   @ 9:13
+                            BinaryOp: +   @ 9:13
+                                ID: p   @ 9:13
+                                ID: q   @ 9:17
+                            Constant: int, 1   @ 9:21
+                    Return:    @ 10:9
+                        ID: t   @ 10:16
     FuncDef: 
-        Type: ['void']   @ 2:1
+        Type: ['int']   @ 14:1
         Decl: ID(name='main'  )
             FuncDecl: 
                 VarDecl: 
-                    Type: ['void']   @ 2:1
-        Compound:    @ 2:1
-            Decl: ID(name='sum'  )
+                    Type: ['int']   @ 14:1
+        Compound:    @ 14:1
+            Decl: ID(name='m'  )
                 VarDecl: 
-                    Type: ['int']   @ 3:5
-            For:    @ 4:5
-                DeclList:    @ 4:5
-                    Decl: ID(name='i'  )
-                        VarDecl: 
-                            Type: ['int']   @ 4:10
-                        Constant: int, 0   @ 4:18
-                BinaryOp: <   @ 4:21
-                    ID: i   @ 4:21
-                    Constant: int, 4   @ 4:25
-                UnaryOp: p++   @ 4:28
-                    ID: i   @ 4:28
-                Assignment: =   @ 5:9
-                    ID: sum   @ 5:9
-                    BinaryOp: +   @ 5:15
-                        ID: sum   @ 5:15
-                        ArrayRef:    @ 5:21
-                            ID: v   @ 5:21
-                            ID: i   @ 5:23
-            Assert:    @ 6:5
-                BinaryOp: ==   @ 6:12
-                    ID: sum   @ 6:12
-                    Constant: int, 10   @ 6:19
-            Return:    @ 7:5
+                    Type: ['int']   @ 15:5
+                Constant: int, 9   @ 15:13
+            Assert:    @ 16:5
+                BinaryOp: ==   @ 16:12
+                    BinaryOp: *   @ 16:12
+                        FuncCall:    @ 16:12
+                            ID: f   @ 16:12
+                            ExprList: 
+                                Constant: int, 3   @ 16:14
+                                ID: m   @ 16:17
+                        ID: m   @ 16:23
+                    BinaryOp: +   @ 16:28
+                        ID: m   @ 16:28
+                        ID: m   @ 16:32
+            Return:    @ 17:5
+                Constant: int, 0   @ 17:12
