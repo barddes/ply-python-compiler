@@ -493,7 +493,8 @@ class GenerateCode(NodeVisitor):
         current_block.next_block = true_block
 
     def visit_Break(self, node: Break):
-        self.current_block.append(('jump', self.loop_stack[-1]))
+        self.current_block.append(('jump', self.loop_stack[-1]['target']))
+        self.current_block.branch = self.loop_stack[-1]['block']
 
     def visit_Cast(self, node: Cast):
         for i, c in node.children():
@@ -595,12 +596,15 @@ class GenerateCode(NodeVisitor):
         begin_statement = self.new_temp()
         end_loop = self.new_temp()
 
-        self.loop_stack.append(end_loop)
-
         current_block = self.current_block
         condition_block = ConditionBlock(self.make_label('for.cond'))
         body_block = BasicBlock(self.make_label('for.body'))
         end_block = BasicBlock(self.make_label('for.end'))
+
+        self.loop_stack.append({
+            'target': end_loop,
+            'block': end_block
+        })
 
         current_block.next_block = condition_block
         condition_block.next_block = body_block
@@ -869,12 +873,15 @@ class GenerateCode(NodeVisitor):
         begin_statement = self.new_temp()
         end_loop = self.new_temp()
 
-        self.loop_stack.append(end_loop)
-
         current_block = self.current_block
         condition_block = ConditionBlock(self.make_label('while.cond'))
         body_block = BasicBlock(self.make_label('while.body'))
         end_block = BasicBlock(self.make_label('while.end'))
+
+        self.loop_stack.append({
+            'target': end_loop,
+            'block': end_block
+        })
 
         self.current_block = condition_block
         self.current_block.append((begin_loop[1:],))
