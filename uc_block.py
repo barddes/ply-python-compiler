@@ -736,7 +736,9 @@ class GenerateCode(NodeVisitor):
         pass
 
     def visit_If(self, node: If):
-        begin_if = self.new_temp()
+        label_begin_if = self.make_label('if.then')
+
+        begin_if = label_begin_if
         end_if = self.new_temp()
         end_elze = self.new_temp()
 
@@ -744,7 +746,7 @@ class GenerateCode(NodeVisitor):
 
         current_block = self.current_block
 
-        if_block = BasicBlock(self.make_label('if.then'))
+        if_block = BasicBlock(label_begin_if)
         else_block = BasicBlock(self.make_label('if.else'))
         end_block = BasicBlock(self.make_label('if.end'))
 
