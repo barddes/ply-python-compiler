@@ -11,7 +11,7 @@ from uc_sema import NodeVisitor, StringType, CharType, VoidType
 class Block(object):
     def __init__(self, label):
         self.label = label  # Label that identifies the block
-        self.instructions = [('LITERAL_INT', 'PARAM1', 'PARAM2')]  # Instructions in the block
+        self.instructions = []  # Instructions in the block
         self.predecessors = []  # List of predecessors
         self.next_block = None  # Link to the next block
         self.nodes = []
@@ -497,6 +497,7 @@ class GenerateCode(NodeVisitor):
     def visit_Break(self, node: Break):
         self.current_block.append(('jump', self.loop_stack[-1]['target']))
         self.current_block.branch = self.loop_stack[-1]['block']
+        self.loop_stack[-1]['block'].predecessors.append(self.current_block)
 
     def visit_Cast(self, node: Cast):
         for i, c in node.children():
@@ -545,7 +546,7 @@ class GenerateCode(NodeVisitor):
 
     def visit_Decl(self, node: Decl):
         if isinstance(node.decl, ArrayDecl):
-            target = self.new_temp()
+            target = self.make_label(node.name.name)
             self.current_block.append(('alloc_%s_%s' % (
                 node.type.name[0], '_'.join([str(x) for x in self.array_get_dim(node.node_info['params'], default=node.node_info['length'])])), target))
             node.lookup_envs(node.name.name)['location'] = target
@@ -564,13 +565,13 @@ class GenerateCode(NodeVisitor):
                 return
 
             if not node.gen_location:
-                target = self.new_temp()
+                target = self.make_label(node.name.name)
                 self.current_block.append(('alloc_%s' % node.node_info['type'], target))
                 node.gen_location = target
                 node.lookup_envs(node.decl.name.name)['location'] = target
 
         if isinstance(node.decl, PtrDecl):
-            target = self.new_temp()
+            target = self.make_label(node.name.name)
             self.current_block.append(('alloc_%s_*' % node.type.name[0], target))
             node.lookup_envs(node.name.name)['location'] = target
 
@@ -594,19 +595,14 @@ class GenerateCode(NodeVisitor):
         node.gen_location = children[-1].gen_location
 
     def visit_For(self, node: For):
-
-        label_begin_loop = self.new_temp()
-        label_begin_statement = self.new_temp()
-        label_end_loop = self.new_temp()
-
-        begin_loop = label_begin_loop
-        begin_statement = label_begin_statement
-        end_loop = label_end_loop
+        begin_loop = self.make_label('for.cond')
+        begin_statement = self.make_label('for.body')
+        end_loop = self.make_label('for.end')
 
         current_block = self.current_block
-        condition_block = ConditionBlock(label_begin_statement)
-        body_block = BasicBlock(label_begin_loop)
-        end_block = BasicBlock(label_end_loop)
+        condition_block = ConditionBlock(begin_loop)
+        body_block = BasicBlock(begin_statement)
+        end_block = BasicBlock(end_loop)
 
         self.loop_stack.append({
             'target': end_loop,
@@ -625,6 +621,7 @@ class GenerateCode(NodeVisitor):
         if node.p1:
             self.visit(node.p1)
 
+        self.current_block.branch = condition_block
         self.current_block = condition_block
         self.current_block.append((begin_loop[1:],))
         self.visit(node.p2)
@@ -639,7 +636,9 @@ class GenerateCode(NodeVisitor):
         if node.p3:
             self.visit(node.p3)
         self.current_block.append(('jump', begin_loop))
+        self.current_block.branch = condition_block
 
+        self.current_block.next_block = end_block
         self.current_block = end_block
         self.current_block.append((end_loop[1:],))
 
@@ -687,12 +686,20 @@ class GenerateCode(NodeVisitor):
 
     def visit_FuncDef(self, node: FuncDef):
         self.fname = node.decl.name.name
-        self.current_block = BasicBlock(self.fname)
-        self.current_block.append(('define', '@%s' % node.decl.name.name))
+        self.current_block = BasicBlock(None)
 
         node.cfg = self.current_block
         self.current_block.nodes.append(node)
 
+        current_block = self.current_block
+        entry_block = BasicBlock(self.make_label('entry'))
+        current_block.branch = entry_block
+        self.current_block = entry_block
+
+        current_block.next_block = entry_block
+        entry_block.predecessors.append(current_block)
+
+        self.current_block.append(('define', '@%s' % node.decl.name.name))
         params = []
         for _ in node.node_info['params']:
             params.append(self.new_temp())
@@ -708,7 +715,7 @@ class GenerateCode(NodeVisitor):
         vars = []
         if node.decl.decl.init:
             for i in node.decl.decl.init.list:
-                target = self.new_temp()
+                target = self.make_label(i.name.name)
                 vars.append(target)
                 self.current_block.append(('alloc_%s' % i.decl.type.name[0], target))
                 i.gen_location = target
@@ -729,6 +736,11 @@ class GenerateCode(NodeVisitor):
 
         final_ret = self.new_temp()
 
+        current_block = self.current_block
+        current_block.next_block = self.ret_block
+        current_block.branch = self.ret_block
+        self.current_block = self.ret_block
+
         self.ret_block.append((node.end_jump[1:],))
         if node.type.name[0] != 'void':
             self.ret_block.append(('load_%s' % node.type.name[0], ret, final_ret))
@@ -736,45 +748,47 @@ class GenerateCode(NodeVisitor):
         else:
             self.ret_block.append(('return_%s' % node.type.name[0],))
 
-        self.current_block.branch = self.ret_block
-        self.current_block.next_block = self.ret_block
-
     def visit_GlobalDecl(self, node: GlobalDecl):
         pass
 
     def visit_If(self, node: If):
-        label_begin_if = self.make_label('if.then')
-        label_end_if = self.make_label('if.else')
-        label_end_elze = self.make_label('if.end')
-
-
-        begin_if = label_begin_if
-        end_if = label_end_if
-        end_elze = label_end_elze
+        begin_if = self.make_label('if.then')
+        if node.elze:
+            begin_else = self.make_label('if.else')
+        end_if = self.make_label('if.end')
 
         self.changeCurrentBlock()
 
         current_block = self.current_block
 
-        if_block = BasicBlock(label_begin_if)
-        else_block = BasicBlock(label_end_if)
-        end_block = BasicBlock(label_end_elze)
+        if_block = BasicBlock(begin_if)
+        if node.elze:
+            else_block = BasicBlock(begin_else)
+        end_block = BasicBlock(end_if)
 
         if_block.predecessors.append(current_block)
-        else_block.predecessors.append(current_block)
+        if node.elze:
+            else_block.predecessors.append(current_block)
         end_block.predecessors.append(if_block)
         end_block.predecessors.append(end_block)
 
         current_block.next_block = if_block
-        if_block.next_block = else_block
-        else_block.next_block = end_block
+        if node.elze:
+            if_block.next_block = else_block
+            else_block.next_block = end_block
+        else:
+            if_block.next_block = end_block
 
         if node.expr:
             self.visit(node.expr)
 
-        self.current_block.append(('cbranch', node.expr.gen_location, begin_if, end_if))
+        if node.elze:
+            self.current_block.append(('cbranch', node.expr.gen_location, begin_if, begin_else))
+            self.current_block.fall_through = else_block
+        else:
+            self.current_block.append(('cbranch', node.expr.gen_location, begin_if, end_if))
+            self.current_block.fall_through = end_block
         self.current_block.taken = if_block
-        self.current_block.fall_through = else_block
 
         if node.then:
             self.current_block = if_block
@@ -783,7 +797,7 @@ class GenerateCode(NodeVisitor):
             self.visit(node.then)
 
             if node.elze:
-                self.current_block.append(('jump', end_elze))
+                self.current_block.append(('jump', end_if))
 
         if node.elze:
             self.current_block = else_block
@@ -794,7 +808,7 @@ class GenerateCode(NodeVisitor):
             current_block.fall_through = end_block
 
         self.current_block = end_block
-        self.current_block.append((end_elze[1:],))
+        self.current_block.append((end_if[1:],))
 
 
     def visit_ID(self, node: ID):
