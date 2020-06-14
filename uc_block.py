@@ -750,9 +750,22 @@ class GenerateCode(NodeVisitor):
         final_ret = self.new_temp()
 
         current_block = self.current_block
-        current_block.next_block = self.ret_block
-        current_block.branch = self.ret_block
-        self.current_block = self.ret_block
+
+        if len(current_block.instructions) > 1:
+            current_block.next_block = self.ret_block
+            current_block.branch = self.ret_block
+            self.current_block = self.ret_block
+        else:
+            for b in current_block.predecessors:
+                if isinstance(b, BasicBlock):
+                    b.branch = self.ret_block
+                else:
+                    if b.taken == current_block:
+                        b.taken = self.ret_block
+                    else:
+                        b.fall_through = self.ret_block
+
+            current_block.prev_block.next_block = self.ret_block
 
         self.ret_block.append((node.end_jump[1:],))
         if node.type.name[0] != 'void':
@@ -782,8 +795,8 @@ class GenerateCode(NodeVisitor):
         if_block.predecessors.append(current_block)
         if node.elze:
             else_block.predecessors.append(current_block)
+            end_block.predecessors.append(else_block)
         end_block.predecessors.append(if_block)
-        end_block.predecessors.append(end_block)
 
         current_block.next_block = if_block
         if node.elze:
