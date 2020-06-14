@@ -761,32 +761,19 @@ class GenerateCode(NodeVisitor):
         for i, c in node.children():
             self.visit(c)
 
+        self.current_block.append(('jump', self.ret_block.label))
+
+        self.current_block.next_block = self.ret_block
+        self.current_block.branch = self.ret_block
+        self.current_block = self.ret_block
+
         final_ret = self.new_temp()
-
-        current_block = self.current_block
-
-        if len(current_block.instructions) > 1:
-            current_block.next_block = self.ret_block
-            current_block.branch = self.ret_block
-            self.current_block = self.ret_block
-        else:
-            for b in current_block.predecessors:
-                if isinstance(b, BasicBlock):
-                    b.branch = self.ret_block
-                else:
-                    if b.taken == current_block:
-                        b.taken = self.ret_block
-                    else:
-                        b.fall_through = self.ret_block
-
-            current_block.prev_block.next_block = self.ret_block
-
-        self.ret_block.append((node.end_jump[1:],))
+        self.current_block.append((node.end_jump[1:],))
         if node.type.name[0] != 'void':
-            self.ret_block.append(('load_%s' % node.type.name[0], ret, final_ret))
-            self.ret_block.append(('return_%s' % node.type.name[0], final_ret))
+            self.current_block.append(('load_%s' % node.type.name[0], ret, final_ret))
+            self.current_block.append(('return_%s' % node.type.name[0], final_ret))
         else:
-            self.ret_block.append(('return_%s' % node.type.name[0],))
+            self.current_block.append(('return_%s' % node.type.name[0],))
 
     def visit_GlobalDecl(self, node: GlobalDecl):
         pass
@@ -845,7 +832,6 @@ class GenerateCode(NodeVisitor):
             end_block.predecessors.append(self.current_block)
             current_block.fall_through = end_block
 
-        self.current_block.append(('jump', end_label))
         self.current_block.branch = end_block
         end_block.predecessors.append(self.current_block)
         self.current_block.next_block = end_block
