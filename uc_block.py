@@ -495,8 +495,8 @@ class GenerateCode(NodeVisitor):
 
         self.visit(node.expr)
         self.current_block.append(('cbranch', node.expr.gen_location, target_end, target_false))
-        self.current_block.taken = false_block
-        self.current_block.fall_through = true_block
+        self.current_block.taken = true_block
+        self.current_block.fall_through = false_block
 
         self.current_block = false_block
         self.current_block.append((target_false[1:],))
@@ -921,26 +921,21 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_While(self, node: While):
-
-        label_begin_loop = self.make_label('while.body')
-        label_begin_statement = self.make_label('while.cond')
-        label_end_loop = self.make_label('while.end')
-
-        begin_loop = label_begin_loop
-        begin_statement = label_begin_statement
-        end_loop = label_end_loop
-
+        begin_loop = self.make_label('while.cond')
+        begin_statement = self.make_label('while.body')
+        end_loop = self.make_label('while.end')
 
         current_block = self.current_block
-        condition_block = ConditionBlock(label_begin_statement)
-        body_block = BasicBlock(label_begin_loop)
-        end_block = BasicBlock(label_end_loop)
+        condition_block = ConditionBlock(begin_loop)
+        body_block = BasicBlock(begin_statement)
+        end_block = BasicBlock(end_loop)
 
         self.loop_stack.append({
             'target': end_loop,
             'block': end_block
         })
 
+        self.current_block.branch = condition_block
         self.current_block = condition_block
         self.current_block.append((begin_loop[1:],))
         self.visit(node.expr)

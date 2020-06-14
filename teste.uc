@@ -1,18 +1,11 @@
-int f(int n, int k) {
-    int p, q, t;
-    if (n < 2) {
-        k = 0;
-        return n;
-    }
-    else {
-        t = f(n-1, p) + f(n-2, q);
-        k = p + q + 1;
-        return t;
-    }
-}
-
 int main() {
-    int m = 9;
-    assert f(3, m) *  m == m + m;
+    int n = 1, reverse = 0, rem;
+    n += 17327;
+    while (n > 0) {
+        rem = n % 10;
+        reverse = reverse * 10 + rem;
+        n = n / 10;
+    }
+    assert reverse == 82371;
     return 0;
 }
