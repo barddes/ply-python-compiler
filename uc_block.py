@@ -810,6 +810,8 @@ class GenerateCode(NodeVisitor):
         if node.elze:
             else_block.predecessors.append(current_block)
             end_block.predecessors.append(else_block)
+        else:
+            end_block.predecessors.append(current_block)
         end_block.predecessors.append(if_block)
 
         current_block.next_block = if_block

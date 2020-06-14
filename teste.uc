@@ -1,8 +1,11 @@
-int v[] = {1, 2, 3, 4};
-void main(){
-    int sum;
-    for (int i = 0; i < 4; i++)
-        sum = sum + v[i];
-    assert sum == 10;
-    return;
+int main () {
+    int x, y;
+    x = 1;
+    y = 1;
+    print(x);
+    if (y > 1) {
+        x = 2;
+    }
+    print(x);
+    return 0;
 }
