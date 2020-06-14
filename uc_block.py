@@ -1,3 +1,5 @@
+from graphviz import Digraph
+
 from objects import Program, BinaryOp, Assignment, ArrayDecl, ArrayRef, Assert, Break, Cast, Compound, Constant, \
     DeclList, Decl, EmptyStatement, ExprList, For, FuncCall, FuncDecl, FuncDef, GlobalDecl, If, ID, InitList, ParamList, \
     Print, PtrDecl, Read, Return, Type, UnaryOp, VarDecl, While, NodeInfo
@@ -9,9 +11,10 @@ from uc_sema import NodeVisitor, StringType, CharType, VoidType
 class Block(object):
     def __init__(self, label):
         self.label = label  # Label that identifies the block
-        self.instructions = []  # Instructions in the block
+        self.instructions = [('LITERAL_INT', 'PARAM1', 'PARAM2')]  # Instructions in the block
         self.predecessors = []  # List of predecessors
         self.next_block = None  # Link to the next block
+        self.nodes = []
 
     def append(self, instr):
         self.instructions.append(instr)
@@ -56,6 +59,77 @@ class BlockVisitor(object):
             if hasattr(self, name):
                 getattr(self, name)(block)
             block = block.next_block
+
+def format_instruction(t):
+    # Auxiliary method to pretty print the instructions
+    op = t[0]
+    if len(t) > 1:
+        if op == "define":
+            return f"\n{op} {t[1]}"
+        else:
+            _str = "" if op.startswith('global') else "  "
+            if op == 'jump':
+                _str += f"{op} label {t[1]}"
+            elif op == 'cbranch':
+                _str += f"{op} {t[1]} label {t[2]} label {t[3]}"
+            elif op == 'global_string':
+                _str += f"{op} {t[1]} \'{t[2]}\'"
+            elif op.startswith('return'):
+                _str += f"{op} {t[1]}"
+            else:
+                for _el in t:
+                    _str += f"{_el} "
+            return _str
+    elif op == 'print_void' or op == 'return_void':
+        return f"  {op}"
+    else:
+        return f"{op}"
+
+class CFG(object):
+
+    def __init__(self, fname):
+        self.fname = fname
+        self.g = Digraph('g', filename=fname + '.gv', node_attr={'shape': 'record'})
+
+    def visit_BasicBlock(self, block):
+        # Get the label as node name
+        _name = block.label
+        if _name:
+            # get the formatted instructions as node label
+            _label = "{" + _name + ":\l\t"
+            for _inst in block.instructions[1:]:
+                _label += format_instruction(_inst) + "\l\t"
+            _label += "}"
+            self.g.node(_name, label=_label)
+            if block.branch:
+                self.g.edge(_name, block.branch.label)
+        else:
+            # Function definition. An empty block that connect to the Entry Block
+            self.g.node(self.fname, label=None, _attributes={'shape': 'ellipse'})
+            self.g.edge(self.fname, block.next_block.label)
+
+    def visit_ConditionBlock(self, block):
+        # Get the label as node name
+        _name = block.label
+        # get the formatted instructions as node label
+        _label = "{" + _name + ":\l\t"
+        for _inst in block.instructions[1:]:
+            _label += format_instruction(_inst) + "\l\t"
+        _label +="|{<f0>T|<f1>F}}"
+        self.g.node(_name, label=_label)
+        self.g.edge(_name + ":f0", block.taken.label)
+        self.g.edge(_name + ":f1", block.fall_through.label)
+
+    def view(self, block):
+        while isinstance(block, Block):
+            name = "visit_%s" % type(block).__name__
+            if hasattr(self, name):
+                getattr(self, name)(block)
+            block = block.next_block
+        # You can use the next stmt to see the dot file
+        # print(self.g.source)
+        self.g.view()
+
 
 class GenerateCode(NodeVisitor):
     unary_ops = {
@@ -103,6 +177,7 @@ class GenerateCode(NodeVisitor):
     def __init__(self):
         self.current_block = None
         self.ret_block = None
+        self.loop_stack = []
 
         super(GenerateCode, self).__init__()
 
@@ -123,6 +198,14 @@ class GenerateCode(NodeVisitor):
         self.versions[self.fname] += 1
 
         return name
+
+    def changeCurrentBlock(self):
+        current_block = self.current_block
+        new_block = ConditionBlock(current_block.label)
+        new_block.instructions = current_block.instructions
+        new_block.predecessors = current_block.predecessors
+        new_block.next_block = current_block.next_block
+        self.current_block = new_block
 
     # You must implement visit_Nodename methods for all of the other
     # AST nodes.  In your code, you will need to make instructions
@@ -259,7 +342,7 @@ class GenerateCode(NodeVisitor):
             else:
                 inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name)
 
-            self.current_block.append(inst)
+            # self.current_block.append(inst)
             var.gen_location = '@%s' % var.decl.name.name
             node.lookup_envs(var.decl.name.name)['location'] = '@%s' % var.decl.name.name
 
@@ -268,15 +351,20 @@ class GenerateCode(NodeVisitor):
                 inst = ('global_%s' % self.get_const_type(const) + self.get_const_dim(const), '@.str.%d' % i, const)
             else:
                 inst = ('global_string', '@.str.%d' % i, const)
-            self.current_block.append(inst)
+            # self.current_block.append(inst)
 
         for i, d in node.children():
             self.visit(d)
 
-        if node.decl_list:
-            for d in node.decl_list:
-                if isinstance(d, FuncDef):
-                    self.current_block = BasicBlock()
+        # if node.decl_list:
+        #     for d in node.decl_list:
+        #         if isinstance(d, FuncDef):
+        #             self.current_block = BasicBlock()
+
+        for _decl in node.decl_list:
+            if isinstance(_decl, FuncDef):
+                dot = CFG(_decl.decl.name.name)
+                dot.view(_decl.cfg)  # _decl.cfg contains the CFG for the function
 
     def visit_Assignment(self, node: Assignment):
         if node.assign_expr:
@@ -364,24 +452,33 @@ class GenerateCode(NodeVisitor):
         node.gen_location = target
 
     def visit_Assert(self, node: Assert):
-        for i, c in node.children():
-            self.visit(c)
-
-        target_true = self.new_temp()
+        # target_true = self.new_temp()
         target_false = self.new_temp()
         target_end = self.new_temp()
 
-        self.current_block.append(('cbranch', node.expr.gen_location, target_true, target_false))
-        self.current_block.append((target_true[1:],))
-        self.current_block.append(('jump', target_end))
+        self.changeCurrentBlock()
+
+        current_block = self.current_block
+        false_block = BasicBlock(self.make_label('assert.false'))
+        true_block = BasicBlock(self.make_label('assert.true'))
+
+        self.visit(node.expr)
+        self.current_block.append(('cbranch', node.expr.gen_location, target_end, target_false))
+        self.current_block.taken = false_block
+        self.current_block.fall_through = true_block
+
+        self.current_block = false_block
         self.current_block.append((target_false[1:],))
         self.current_block.append(('print_string', '@.str.%d' % node.error_str))
         self.current_block.append(('jump', '%1'))
+
+        self.current_block = true_block
         self.current_block.append((target_end[1:],))
 
+        current_block.next_block = true_block
+
     def visit_Break(self, node: Break):
-        for i, c in node.children():
-            self.visit(c)
+        self.current_block.append(('jump', self.loop_stack[-1]))
 
     def visit_Cast(self, node: Cast):
         for i, c in node.children():
@@ -483,19 +580,39 @@ class GenerateCode(NodeVisitor):
         begin_statement = self.new_temp()
         end_loop = self.new_temp()
 
+        self.loop_stack.append(end_loop)
+
+        current_block = self.current_block
+        condition_block = ConditionBlock(self.make_label('for.cond'))
+        body_block = BasicBlock(self.make_label('for.body'))
+        end_block = BasicBlock(self.make_label('for.end'))
+
         if node.p1:
             self.visit(node.p1)
 
+        self.current_block = condition_block
         self.current_block.append((begin_loop[1:],))
         self.visit(node.p2)
         self.current_block.append(('cbranch', node.p2.gen_location, begin_statement, end_loop))
+        self.current_block.taken = body_block
+        self.current_block.fall_through = end_block
+
+        self.current_block = body_block
         self.current_block.append((begin_statement[1:],))
         if node.statement:
             self.visit(node.statement)
         if node.p3:
             self.visit(node.p3)
         self.current_block.append(('jump', begin_loop))
+
+        self.current_block = end_block
         self.current_block.append((end_loop[1:],))
+
+        current_block.next_block = condition_block
+        condition_block.next_block = body_block
+        body_block.next_block = end_block
+
+        self.loop_stack.pop(-1)
 
     def visit_FuncCall(self, node: FuncCall):
         self.visit(node.expr1)
@@ -528,22 +645,6 @@ class GenerateCode(NodeVisitor):
                 self.visit(i)
                 self.current_block.append(('param_%s' % i.node_info['type'], i.gen_location))
 
-
-
-        # if node.expr2:
-        #     # para 1 parametro
-        #     if not isinstance(node.expr2, ExprList):
-        #         node_info = node.expr2.lookup_envs(node.expr2.name)
-        #         inst = ('param_%s' % node_info['type'].typename, node.expr2.gen_location)
-        #         self.current_block.append(inst)
-        #     # para +1 parametro
-        #     else:
-        #         for child in node.expr2.list:
-        #             node_info = child.lookup_envs(child.name)
-        #             target = self.new_temp()
-        #             inst = inst = ('param_%s' % node_info['type'].typename, child.gen_location)
-        #             self.current_block.append(inst)
-
         target = self.new_temp()
         inst = inst = ('call', '@%s' % node.expr1.name, target)
         self.current_block.append(inst)
@@ -557,7 +658,9 @@ class GenerateCode(NodeVisitor):
         self.fname = node.decl.name.name
         self.current_block = BasicBlock(None)
         self.current_block.append(('define', '@%s' % node.decl.name.name))
+
         node.cfg = self.current_block
+        self.current_block.nodes.append(node)
 
         params = []
         for _ in node.node_info['params']:
@@ -602,6 +705,7 @@ class GenerateCode(NodeVisitor):
         else:
             self.ret_block.append(('return_%s' % node.type.name[0],))
 
+        self.current_block.branch = self.ret_block
         self.current_block.next_block = self.ret_block
 
     def visit_GlobalDecl(self, node: GlobalDecl):
@@ -612,11 +716,10 @@ class GenerateCode(NodeVisitor):
         end_if = self.new_temp()
         end_elze = self.new_temp()
 
-        conditional_block = ConditionBlock('if')
-        self.current_block.next = conditional_block
-        self.current_block = conditional_block
+        self.changeCurrentBlock()
 
         current_block = self.current_block
+
         if_block = BasicBlock(self.make_label('if.then'))
         else_block = BasicBlock(self.make_label('if.else'))
         end_block = BasicBlock(self.make_label('if.end'))
@@ -625,27 +728,30 @@ class GenerateCode(NodeVisitor):
             self.visit(node.expr)
 
         self.current_block.append(('cbranch', node.expr.gen_location, begin_if, end_if))
+
         if node.then:
-            conditional_block.taken = if_block
+            self.current_block.taken = if_block
             self.current_block = if_block
             self.current_block.append((begin_if[1:],))
+            self.current_block.branch = end_block
             self.visit(node.then)
 
             if node.elze:
                 self.current_block.append(('jump', end_elze))
 
-        self.current_block.append((end_if[1:],))
-
         if node.elze:
-            conditional_block.fall_through = else_block
+            self.current_block.fall_through = else_block
             self.current_block = else_block
+            self.current_block.append((end_if[1:],))
+            self.current_block.branch = end_block
             self.visit(node.elze)
-            self.current_block.append((end_elze[1:],))
 
-        current_block.next = if_block
+        self.current_block = end_block
+        self.current_block.append((end_elze[1:],))
+
+        current_block.next_block = if_block
         if_block.next_block = else_block
         else_block.next_block = end_block
-        self.current_block = end_block
 
     def visit_ID(self, node: ID):
         node_info = node.lookup_envs(node.name)
@@ -692,7 +798,6 @@ class GenerateCode(NodeVisitor):
                 self.visit(i)
                 self.current_block.append(('print_%s' % i.node_info['type'], i.gen_location))
 
-
     def visit_PtrDecl(self, node: PtrDecl):
         for i, c in node.children():
             self.visit(c)
@@ -732,19 +837,39 @@ class GenerateCode(NodeVisitor):
             self.visit(c)
 
     def visit_While(self, node: While):
-
         begin_loop = self.new_temp()
         begin_statement = self.new_temp()
         end_loop = self.new_temp()
 
+        self.loop_stack.append(end_loop)
+
+        current_block = self.current_block
+        condition_block = ConditionBlock(self.make_label('while.cond'))
+        body_block = BasicBlock(self.make_label('while.body'))
+        end_block = BasicBlock(self.make_label('while.end'))
+
+        self.current_block = condition_block
         self.current_block.append((begin_loop[1:],))
         self.visit(node.expr)
         self.current_block.append(('cbranch', node.expr.gen_location, begin_statement, end_loop))
-        self.current_block.append((begin_statement[1:],))
+        self.current_block.taken = body_block
+        self.current_block.fall_through = end_block
+
         if node.statement:
+            self.current_block = body_block
+            self.current_block.branch = condition_block
+            self.current_block.append((begin_statement[1:],))
             self.visit(node.statement)
-        self.current_block.append(('jump', begin_loop))
+            self.current_block.append(('jump', begin_loop))
+
+        self.current_block = end_block
         self.current_block.append((end_loop[1:],))
+
+        current_block.next_block = condition_block
+        condition_block.next_block = body_block
+        body_block.next_block = end_block
+
+        self.loop_stack.pop(-1)
 
 
 

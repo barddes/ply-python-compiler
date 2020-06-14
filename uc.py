@@ -12,7 +12,7 @@ import sys
 from contextlib import contextmanager
 from uc_parser import UCParser
 from uc_sema import Visitor
-from uc_code import GenerateCode
+from uc_block import GenerateCode
 from uc_interpreter import Interpreter
 
 """

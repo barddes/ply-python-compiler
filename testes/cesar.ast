@@ -1,6 +1,26 @@
 Func
+func call
 If
 While
 Assert
 Break
 For
+
+
+
+...
+
+while (...) {
+    ...
+}
+
+...
+
+
+
+
+....
+
+assert (...)
+
+...
