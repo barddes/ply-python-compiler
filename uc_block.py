@@ -797,8 +797,8 @@ class GenerateCode(NodeVisitor):
         then_label = self.make_label('if.then')
         then_block = BasicBlock(then_label)
 
+        else_label = self.make_label('if.else')
         if node.elze:
-            else_label = self.make_label('if.else')
             else_block = BasicBlock(else_label)
 
         end_label = self.make_label('if.end')
@@ -838,10 +838,16 @@ class GenerateCode(NodeVisitor):
             self.current_block.append((end_label[1:],))
             self.current_block.branch = end_block
             self.visit(node.elze)
+            self.current_block.append(('jump', end_label))
+            self.current_block.branch = end_block
+            end_block.predecessors.append(self.current_block)
         else:
             end_block.predecessors.append(self.current_block)
             current_block.fall_through = end_block
 
+        self.current_block.append(('jump', end_label))
+        self.current_block.branch = end_block
+        end_block.predecessors.append(self.current_block)
         self.current_block.next_block = end_block
         end_block.predecessors.append(self.current_block)
         self.current_block = end_block

@@ -1,59 +1,76 @@
 Program: 
     FuncDef: 
         Type: ['int']   @ 1:1
-        Decl: ID(name='main'  )
+        Decl: ID(name='f'  )
             FuncDecl: 
                 VarDecl: 
                     Type: ['int']   @ 1:1
         Compound:    @ 1:1
-            Decl: ID(name='x'  )
+            Decl: ID(name='a'  )
                 VarDecl: 
                     Type: ['int']   @ 2:5
-                Constant: int, 2   @ 2:12
-            Decl: ID(name='y'  )
+            Decl: ID(name='b'  )
                 VarDecl: 
                     Type: ['int']   @ 2:5
-            Decl: ID(name='z'  )
+            Decl: ID(name='c'  )
                 VarDecl: 
                     Type: ['int']   @ 2:5
-            Assignment: =   @ 3:5
-                ID: y   @ 3:5
-                UnaryOp: ++   @ 3:11
-                    ID: x   @ 3:11
-            Assignment: =   @ 4:5
-                ID: z   @ 4:5
-                UnaryOp: p++   @ 4:9
-                    ID: x   @ 4:9
-            Assert:    @ 5:5
-                BinaryOp: &&   @ 5:12
-                    BinaryOp: ==   @ 5:12
-                        ID: y   @ 5:12
-                        Constant: int, 3   @ 5:17
-                    BinaryOp: ==   @ 5:22
-                        ID: z   @ 5:22
-                        Constant: int, 3   @ 5:27
-            If:    @ 6:5
-                BinaryOp: ==   @ 6:8
-                    ID: x   @ 6:8
-                    ID: x   @ 6:11
-                Compound:    @ 6:1
-                    Print:    @ 7:9
-                        ID: x   @ 7:15
-                    For:    @ 8:9
-                        DeclList:    @ 8:9
-                            Decl: ID(name='k'  )
-                                VarDecl: 
-                                    Type: ['int']   @ 8:13
-                                Constant: int, 0   @ 8:21
-                        BinaryOp: <   @ 8:24
-                            ID: k   @ 8:24
-                            Constant: int, 10   @ 8:28
-                        UnaryOp: p++   @ 8:32
-                            ID: k   @ 8:32
-                        Print:    @ 9:13
-                            ID: k   @ 9:19
-                Compound:    @ 11:1
-                    Print:    @ 12:9
-                        ID: y   @ 12:15
-            Return:    @ 14:5
-                Constant: int, 0   @ 14:12
+            Decl: ID(name='d'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
+            If:    @ 3:5
+                BinaryOp: ==   @ 3:8
+                    ID: a   @ 3:8
+                    ID: a   @ 3:13
+                Compound:    @ 3:1
+                    Assignment: =   @ 4:9
+                        ID: a   @ 4:9
+                        Constant: int, 1   @ 4:13
+                    If:    @ 5:9
+                        BinaryOp: ==   @ 5:13
+                            ID: b   @ 5:13
+                            ID: a   @ 5:18
+                        Compound:    @ 5:1
+                            Assignment: =   @ 6:13
+                                ID: b   @ 6:13
+                                Constant: int, 3   @ 6:17
+                    Assignment: =   @ 8:9
+                        ID: a   @ 8:9
+                        Constant: int, 2   @ 8:13
+                    If:    @ 9:9
+                        BinaryOp: ==   @ 9:13
+                            ID: b   @ 9:13
+                            ID: c   @ 9:18
+                        Compound:    @ 9:1
+                            Assignment: =   @ 10:13
+                                ID: c   @ 10:13
+                                Constant: int, 3   @ 10:17
+                        Compound:    @ 12:1
+                            If:    @ 13:13
+                                BinaryOp: <   @ 13:17
+                                    ID: c   @ 13:17
+                                    Constant: int, 10   @ 13:21
+                                Compound:    @ 13:1
+                                    Assignment: =   @ 14:17
+                                        ID: a   @ 14:17
+                                        Constant: int, 10   @ 14:21
+                                    If:    @ 15:17
+                                        BinaryOp: ==   @ 15:20
+                                            ID: a   @ 15:20
+                                            Constant: int, 20   @ 15:25
+                                        Compound:    @ 15:1
+                                            Print:    @ 16:21
+                                                ID: a   @ 16:27
+                                        Compound:    @ 18:1
+                                            Print:    @ 19:21
+                                                ID: b   @ 19:27
+                If:    @ 24:10
+                    BinaryOp: ==   @ 24:14
+                        ID: b   @ 24:14
+                        Constant: int, 0   @ 24:17
+                    Compound:    @ 24:1
+                        Assignment: =   @ 25:9
+                            ID: b   @ 25:9
+                            Constant: int, 1   @ 25:13
+            Return:    @ 27:5
+                ID: c   @ 27:12

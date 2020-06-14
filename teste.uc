@@ -1,15 +1,28 @@
-int main() {
-    int x =2, y, z;
-    y = ++x;
-    z = x++;
-    assert y == 3 && z == 3;
-    if(x==x){
-        print(x);
-        for(int k = 0; k < 10; k++)
-            print(k);
+int f(){
+    int a, b, c, d;
+    if(a == a){ // 0
+        a = 1;
+        if (b == a){ // 1
+            b = 3;
+        }
+        a = 2;
+        if (b == c){ // 2
+            c = 3;
+        }
+        else{ // 2
+            if (c < 10){ // 3
+                a = 10;
+                if(a == 20){ // 4
+                    print(a);
+                }
+                else{ // 4
+                    print(b);
+                } // 4
+            } // 3
+        } // 2
     }
-    else{
-        print(y);
-    }
-    return 0;
+    else if (b==0){
+        b = 1;
+    } // 1
+    return c;
 }
