@@ -774,6 +774,8 @@ class GenerateCode(NodeVisitor):
             self.current_block.append((end_if[1:],))
             self.current_block.branch = end_block
             self.visit(node.elze)
+        else:
+            current_block.fall_through = end_block
 
         self.current_block = end_block
         self.current_block.append((end_elze[1:],))
