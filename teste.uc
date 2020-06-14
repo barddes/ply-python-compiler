@@ -1,9 +1,8 @@
 void f(int b){
-    if (0 == 0){
-        int a = 0;
+    while(b < 10){
+        b++;
+
+        if (b == 7)
+            return;
     }
-    else{
-        int b = 0;
-    }
-    b = 2;
 }
