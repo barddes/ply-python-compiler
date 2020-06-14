@@ -468,14 +468,16 @@ class GenerateCode(NodeVisitor):
 
     def visit_Assert(self, node: Assert):
         # target_true = self.new_temp()
-        target_false = self.new_temp()
-        target_end = self.new_temp()
 
-        self.changeCurrentBlock()
+        label_target_false = self.make_label('assert.false')
+        label_target_end = self.make_label('assert.true')
+
+        target_false = label_target_false
+        target_end = label_target_end
 
         current_block = self.current_block
-        false_block = BasicBlock(self.make_label('assert.false'))
-        true_block = BasicBlock(self.make_label('assert.true'))
+        false_block = BasicBlock(label_target_false)
+        true_block = BasicBlock(label_target_end)
 
         self.visit(node.expr)
         self.current_block.append(('cbranch', node.expr.gen_location, target_end, target_false))
