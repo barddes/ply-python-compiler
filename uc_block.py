@@ -467,17 +467,17 @@ class GenerateCode(NodeVisitor):
         node.gen_location = target
 
     def visit_Assert(self, node: Assert):
-        # target_true = self.new_temp()
+        self.changeCurrentBlock()
 
-        label_target_false = self.make_label('assert.false')
-        label_target_end = self.make_label('assert.true')
-
-        target_false = label_target_false
-        target_end = label_target_end
+        target_false = self.make_label('assert.false')
+        target_end = self.make_label('assert.true')
 
         current_block = self.current_block
-        false_block = BasicBlock(label_target_false)
-        true_block = BasicBlock(label_target_end)
+        false_block = BasicBlock(target_false)
+        true_block = BasicBlock(target_end)
+
+        current_block.next_block = false_block
+        false_block.next_block = true_block
 
         self.visit(node.expr)
         self.current_block.append(('cbranch', node.expr.gen_location, target_end, target_false))
@@ -487,12 +487,10 @@ class GenerateCode(NodeVisitor):
         self.current_block = false_block
         self.current_block.append((target_false[1:],))
         self.current_block.append(('print_string', '@.str.%d' % node.error_str))
-        self.current_block.append(('jump', '%1'))
+        self.current_block.append(('jump', self.ret_block.label))
 
         self.current_block = true_block
         self.current_block.append((target_end[1:],))
-
-        current_block.next_block = true_block
 
     def visit_Break(self, node: Break):
         self.current_block.append(('jump', self.loop_stack[-1]['target']))
@@ -884,7 +882,7 @@ class GenerateCode(NodeVisitor):
         if node.value:
             self.current_block.append(('store_%s' % node.node_info['type'], node.value.gen_location, node.func_def.ret_target))
 
-        self.current_block.append(('jump', node.func_def.end_jump))
+        self.current_block.append(('jump', self.ret_block.label))
 
     def visit_Type(self, node: Type):
         for i, c in node.children():
