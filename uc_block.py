@@ -165,10 +165,10 @@ class GenerateCode(NodeVisitor):
         value = self.labels.get(name, 0)
         self.labels[name] = value + 1
 
-        if value != 0:
-            return name
+        if value == 0:
+            return '%%%s' % name
         else:
-            return '%s.%d' % (name, value)
+            return '%%%s.%d' % (name, value)
 
     '''
     Node visitor class that creates 3-address encoded instruction sequences.
@@ -205,6 +205,21 @@ class GenerateCode(NodeVisitor):
         new_block.instructions = current_block.instructions
         new_block.predecessors = current_block.predecessors
         new_block.next_block = current_block.next_block
+
+        for b in current_block.predecessors:
+            if isinstance(b, BasicBlock):
+                b.branch = new_block
+            else:
+                if b.taken == current_block:
+                    b.taken = new_block
+                else:
+                    b.fall_through = new_block
+
+            if b.next_block == current_block:
+                b.next_block = new_block
+
+        for n in current_block.nodes:
+            n.cfg = new_block
         self.current_block = new_block
 
     # You must implement visit_Nodename methods for all of the other
@@ -587,6 +602,15 @@ class GenerateCode(NodeVisitor):
         body_block = BasicBlock(self.make_label('for.body'))
         end_block = BasicBlock(self.make_label('for.end'))
 
+        current_block.next_block = condition_block
+        condition_block.next_block = body_block
+        body_block.next_block = end_block
+
+        condition_block.predecessors.append(current_block)
+        condition_block.predecessors.append(body_block)
+        body_block.predecessors.append(condition_block)
+        end_block.predecessors.append(condition_block)
+
         if node.p1:
             self.visit(node.p1)
 
@@ -607,10 +631,6 @@ class GenerateCode(NodeVisitor):
 
         self.current_block = end_block
         self.current_block.append((end_loop[1:],))
-
-        current_block.next_block = condition_block
-        condition_block.next_block = body_block
-        body_block.next_block = end_block
 
         self.loop_stack.pop(-1)
 
@@ -656,7 +676,7 @@ class GenerateCode(NodeVisitor):
 
     def visit_FuncDef(self, node: FuncDef):
         self.fname = node.decl.name.name
-        self.current_block = BasicBlock(None)
+        self.current_block = BasicBlock(self.fname)
         self.current_block.append(('define', '@%s' % node.decl.name.name))
 
         node.cfg = self.current_block
@@ -724,13 +744,23 @@ class GenerateCode(NodeVisitor):
         else_block = BasicBlock(self.make_label('if.else'))
         end_block = BasicBlock(self.make_label('if.end'))
 
+        if_block.predecessors.append(current_block)
+        else_block.predecessors.append(current_block)
+        end_block.predecessors.append(if_block)
+        end_block.predecessors.append(end_block)
+
+        current_block.next_block = if_block
+        if_block.next_block = else_block
+        else_block.next_block = end_block
+
         if node.expr:
             self.visit(node.expr)
 
         self.current_block.append(('cbranch', node.expr.gen_location, begin_if, end_if))
+        self.current_block.taken = if_block
+        self.current_block.fall_through = else_block
 
         if node.then:
-            self.current_block.taken = if_block
             self.current_block = if_block
             self.current_block.append((begin_if[1:],))
             self.current_block.branch = end_block
@@ -740,7 +770,6 @@ class GenerateCode(NodeVisitor):
                 self.current_block.append(('jump', end_elze))
 
         if node.elze:
-            self.current_block.fall_through = else_block
             self.current_block = else_block
             self.current_block.append((end_if[1:],))
             self.current_block.branch = end_block
@@ -749,9 +778,6 @@ class GenerateCode(NodeVisitor):
         self.current_block = end_block
         self.current_block.append((end_elze[1:],))
 
-        current_block.next_block = if_block
-        if_block.next_block = else_block
-        else_block.next_block = end_block
 
     def visit_ID(self, node: ID):
         node_info = node.lookup_envs(node.name)

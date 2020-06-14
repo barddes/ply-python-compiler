@@ -1,18 +1,10 @@
-int z = 3, t =4;
-
-int g (int t) {
- int x;
- t *= 2;
- x = 2*t;
- z = x+1;
- return x;
-}
-
-int main(){
-    int i, j, k;
-    i = g(t);
-    j = g(z);
-    k = g(t+z);
-    assert i == 16 && j == 68 && k == 292;
-    return 0;
+int checkPrime(int n) {
+    int i, isPrime = 1;
+    for (i = 2; i <= n/2; ++i) {
+        if (n % i == 0) {
+            isPrime = 0;
+            break;
+        }
+    }
+    return isPrime;
 }
