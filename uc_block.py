@@ -110,6 +110,9 @@ class CFG(object):
             _label = "{" + _name + ":\l\t"
             for _inst in block.instructions[1:]:
                 _label += format_instruction(_inst) + "\l\t"
+            _label += "\l\t"
+            for _pred in block.predecessors:
+                _label += "pred %s \l\t" % _pred.label
             _label += "}"
             self.g.node(_name, label=_label)
             if block.branch:
@@ -126,6 +129,9 @@ class CFG(object):
         _label = "{" + _name + ":\l\t"
         for _inst in block.instructions[1:]:
             _label += format_instruction(_inst) + "\l\t"
+        _label += "\l\t"
+        for _pred in block.predecessors:
+            _label += "pred %s \l\t" % _pred.label
         _label +="|{<f0>T|<f1>F}}"
         self.g.node(_name, label=_label)
         self.g.edge(_name + ":f0", block.taken.label)
@@ -497,12 +503,15 @@ class GenerateCode(NodeVisitor):
         self.current_block.append(('cbranch', node.expr.gen_location, target_end, target_false))
         self.current_block.taken = true_block
         self.current_block.fall_through = false_block
+        true_block.predecessors.append(self.current_block)
+        false_block.predecessors.append(self.current_block)
 
         self.current_block = false_block
         self.current_block.append((target_false[1:],))
         self.current_block.append(('print_string', '@.str.%d' % node.error_str))
         self.current_block.append(('jump', self.ret_block.label))
         self.current_block.branch = self.ret_block
+        self.ret_block.predecessors.append(self.current_block)
 
         self.current_block = true_block
         self.current_block.append((target_end[1:],))
@@ -628,6 +637,7 @@ class GenerateCode(NodeVisitor):
 
         self.current_block.next_block = condition_block
         self.current_block.branch = condition_block
+        condition_block.predecessors.append(self.current_block)
         self.current_block = condition_block
         self.current_block.append((cond_label[1:],))
         self.visit(node.p2)
@@ -636,6 +646,7 @@ class GenerateCode(NodeVisitor):
         self.current_block.fall_through = end_block
 
         self.current_block.next_block = body_block
+        body_block.predecessors.append(self.current_block)
         self.current_block = body_block
         self.current_block.append((body_label[1:],))
         if node.statement:
@@ -644,13 +655,17 @@ class GenerateCode(NodeVisitor):
 
         self.current_block.next_block = inc_block
         self.current_block.branch = inc_block
+        inc_block.predecessors.append(self.current_block)
         self.current_block = inc_block
+        self.current_block.append((inc_label,))
         if node.p3:
             self.visit(node.p3)
         self.current_block.append(('jump', cond_label))
         self.current_block.branch = condition_block
+        condition_block.predecessors.append(self.current_block)
 
         self.current_block.next_block = end_block
+        end_block.predecessors.append(condition_block)
         self.current_block = end_block
         self.current_block.append((end_label[1:],))
 
@@ -910,6 +925,7 @@ class GenerateCode(NodeVisitor):
             self.current_block.append(('store_%s' % node.node_info['type'], node.value.gen_location, node.func_def.ret_target))
 
         self.current_block.append(('jump', self.ret_block.label))
+        self.ret_block.predecessors.append(self.current_block)
 
     def visit_Type(self, node: Type):
         for i, c in node.children():
