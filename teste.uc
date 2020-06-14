@@ -1,8 +1,8 @@
 void f(int b){
-    while(b < 10){
-        b++;
+    for(int i=0; i<10; i++){
+        if (i == 0)
+            break;
 
-        if (b == 7)
-            return;
+        i = 19;
     }
 }

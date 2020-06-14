@@ -10,15 +10,23 @@ Program:
                 VarDecl: 
                     Type: ['void']   @ 1:1
         Compound:    @ 1:1
-            While:    @ 2:5
-                BinaryOp: <   @ 2:11
-                    ID: b   @ 2:11
-                    Constant: int, 10   @ 2:15
+            For:    @ 2:5
+                DeclList:    @ 2:5
+                    Decl: ID(name='i'  )
+                        VarDecl: 
+                            Type: ['int']   @ 2:9
+                        Constant: int, 0   @ 2:15
+                BinaryOp: <   @ 2:18
+                    ID: i   @ 2:18
+                    Constant: int, 10   @ 2:20
+                UnaryOp: p++   @ 2:24
+                    ID: i   @ 2:24
                 Compound:    @ 2:1
-                    UnaryOp: p++   @ 3:9
-                        ID: b   @ 3:9
-                    If:    @ 5:9
-                        BinaryOp: ==   @ 5:13
-                            ID: b   @ 5:13
-                            Constant: int, 7   @ 5:18
-                        Return:    @ 6:13
+                    If:    @ 3:9
+                        BinaryOp: ==   @ 3:13
+                            ID: i   @ 3:13
+                            Constant: int, 0   @ 3:18
+                        Break: 
+                    Assignment: =   @ 6:9
+                        ID: i   @ 6:9
+                        Constant: int, 19   @ 6:13
