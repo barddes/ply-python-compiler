@@ -1,32 +1,67 @@
 Program: 
     FuncDef: 
-        Type: ['void']   @ 1:1
-        Decl: ID(name='f'  )
+        Type: ['int']   @ 1:1
+        Decl: ID(name='main'  )
             FuncDecl: 
-                ParamList: 
-                    Decl: ID(name='b'  )
-                        VarDecl: 
-                            Type: ['int']   @ 1:8
                 VarDecl: 
-                    Type: ['void']   @ 1:1
+                    Type: ['int']   @ 1:1
         Compound:    @ 1:1
-            For:    @ 2:5
-                DeclList:    @ 2:5
-                    Decl: ID(name='i'  )
-                        VarDecl: 
-                            Type: ['int']   @ 2:9
-                        Constant: int, 0   @ 2:15
-                BinaryOp: <   @ 2:18
-                    ID: i   @ 2:18
-                    Constant: int, 10   @ 2:20
-                UnaryOp: p++   @ 2:24
-                    ID: i   @ 2:24
-                Compound:    @ 2:1
-                    If:    @ 3:9
-                        BinaryOp: ==   @ 3:13
-                            ID: i   @ 3:13
-                            Constant: int, 0   @ 3:18
-                        Break: 
-                    Assignment: =   @ 6:9
-                        ID: i   @ 6:9
-                        Constant: int, 19   @ 6:13
+            Decl: ID(name='a'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
+            Decl: ID(name='b'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
+            Decl: ID(name='c'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
+            Assignment: =   @ 4:5
+                ID: a   @ 4:5
+                Constant: int, 1   @ 4:9
+            Assignment: =   @ 5:5
+                ID: b   @ 5:5
+                Constant: int, 1   @ 5:9
+            Assignment: =   @ 6:5
+                ID: c   @ 6:5
+                Constant: int, 1   @ 6:9
+            Assignment: =   @ 7:5
+                ID: c   @ 7:5
+                Constant: int, 1   @ 7:9
+            Assignment: =   @ 8:5
+                ID: a   @ 8:5
+                Constant: int, 1   @ 8:9
+            Assignment: =   @ 9:5
+                ID: b   @ 9:5
+                Constant: int, 1   @ 9:9
+            Assignment: =   @ 10:5
+                ID: c   @ 10:5
+                Constant: int, 1   @ 10:9
+            Assignment: =   @ 11:5
+                ID: a   @ 11:5
+                Constant: int, 1   @ 11:9
+            Assignment: =   @ 12:5
+                ID: b   @ 12:5
+                Constant: int, 1   @ 12:9
+            Assignment: =   @ 13:5
+                ID: c   @ 13:5
+                Constant: int, 1   @ 13:9
+            Assignment: =   @ 14:5
+                ID: a   @ 14:5
+                Constant: int, 1   @ 14:9
+            Assignment: =   @ 15:5
+                ID: b   @ 15:5
+                Constant: int, 1   @ 15:9
+            Assignment: =   @ 16:5
+                ID: c   @ 16:5
+                Constant: int, 1   @ 16:9
+            Assignment: =   @ 17:5
+                ID: a   @ 17:5
+                Constant: int, 1   @ 17:9
+            Assignment: =   @ 18:5
+                ID: b   @ 18:5
+                Constant: int, 1   @ 18:9
+            Assignment: =   @ 19:5
+                ID: c   @ 19:5
+                Constant: int, 1   @ 19:9
+            Return:    @ 22:5
+                Constant: int, 0   @ 22:12

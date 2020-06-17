@@ -1,8 +1,23 @@
-void f(int b){
-    for(int i=0; i<10; i++){
-        if (i == 0)
-            break;
+int main() {
+    int a, b, c;
 
-        i = 19;
-    }
+    a = 1;
+    b = 1;
+    c = 1;
+    c = 1;
+    a = 1;
+    b = 1;
+    c = 1;
+    a = 1;
+    b = 1;
+    c = 1;
+    a = 1;
+    b = 1;
+    c = 1;
+    a = 1;
+    b = 1;
+    c = 1;
+
+
+    return 0;
 }

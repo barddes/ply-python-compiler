@@ -1,3 +1,5 @@
+import re
+
 from graphviz import Digraph
 
 from objects import Program, BinaryOp, Assignment, ArrayDecl, ArrayRef, Assert, Break, Cast, Compound, Constant, \
@@ -16,6 +18,11 @@ class Block(object):
         self._next_block = None  # Link to the next block
         self.nodes = []
         self.prev_block = None
+
+        self.block_in = []
+        self.block_out = []
+        self.block_gen = []
+        self.block_kill = []
 
     def append(self, instr):
         self.instructions.append(instr)
@@ -204,6 +211,7 @@ class GenerateCode(NodeVisitor):
 
         # The generated code (list of tuples)
         self.code = []
+        self.label = 0
 
     def new_temp(self):
         '''
@@ -391,10 +399,10 @@ class GenerateCode(NodeVisitor):
         for i, d in node.children():
             self.visit(d)
 
-        # if node.decl_list:
-        #     for d in node.decl_list:
-        #         if isinstance(d, FuncDef):
-        #             self.current_block = BasicBlock()
+        for _decl in node.decl_list:
+            if isinstance(_decl, FuncDef):
+                cfg = _decl.cfg
+                self.reaching_definitions(cfg)
 
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
@@ -507,14 +515,14 @@ class GenerateCode(NodeVisitor):
         false_block.predecessors.append(self.current_block)
 
         self.current_block = false_block
-        self.current_block.append((target_false[1:],))
+        self.current_block.append((str(target_false[1:]) + ':',))
         self.current_block.append(('print_string', '@.str.%d' % node.error_str))
         self.current_block.append(('jump', self.ret_block.label))
         self.current_block.branch = self.ret_block
         self.ret_block.predecessors.append(self.current_block)
 
         self.current_block = true_block
-        self.current_block.append((target_end[1:],))
+        self.current_block.append((str(target_end[1:]) + ':',))
 
     def visit_Break(self, node: Break):
         self.current_block.append(('jump', self.loop_stack[-1].label))
@@ -636,7 +644,7 @@ class GenerateCode(NodeVisitor):
         self.current_block.branch = condition_block
         condition_block.predecessors.append(self.current_block)
         self.current_block = condition_block
-        self.current_block.append((cond_label[1:],))
+        self.current_block.append((str(cond_label[1:]) + ':',))
         self.visit(node.p2)
         self.current_block.append(('cbranch', node.p2.gen_location, body_label, end_label))
         self.current_block.taken = body_block
@@ -645,7 +653,7 @@ class GenerateCode(NodeVisitor):
         self.current_block.next_block = body_block
         body_block.predecessors.append(self.current_block)
         self.current_block = body_block
-        self.current_block.append((body_label[1:],))
+        self.current_block.append((str(body_label[1:]) + ':',))
         if node.statement:
             self.visit(node.statement)
         self.current_block.append(('jump', inc_label))
@@ -664,7 +672,7 @@ class GenerateCode(NodeVisitor):
         self.current_block.next_block = end_block
         end_block.predecessors.append(condition_block)
         self.current_block = end_block
-        self.current_block.append((end_label[1:],))
+        self.current_block.append((str(end_label[1:]) + ':',))
 
         self.loop_stack.pop(-1)
 
@@ -766,7 +774,7 @@ class GenerateCode(NodeVisitor):
         self.current_block = self.ret_block
 
         final_ret = self.new_temp()
-        self.current_block.append((node.end_jump[1:],))
+        self.current_block.append((str(node.end_jump[1:]) + ':',))
         if node.type.name[0] != 'void':
             self.current_block.append(('load_%s' % node.type.name[0], ret, final_ret))
             self.current_block.append(('return_%s' % node.type.name[0], final_ret))
@@ -811,7 +819,7 @@ class GenerateCode(NodeVisitor):
         if node.then:
             self.current_block.next_block = then_block
             self.current_block = then_block
-            self.current_block.append((then_label[1:],))
+            self.current_block.append((str(then_label[1:]) + ':',))
             self.current_block.branch = end_block
             self.visit(node.then)
 
@@ -823,7 +831,7 @@ class GenerateCode(NodeVisitor):
         if node.elze:
             self.current_block.next_block = else_block
             self.current_block = else_block
-            self.current_block.append((end_label[1:],))
+            self.current_block.append((str(else_label[1:]) + ':',))
             self.current_block.branch = end_block
             self.visit(node.elze)
 
@@ -834,7 +842,7 @@ class GenerateCode(NodeVisitor):
 
         self.current_block.next_block = end_block
         self.current_block = end_block
-        self.current_block.append((end_label[1:],))
+        self.current_block.append((str(end_label[1:]) + ':',))
 
 
     def visit_ID(self, node: ID):
@@ -936,7 +944,7 @@ class GenerateCode(NodeVisitor):
         condition_block.predecessors.append(self.current_block)
         self.current_block = condition_block
 
-        self.current_block.append((cond_label[1:],))
+        self.current_block.append((str(cond_label[1:]) + ':',))
         self.visit(node.expr)
 
         self.current_block.append(('cbranch', node.expr.gen_location, body_label, end_label))
@@ -948,7 +956,7 @@ class GenerateCode(NodeVisitor):
         if node.statement:
             self.current_block.next_block = body_block
             self.current_block = body_block
-            self.current_block.append((body_label[1:],))
+            self.current_block.append((str(body_label[1:]) + ':',))
             self.visit(node.statement)
 
             self.current_block.branch = condition_block
@@ -957,9 +965,63 @@ class GenerateCode(NodeVisitor):
 
         self.current_block.next_block = end_block
         self.current_block = end_block
-        self.current_block.append((end_label[1:],))
+        self.current_block.append((str(end_label[1:]) + ':',))
 
         self.loop_stack.pop(-1)
+
+
+    def make_label_instructions(self):
+        label = self.label
+        self.label = label + 1
+        return label
+
+    def reaching_definitions(self, block):
+        self.code_obj = []
+
+        definition_re = re.compile(r'((load|store|literal|elem|get|add|sub|mul|div|mod|oper|read)_.*)|fptosi|sitofp')
+        label_re = re.compile(r'.*:')
+
+        while isinstance(block, Block):
+            for _inst in block.instructions:
+                obj = {
+                    'label': self.make_label_instructions(),
+                    'inst': _inst,
+                    'def': None
+                }
+
+                if definition_re.match(_inst[0]):
+                    obj['def'] = _inst[-1]
+                elif label_re.match(_inst[0]):
+                    obj['def'] = '%%%s' % _inst[0][0:-1]
+
+                self.code_obj.append(obj)
+            block = block.next_block
+
+
+        table_format = '{:60} {:20} {:20}'
+        print(table_format.format('Instruction', 'Gen', 'Kill'))
+        print(table_format.format('-----------', '---', '----'))
+
+        for _inst in self.code_obj:
+            gen = ''
+            kill = ''
+
+            if _inst['def']:
+                gen = str(_inst['label'])
+                kill = [str(x['label']) for x in self.code_obj if x['def'] == _inst['def']]
+                kill.remove(gen)
+
+            print(table_format.format('%d: %s' % (_inst['label'], _inst['inst']), gen, ', '.join(kill)))
+
+        print(table_format.format('-----------', '---', '----'))
+
+        pass
+
+
+
+
+
+
 
 
 
