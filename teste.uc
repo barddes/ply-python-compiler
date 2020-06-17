@@ -1,23 +1,11 @@
 int main() {
-    int a, b, c;
-
-    a = 1;
-    b = 1;
-    c = 1;
-    c = 1;
-    a = 1;
-    b = 1;
-    c = 1;
-    a = 1;
-    b = 1;
-    c = 1;
-    a = 1;
-    b = 1;
-    c = 1;
-    a = 1;
-    b = 1;
-    c = 1;
-
-
+    int x, y;
+    x = 1;
+    y = 1;
+    print(x);
+    if (y > 1) {
+        x = 2;
+    }
+    print(x);
     return 0;
 }

@@ -19,10 +19,11 @@ class Block(object):
         self.nodes = []
         self.prev_block = None
 
-        self.block_in = []
-        self.block_out = []
-        self.block_gen = []
-        self.block_kill = []
+        self.code_obj = []
+        self.block_in = set()
+        self.block_out = set()
+        self.block_gen = set()
+        self.block_kill = set()
 
     def append(self, instr):
         self.instructions.append(instr)
@@ -115,11 +116,19 @@ class CFG(object):
         if _name:
             # get the formatted instructions as node label
             _label = "{" + _name + ":\l\t"
-            for _inst in block.instructions[1:]:
-                _label += format_instruction(_inst) + "\l\t"
-            _label += "\l\t"
-            for _pred in block.predecessors:
-                _label += "pred %s \l\t" % _pred.label
+            # for _inst in block.instructions[1:]:
+            #     _label += format_instruction(_inst) + "\l\t"
+
+            for _inst in block.code_obj[1:]:
+                _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
+
+            _label += '\l\t'
+            _label += 'GEN ' + str(block.block_gen).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'KILL ' + str(block.block_kill).replace('{', '').replace('}', '') + '\l\t'
+
+            # _label += "\l\t"
+            # for _pred in block.predecessors:
+            #     _label += "pred %s \l\t" % _pred.label
             _label += "}"
             self.g.node(_name, label=_label)
             if block.branch:
@@ -134,11 +143,19 @@ class CFG(object):
         _name = block.label
         # get the formatted instructions as node label
         _label = "{" + _name + ":\l\t"
-        for _inst in block.instructions[1:]:
-            _label += format_instruction(_inst) + "\l\t"
-        _label += "\l\t"
-        for _pred in block.predecessors:
-            _label += "pred %s \l\t" % _pred.label
+        # for _inst in block.instructions[1:]:
+        #     _label += format_instruction(_inst) + "\l\t"
+
+        for _inst in block.code_obj[1:]:
+            _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
+
+        _label += '\l\t'
+        _label += 'GEN ' + str(block.block_gen).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'KILL ' + str(block.block_kill).replace('{', '').replace('}', '') + '\l\t'
+
+        # _label += "\l\t"
+        # for _pred in block.predecessors:
+        #     _label += "pred %s \l\t" % _pred.label
         _label +="|{<f0>T|<f1>F}}"
         self.g.node(_name, label=_label)
         self.g.edge(_name + ":f0", block.taken.label)
@@ -975,47 +992,68 @@ class GenerateCode(NodeVisitor):
         self.label = label + 1
         return label
 
-    def reaching_definitions(self, block):
+    def reaching_definitions(self, cfg):
+        block = cfg
         self.code_obj = []
 
         definition_re = re.compile(r'((load|store|literal|elem|get|add|sub|mul|div|mod|oper|read)_.*)|fptosi|sitofp')
         label_re = re.compile(r'.*:')
 
         while isinstance(block, Block):
-            for _inst in block.instructions:
+            for inst in block.instructions:
                 obj = {
                     'label': self.make_label_instructions(),
-                    'inst': _inst,
+                    'inst': inst,
                     'def': None
                 }
 
-                if definition_re.match(_inst[0]):
-                    obj['def'] = _inst[-1]
-                elif label_re.match(_inst[0]):
-                    obj['def'] = '%%%s' % _inst[0][0:-1]
+                if definition_re.match(inst[0]):
+                    obj['def'] = inst[-1]
+                # elif label_re.match(inst[0]):
+                #     obj['def'] = '%%%s' % inst[0][0:-1]
 
+                block.code_obj.append(obj)
                 self.code_obj.append(obj)
             block = block.next_block
-
 
         table_format = '{:60} {:20} {:20}'
         print(table_format.format('Instruction', 'Gen', 'Kill'))
         print(table_format.format('-----------', '---', '----'))
 
-        for _inst in self.code_obj:
-            gen = ''
-            kill = ''
+        for inst in self.code_obj:
+            gen = set()
+            kill = set()
 
-            if _inst['def']:
-                gen = str(_inst['label'])
-                kill = [str(x['label']) for x in self.code_obj if x['def'] == _inst['def']]
-                kill.remove(gen)
+            if inst['def']:
+                gen = {inst['label']}
+                kill = set([x['label'] for x in self.code_obj if x['def'] == inst['def']]) - gen
 
-            print(table_format.format('%d: %s' % (_inst['label'], _inst['inst']), gen, ', '.join(kill)))
+            if not gen:
+                gen = ''
+            if not kill:
+                kill = ''
+
+            print(table_format.format('%d: %s' % (inst['label'], inst['inst']), str(gen), str(kill)))
 
         print(table_format.format('-----------', '---', '----'))
 
-        pass
+        block = cfg
+        while isinstance(block, Block):
+            for inst in block.code_obj:
+                if not inst['def']:
+                    continue
+
+                gen_n = {inst['label']}
+                kill_n = set([x['label'] for x in self.code_obj if x['def'] == inst['def']])
+
+                new_gen = gen_n | (block.block_gen - kill_n)
+                new_kill = block.block_kill | kill_n
+
+                block.block_gen = new_gen
+                block.block_kill = new_kill
+
+            block = block.next_block
+
 
 
 
