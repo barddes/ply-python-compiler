@@ -125,6 +125,8 @@ class CFG(object):
             _label += '\l\t'
             _label += 'GEN ' + str(block.block_gen).replace('{', '').replace('}', '') + '\l\t'
             _label += 'KILL ' + str(block.block_kill).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'IN   ' + str(block.block_in).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'OUT  ' + str(block.block_out).replace('{', '').replace('}', '') + '\l\t'
 
             # _label += "\l\t"
             # for _pred in block.predecessors:
@@ -152,6 +154,8 @@ class CFG(object):
         _label += '\l\t'
         _label += 'GEN ' + str(block.block_gen).replace('{', '').replace('}', '') + '\l\t'
         _label += 'KILL ' + str(block.block_kill).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'IN   ' + str(block.block_in).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'OUT  ' + str(block.block_out).replace('{', '').replace('}', '') + '\l\t'
 
         # _label += "\l\t"
         # for _pred in block.predecessors:
@@ -1037,8 +1041,11 @@ class GenerateCode(NodeVisitor):
 
         print(table_format.format('-----------', '---', '----'))
 
+
+        nodes = []
         block = cfg
         while isinstance(block, Block):
+            nodes.append(block)
             for inst in block.code_obj:
                 if not inst['def']:
                     continue
@@ -1051,8 +1058,28 @@ class GenerateCode(NodeVisitor):
 
                 block.block_gen = new_gen
                 block.block_kill = new_kill
-
             block = block.next_block
+
+        while len(nodes) > 0:
+            node = nodes.pop(0)
+
+            old = node.block_out
+
+            block_in = set()
+            for pred in node.predecessors:
+                block_in |= pred.block_out
+
+            node.block_in = block_in
+            node.block_out = node.block_gen | (block_in - node.block_kill)
+
+            if old != node.block_out:
+                if isinstance(node, ConditionBlock):
+                    succ = [node.taken, node.fall_through]
+                else:
+                    succ = [node.branch]
+                for s in succ:
+                    if s and s not in nodes:
+                        nodes.append(s)
 
 
 
