@@ -787,8 +787,9 @@ class GenerateCode(NodeVisitor):
         for i, c in node.children():
             self.visit(c)
 
-        self.current_block.append(('jump', self.ret_block.label))
-        self.ret_block.predecessors.append(self.current_block)
+        if self.current_block.instructions[-1] != ('jump', self.ret_block.label):
+            self.current_block.append(('jump', self.ret_block.label))
+            self.ret_block.predecessors.append(self.current_block)
 
         self.current_block.next_block = self.ret_block
         self.current_block.branch = self.ret_block
@@ -1000,47 +1001,66 @@ class GenerateCode(NodeVisitor):
         block = cfg
         self.code_obj = []
 
-        definition_re = re.compile(r'((load|store|literal|elem|get|add|sub|mul|div|mod|oper|read)_.*)|fptosi|sitofp')
+        definition_re = re.compile(r'(load|store|literal|elem|get|add|sub|mul|div|mod|oper|read)_.*|fptosi|sitofp|call')
         label_re = re.compile(r'.*:')
+
+        uses_1_re = re.compile(r'(load|store|get|return|param|print)_(?!void).*|fptosi|sitofp|jump|call')
+        uses_2_re = re.compile(r'(elem|add|sub|mul|div|mod|oper)_.*')
+        uses_3_re = re.compile(r'cbranch')
 
         while isinstance(block, Block):
             for inst in block.instructions:
                 obj = {
                     'label': self.make_label_instructions(),
                     'inst': inst,
-                    'def': None
+                    'def': set(),
+                    'use': set()
                 }
 
                 if definition_re.match(inst[0]):
-                    obj['def'] = inst[-1]
-                # elif label_re.match(inst[0]):
-                #     obj['def'] = '%%%s' % inst[0][0:-1]
+                    obj['def'] |= {inst[-1]}
+                elif label_re.match(inst[0]):
+                    obj['def'] |= {'%%%s' % inst[0][0:-1]}
+
+                if uses_1_re.match(inst[0]):
+                    obj['use'] |= {inst[1]}
+                elif uses_2_re.match(inst[0]):
+                    obj['use'] |= {inst[1], inst[2]}
+                elif uses_3_re.match(inst[0]):
+                    obj['use'] |= {inst[1], inst[2], inst[3]}
 
                 block.code_obj.append(obj)
                 self.code_obj.append(obj)
             block = block.next_block
 
-        table_format = '{:60} {:20} {:20}'
-        print(table_format.format('Instruction', 'Gen', 'Kill'))
-        print(table_format.format('-----------', '---', '----'))
+        table_format = '{:60} {:20} {:20} {:20} {:20}'
+        print(table_format.format('Instruction', 'RD Gen', 'RD Kill', 'Def', 'Use'))
+        print(table_format.format('-----------', '------', '-------', '---', '---'))
 
         for inst in self.code_obj:
             gen = set()
             kill = set()
+            _def = set()
+            use = set()
 
             if inst['def']:
                 gen = {inst['label']}
+                _def = inst['def']
                 kill = set([x['label'] for x in self.code_obj if x['def'] == inst['def']]) - gen
+
+            if inst['use']:
+                use = inst['use']
 
             if not gen:
                 gen = ''
             if not kill:
                 kill = ''
+            if not _def:
+                _def = ''
+            if not use:
+                use = ''
 
-            print(table_format.format('%d: %s' % (inst['label'], inst['inst']), str(gen), str(kill)))
-
-        print(table_format.format('-----------', '---', '----'))
-
+            print(table_format.format('%d: %s' % (inst['label'], inst['inst']), str(gen), str(kill), str(_def), str(use)))
 
         nodes = []
         block = cfg
@@ -1080,16 +1100,3 @@ class GenerateCode(NodeVisitor):
                 for s in succ:
                     if s and s not in nodes:
                         nodes.append(s)
-
-
-
-
-
-
-
-
-
-
-
-
-
