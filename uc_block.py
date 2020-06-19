@@ -796,7 +796,7 @@ class GenerateCode(NodeVisitor):
         self.current_block = self.ret_block
 
         final_ret = self.new_temp()
-        self.current_block.append((str(node.end_jump[1:]) + ':',))
+        self.current_block.append((self.ret_block.label + ':',))
         if node.type.name[0] != 'void':
             self.current_block.append(('load_%s' % node.type.name[0], ret, final_ret))
             self.current_block.append(('return_%s' % node.type.name[0], final_ret))
