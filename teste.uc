@@ -1,11 +1,12 @@
-int main() {
-    float a=1.,b=2.,c=3.,d=4.,e=5.,f=6.;
+int main_un() {
+    int a = 1, b = 1, c = 2;
+    if(a == b){
+        print(a);
+    }
 
-    c = a + b;
-    d = a / 5.;
-    e = c - 9.;
-    f = a % 3.;
-    c = 3. * e;
+    if(a == c){
+        print(c);
+    }
 
     return 0;
 }

@@ -1,59 +1,36 @@
 Program: 
     FuncDef: 
         Type: ['int']   @ 1:1
-        Decl: ID(name='main'  )
+        Decl: ID(name='main_un'  )
             FuncDecl: 
                 VarDecl: 
                     Type: ['int']   @ 1:1
         Compound:    @ 1:1
             Decl: ID(name='a'  )
                 VarDecl: 
-                    Type: ['float']   @ 2:5
-                Constant: float, 1.0   @ 2:13
+                    Type: ['int']   @ 2:5
+                Constant: int, 1   @ 2:13
             Decl: ID(name='b'  )
                 VarDecl: 
-                    Type: ['float']   @ 2:5
-                Constant: float, 2.0   @ 2:18
+                    Type: ['int']   @ 2:5
+                Constant: int, 1   @ 2:20
             Decl: ID(name='c'  )
                 VarDecl: 
-                    Type: ['float']   @ 2:5
-                Constant: float, 3.0   @ 2:23
-            Decl: ID(name='d'  )
-                VarDecl: 
-                    Type: ['float']   @ 2:5
-                Constant: float, 4.0   @ 2:28
-            Decl: ID(name='e'  )
-                VarDecl: 
-                    Type: ['float']   @ 2:5
-                Constant: float, 5.0   @ 2:33
-            Decl: ID(name='f'  )
-                VarDecl: 
-                    Type: ['float']   @ 2:5
-                Constant: float, 6.0   @ 2:38
-            Assignment: =   @ 4:5
-                ID: c   @ 4:5
-                BinaryOp: +   @ 4:9
-                    ID: a   @ 4:9
-                    ID: b   @ 4:13
-            Assignment: =   @ 5:5
-                ID: d   @ 5:5
-                BinaryOp: /   @ 5:9
-                    ID: a   @ 5:9
-                    Constant: float, 5.0   @ 5:13
-            Assignment: =   @ 6:5
-                ID: e   @ 6:5
-                BinaryOp: -   @ 6:9
-                    ID: c   @ 6:9
-                    Constant: float, 9.0   @ 6:13
-            Assignment: =   @ 7:5
-                ID: f   @ 7:5
-                BinaryOp: %   @ 7:9
-                    ID: a   @ 7:9
-                    Constant: float, 3.0   @ 7:13
-            Assignment: =   @ 8:5
-                ID: c   @ 8:5
-                BinaryOp: *   @ 8:9
-                    Constant: float, 3.0   @ 8:9
-                    ID: e   @ 8:14
-            Return:    @ 10:5
-                Constant: int, 0   @ 10:12
+                    Type: ['int']   @ 2:5
+                Constant: int, 2   @ 2:27
+            If:    @ 3:5
+                BinaryOp: ==   @ 3:8
+                    ID: a   @ 3:8
+                    ID: b   @ 3:13
+                Compound:    @ 3:1
+                    Print:    @ 4:9
+                        ID: a   @ 4:15
+            If:    @ 7:5
+                BinaryOp: ==   @ 7:8
+                    ID: a   @ 7:8
+                    ID: c   @ 7:13
+                Compound:    @ 7:1
+                    Print:    @ 8:9
+                        ID: c   @ 8:15
+            Return:    @ 11:5
+                Constant: int, 0   @ 11:12

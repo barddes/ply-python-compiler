@@ -502,14 +502,15 @@ class GenerateCode(NodeVisitor):
                 self.reaching_definitions(cfg)
                 self.copy_propagation(cfg)
 
-                self.reaching_definitions(cfg)
                 self.instruction_analisys(cfg)
+                self.reaching_definitions(cfg)
                 self.constant_folding(cfg)
 
-                self.reaching_definitions(cfg)
                 self.instruction_analisys(cfg)
-                self.branch_folding(cfg)
+                self.reaching_definitions(cfg)
+                # self.branch_folding(cfg)
 
+                self.instruction_analisys(cfg)
                 self.reaching_definitions(cfg)
                 self.liveness_analisys(cfg)
                 # self.deadcode_elimination(cfg)
@@ -1124,7 +1125,9 @@ class GenerateCode(NodeVisitor):
                 self.code_obj.append(obj)
             block = block.next_block
 
-        # Print
+        self.print_analisys_table()
+
+    def print_analisys_table(self):
         table_format = '{:60} {:20} {:20} {:20} {:20}'
         print(table_format.format('Instruction', 'RD Gen', 'RD Kill', 'Def', 'Use'))
         print(table_format.format('-----------', '------', '-------', '---', '---'))
@@ -1492,7 +1495,6 @@ class GenerateCode(NodeVisitor):
 
         while isinstance(block, Block):
             current_in = block.rd_in.copy()
-
             for inst in block.code_obj:
                 if inst['inst'][0] == 'cbranch':
                     param = inst['inst'][1]
@@ -1503,12 +1505,24 @@ class GenerateCode(NodeVisitor):
                         def_inst = list(defs.copy().pop())
 
                         if def_inst[1] == def_inst[2]:
-                            # new_inst = ('jump')
+                            new_block = self.changeBlockToBasic(block, def_inst[0].startswith('eq'))
+                            if new_block == cfg:
+                                cfg = new_block
+                            block = new_block
 
-                            if def_inst[0].startswith('eq'):
-                                pass
-                            elif def_inst[0].startswith('ne'):
-                                pass
+                            new_inst = ('jump', block.branch.label)
+                            old_inst = inst['inst']
+
+                            print('[Branch Folding] Changing %d: %s to %s' % (inst['label'], old_inst, new_inst))
+
+                            idx = block.instructions.index(old_inst)
+                            block.instructions[idx] = new_inst
+                            inst['inst'] = new_inst
+
+                if inst['def']:
+                    inst_kill = {x['label'] for x in self.code_obj if x['def'] == inst['def']} - {inst['label']}
+                    current_in -= inst_kill
+                    current_in |= {inst['label']}
 
             block = block.next_block
 
