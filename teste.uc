@@ -1,19 +1,11 @@
-int checkPrime(int n) {
-    int i, isPrime = 1;
-    for (i = 2; i <= n/2; ++i) {
-        if (n % i == 0) {
-            isPrime = 0;
-            break;
-        }
-    }
-    return isPrime;
-}
+int main() {
+    float a=1.,b=2.,c=3.,d=4.,e=5.,f=6.;
 
-int main(){
-    int a = 0, b;
-    print("Digite algum numero:");
+    c = a + b;
+    d = a / 5.;
+    e = c - 9.;
+    f = a % 3.;
+    c = 3. * e;
 
-    read(a);
-    b = checkPrime(a);
     return 0;
 }

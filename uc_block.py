@@ -1,3 +1,4 @@
+import operator
 import re
 
 from graphviz import Digraph
@@ -131,17 +132,17 @@ class CFG(object):
             for _inst in block.code_obj[1:]:
                 _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
 
-            _label += 'RD:\l\t'
-            _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'KILL ' + str(block.rd_kill).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'IN   ' + str(block.rd_in).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'OUT  ' + str(block.rd_out).replace('{', '').replace('}', '') + '\l\t'
-
-            _label += 'LA:\l\t'
-            _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'RD:\l\t'
+            # _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'KILL ' + str(block.rd_kill).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'IN   ' + str(block.rd_in).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'OUT  ' + str(block.rd_out).replace('{', '').replace('}', '') + '\l\t'
+            #
+            # _label += 'LA:\l\t'
+            # _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
 
             # _label += "\l\t"
             # for _pred in block.predecessors:
@@ -166,17 +167,17 @@ class CFG(object):
         for _inst in block.code_obj[1:]:
             _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
 
-        _label += 'RD:\l\t'
-        _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'KILL ' + str(block.rd_kill).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'IN   ' + str(block.rd_in).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'OUT  ' + str(block.rd_out).replace('{', '').replace('}', '') + '\l\t'
-
-        _label += 'LA:\l\t'
-        _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'RD:\l\t'
+        # _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'KILL ' + str(block.rd_kill).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'IN   ' + str(block.rd_in).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'OUT  ' + str(block.rd_out).replace('{', '').replace('}', '') + '\l\t'
+        #
+        # _label += 'LA:\l\t'
+        # _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
         # _label += "\l\t"
         # for _pred in block.predecessors:
         #     _label += "pred %s \l\t" % _pred.label
@@ -470,8 +471,13 @@ class GenerateCode(NodeVisitor):
                 self.reaching_definitions(cfg)
                 self.copy_propagation(cfg)
 
-                # self.instruction_analisys(cfg)
+                self.reaching_definitions(cfg)
+                self.instruction_analisys(cfg)
+                self.constant_folding(cfg)
+
+                self.reaching_definitions(cfg)
                 self.liveness_analisys(cfg)
+                # self.deadcode_elimination(cfg)
 
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
@@ -1201,6 +1207,7 @@ class GenerateCode(NodeVisitor):
 
         block = cfg
         while isinstance(block, Block):
+            block.code_obj = []
             block.rd_gen = block.rd_kill = block.rd_in = block.rd_out = set()
             block.la_def = block.la_use = block.la_in = block.la_out = set()
             block = block.next_block
@@ -1346,15 +1353,59 @@ class GenerateCode(NodeVisitor):
                     current_in -= inst_kill
                     current_in |= {inst['label']}
 
-                # load, store
-                # add, sub, mul, div, mod
-                # lt, le, ge, gt, eq, ne, and, or, not
-                # fptosi, sitofp
-                # return, param, print
+            block = block.next_block
 
+    def constant_folding(self, cfg):
+        block = cfg
 
-                # get, elem
-                pass
+        while isinstance(block, Block):
+            current_in = block.rd_in.copy()
+
+            for inst in block.code_obj:
+                matches = re.match(r'(add|sub|mul|div|mod)_(?!void)(.*)', inst['inst'][0])
+                if matches:
+                    op = matches.group(1)
+                    type = matches.group(2)
+
+                    if (op, type) == ('div', 'float'):
+                        op = 'truediv'
+                    elif (op, type) == ('div', 'int'):
+                        op = 'floordiv'
+                    elif op == 'not':
+                        op = 'not_'
+
+                    param1 = inst['inst'][1]
+                    param2 = inst['inst'][2]
+
+                    defs1 = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param1}}
+                    defs2 = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param2}}
+
+                    if len(defs1) == len(defs2) == 1:
+                        def_inst1 = list(defs1.copy().pop())
+                        def_inst2 = list(defs2.copy().pop())
+
+                        literal_re = re.compile(r'literal_.*')
+
+                        if literal_re.match(def_inst1[0]) and literal_re.match(def_inst2[0]):
+                            res = getattr(operator, op)(def_inst1[1], def_inst2[1])
+
+                            if type == 'int':
+                                res = res // 1
+
+                            new_inst = ('literal_%s' % type, res, inst['inst'][-1])
+
+                            old_inst = inst['inst']
+
+                            print('[Constant Folding] Changing %d: %s to %s' % (inst['label'], old_inst, new_inst))
+
+                            idx = block.instructions.index(old_inst)
+                            block.instructions[idx] = new_inst
+                            inst['inst'] = new_inst
+
+                if inst['def']:
+                    inst_kill = {x['label'] for x in self.code_obj if x['def'] == inst['def']} - {inst['label']}
+                    current_in -= inst_kill
+                    current_in |= {inst['label']}
 
             block = block.next_block
 

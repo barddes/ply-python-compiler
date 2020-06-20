@@ -1,69 +1,59 @@
 Program: 
     FuncDef: 
         Type: ['int']   @ 1:1
-        Decl: ID(name='checkPrime'  )
-            FuncDecl: 
-                ParamList: 
-                    Decl: ID(name='n'  )
-                        VarDecl: 
-                            Type: ['int']   @ 1:16
-                VarDecl: 
-                    Type: ['int']   @ 1:1
-        Compound:    @ 1:1
-            Decl: ID(name='i'  )
-                VarDecl: 
-                    Type: ['int']   @ 2:5
-            Decl: ID(name='isPrime'  )
-                VarDecl: 
-                    Type: ['int']   @ 2:5
-                Constant: int, 1   @ 2:22
-            For:    @ 3:5
-                Assignment: =   @ 3:10
-                    ID: i   @ 3:10
-                    Constant: int, 2   @ 3:14
-                BinaryOp: <=   @ 3:17
-                    ID: i   @ 3:17
-                    BinaryOp: /   @ 3:22
-                        ID: n   @ 3:22
-                        Constant: int, 2   @ 3:24
-                UnaryOp: ++   @ 3:29
-                    ID: i   @ 3:29
-                Compound:    @ 3:1
-                    If:    @ 4:9
-                        BinaryOp: ==   @ 4:13
-                            BinaryOp: %   @ 4:13
-                                ID: n   @ 4:13
-                                ID: i   @ 4:17
-                            Constant: int, 0   @ 4:22
-                        Compound:    @ 4:1
-                            Assignment: =   @ 5:13
-                                ID: isPrime   @ 5:13
-                                Constant: int, 0   @ 5:23
-                            Break: 
-            Return:    @ 9:5
-                ID: isPrime   @ 9:12
-    FuncDef: 
-        Type: ['int']   @ 12:1
         Decl: ID(name='main'  )
             FuncDecl: 
                 VarDecl: 
-                    Type: ['int']   @ 12:1
-        Compound:    @ 12:1
+                    Type: ['int']   @ 1:1
+        Compound:    @ 1:1
             Decl: ID(name='a'  )
                 VarDecl: 
-                    Type: ['int']   @ 13:5
-                Constant: int, 0   @ 13:13
+                    Type: ['float']   @ 2:5
+                Constant: float, 1.0   @ 2:13
             Decl: ID(name='b'  )
                 VarDecl: 
-                    Type: ['int']   @ 13:5
-            Print:    @ 14:5
-                Constant: string, "Digite algum numero:"   @ 14:11
-            Read:    @ 16:5
-                ID: a   @ 16:10
-            Assignment: =   @ 17:5
-                ID: b   @ 17:5
-                FuncCall:    @ 17:9
-                    ID: checkPrime   @ 17:9
-                    ID: a   @ 17:20
-            Return:    @ 18:5
-                Constant: int, 0   @ 18:12
+                    Type: ['float']   @ 2:5
+                Constant: float, 2.0   @ 2:18
+            Decl: ID(name='c'  )
+                VarDecl: 
+                    Type: ['float']   @ 2:5
+                Constant: float, 3.0   @ 2:23
+            Decl: ID(name='d'  )
+                VarDecl: 
+                    Type: ['float']   @ 2:5
+                Constant: float, 4.0   @ 2:28
+            Decl: ID(name='e'  )
+                VarDecl: 
+                    Type: ['float']   @ 2:5
+                Constant: float, 5.0   @ 2:33
+            Decl: ID(name='f'  )
+                VarDecl: 
+                    Type: ['float']   @ 2:5
+                Constant: float, 6.0   @ 2:38
+            Assignment: =   @ 4:5
+                ID: c   @ 4:5
+                BinaryOp: +   @ 4:9
+                    ID: a   @ 4:9
+                    ID: b   @ 4:13
+            Assignment: =   @ 5:5
+                ID: d   @ 5:5
+                BinaryOp: /   @ 5:9
+                    ID: a   @ 5:9
+                    Constant: float, 5.0   @ 5:13
+            Assignment: =   @ 6:5
+                ID: e   @ 6:5
+                BinaryOp: -   @ 6:9
+                    ID: c   @ 6:9
+                    Constant: float, 9.0   @ 6:13
+            Assignment: =   @ 7:5
+                ID: f   @ 7:5
+                BinaryOp: %   @ 7:9
+                    ID: a   @ 7:9
+                    Constant: float, 3.0   @ 7:13
+            Assignment: =   @ 8:5
+                ID: c   @ 8:5
+                BinaryOp: *   @ 8:9
+                    Constant: float, 3.0   @ 8:9
+                    ID: e   @ 8:14
+            Return:    @ 10:5
+                Constant: int, 0   @ 10:12
