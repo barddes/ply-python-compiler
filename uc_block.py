@@ -269,6 +269,37 @@ class GenerateCode(NodeVisitor):
 
         return name
 
+    def changeBlockToBasic(self, block, result):
+        new_block = BasicBlock(block.label)
+        new_block.instructions = block.instructions
+        new_block.predecessors = block.predecessors
+        new_block.next_block = block.next_block
+
+        if result:
+            new_block.branch = block.taken
+        else:
+            new_block.branch = block.fall_through
+
+        if block.prev_block:
+            block.prev_block.next_block = new_block
+
+        for pred in block.predecessors:
+            if isinstance(pred, BasicBlock):
+                pred.branch = new_block
+            else:
+                if pred.taken == block:
+                    pred.taken = new_block
+                else:
+                    pred.fall_through = new_block
+
+            if pred.next_block == block:
+                pred.next_block = new_block
+
+        for node in block.nodes:
+            node.cfg = new_block
+
+        return new_block
+
     def changeCurrentBlock(self):
         current_block = self.current_block
         new_block = ConditionBlock(current_block.label)
@@ -474,6 +505,10 @@ class GenerateCode(NodeVisitor):
                 self.reaching_definitions(cfg)
                 self.instruction_analisys(cfg)
                 self.constant_folding(cfg)
+
+                self.reaching_definitions(cfg)
+                self.instruction_analisys(cfg)
+                self.branch_folding(cfg)
 
                 self.reaching_definitions(cfg)
                 self.liveness_analisys(cfg)
@@ -1362,7 +1397,7 @@ class GenerateCode(NodeVisitor):
             current_in = block.rd_in.copy()
 
             for inst in block.code_obj:
-                matches = re.match(r'(add|sub|mul|div|mod)_(?!void)(.*)', inst['inst'][0])
+                matches = re.match(r'(add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or)_(?!void)(.*)', inst['inst'][0])
                 if matches:
                     op = matches.group(1)
                     type = matches.group(2)
@@ -1371,8 +1406,6 @@ class GenerateCode(NodeVisitor):
                         op = 'truediv'
                     elif (op, type) == ('div', 'int'):
                         op = 'floordiv'
-                    elif op == 'not':
-                        op = 'not_'
 
                     param1 = inst['inst'][1]
                     param2 = inst['inst'][2]
@@ -1385,14 +1418,59 @@ class GenerateCode(NodeVisitor):
                         def_inst2 = list(defs2.copy().pop())
 
                         literal_re = re.compile(r'literal_.*')
+                        bool_re = re.compile(r'(eq|ne)_.*')
 
                         if literal_re.match(def_inst1[0]) and literal_re.match(def_inst2[0]):
                             res = getattr(operator, op)(def_inst1[1], def_inst2[1])
 
-                            if type == 'int':
-                                res = res // 1
+                            if not isinstance(res, bool):
+                                if type == 'int':
+                                    res = res // 1
 
-                            new_inst = ('literal_%s' % type, res, inst['inst'][-1])
+                                new_inst = ('literal_%s' % type, res, inst['inst'][-1])
+                            else:
+                                if res:
+                                    new_inst = ('eq_%s' % type, inst['inst'][1], inst['inst'][1], inst['inst'][-1])
+                                else:
+                                    new_inst = ('ne_%s' % type, inst['inst'][1], inst['inst'][1], inst['inst'][-1])
+
+                            old_inst = inst['inst']
+
+                            print('[Constant Folding] Changing %d: %s to %s' % (inst['label'], old_inst, new_inst))
+
+                            idx = block.instructions.index(old_inst)
+                            block.instructions[idx] = new_inst
+                            inst['inst'] = new_inst
+                        elif bool_re.match(def_inst1[0]) and bool_re.match(def_inst2[0]):
+                            if def_inst1[1] == def_inst1[2] and def_inst2[1] == def_inst2[2]:
+                                b1 = def_inst1[0].startswith('eq')
+                                b2 = def_inst2[0].startswith('eq')
+
+                                if getattr(operator, op)(b1, b2):
+                                    new_inst = ('eq_%s' % type, inst['inst'][1], inst['inst'][1], inst['inst'][-1])
+                                else:
+                                    new_inst = ('ne_%s' % type, inst['inst'][1], inst['inst'][1], inst['inst'][-1])
+
+                                old_inst = inst['inst']
+
+                                print('[Constant Folding] Changing %d: %s to %s' % (inst['label'], old_inst, new_inst))
+
+                                idx = block.instructions.index(old_inst)
+                                block.instructions[idx] = new_inst
+                                inst['inst'] = new_inst
+                elif inst['inst'][0] == 'not_bool':
+                    param1 = inst['inst'][1]
+
+                    defs1 = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param1}}
+
+                    if len(defs1) == 1:
+                        def_inst1 = list(defs1.copy().pop())
+
+                        if re.match(r'(eq|ne)_.*', def_inst1[0]) and def_inst1[1] == def_inst1[2]:
+                            if not def_inst1[0].startswith('eq'):
+                                new_inst = ('eq_bool', inst['inst'][1], inst['inst'][1], inst['inst'][-1])
+                            else:
+                                new_inst = ('ne_bool', inst['inst'][1], inst['inst'][1], inst['inst'][-1])
 
                             old_inst = inst['inst']
 
@@ -1408,6 +1486,32 @@ class GenerateCode(NodeVisitor):
                     current_in |= {inst['label']}
 
             block = block.next_block
+
+    def branch_folding(self, cfg):
+        block = cfg
+
+        while isinstance(block, Block):
+            current_in = block.rd_in.copy()
+
+            for inst in block.code_obj:
+                if inst['inst'][0] == 'cbranch':
+                    param = inst['inst'][1]
+
+                    defs = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param}}
+
+                    if len(defs) == 1:
+                        def_inst = list(defs.copy().pop())
+
+                        if def_inst[1] == def_inst[2]:
+                            # new_inst = ('jump')
+
+                            if def_inst[0].startswith('eq'):
+                                pass
+                            elif def_inst[0].startswith('ne'):
+                                pass
+
+            block = block.next_block
+
 
 
 
