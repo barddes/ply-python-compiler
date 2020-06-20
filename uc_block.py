@@ -20,10 +20,19 @@ class Block(object):
         self.prev_block = None
 
         self.code_obj = []
-        self.block_in = set()
-        self.block_out = set()
-        self.block_gen = set()
-        self.block_kill = set()
+
+        # Reaching Definitions
+        self.rd_in = set()
+        self.rd_out = set()
+        self.rd_gen = set()
+        self.rd_kill = set()
+
+        # Liveness analisys
+        self.la_use = set()
+        self.la_def = set()
+        self.la_in = set()
+        self.la_out = set()
+
 
     def append(self, instr):
         self.instructions.append(instr)
@@ -122,11 +131,17 @@ class CFG(object):
             for _inst in block.code_obj[1:]:
                 _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
 
-            _label += '\l\t'
-            _label += 'GEN ' + str(block.block_gen).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'KILL ' + str(block.block_kill).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'IN   ' + str(block.block_in).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'OUT  ' + str(block.block_out).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'RD:\l\t'
+            _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'KILL ' + str(block.rd_kill).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'IN   ' + str(block.rd_in).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'OUT  ' + str(block.rd_out).replace('{', '').replace('}', '') + '\l\t'
+
+            _label += 'LA:\l\t'
+            _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
 
             # _label += "\l\t"
             # for _pred in block.predecessors:
@@ -151,12 +166,17 @@ class CFG(object):
         for _inst in block.code_obj[1:]:
             _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
 
-        _label += '\l\t'
-        _label += 'GEN ' + str(block.block_gen).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'KILL ' + str(block.block_kill).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'IN   ' + str(block.block_in).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'OUT  ' + str(block.block_out).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'RD:\l\t'
+        _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'KILL ' + str(block.rd_kill).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'IN   ' + str(block.rd_in).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'OUT  ' + str(block.rd_out).replace('{', '').replace('}', '') + '\l\t'
 
+        _label += 'LA:\l\t'
+        _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
         # _label += "\l\t"
         # for _pred in block.predecessors:
         #     _label += "pred %s \l\t" % _pred.label
@@ -223,6 +243,7 @@ class GenerateCode(NodeVisitor):
         self.current_block = None
         self.ret_block = None
         self.loop_stack = []
+        self.global_vars = set()
 
         super(GenerateCode, self).__init__()
 
@@ -420,10 +441,16 @@ class GenerateCode(NodeVisitor):
         for i, d in node.children():
             self.visit(d)
 
+        for e in node.global_env.symtable:
+            if node.global_env.symtable[e].get('global', None):
+                self.global_vars |= {e}
+
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
                 cfg = _decl.cfg
+                self.instruction_analisys(cfg)
                 self.reaching_definitions(cfg)
+                self.liveness_analisys(cfg)
 
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
@@ -729,7 +756,7 @@ class GenerateCode(NodeVisitor):
                 self.current_block.append(('param_%s' % i.node_info['type'], i.gen_location))
 
         target = self.new_temp()
-        inst = inst = ('call', '@%s' % node.expr1.name, target)
+        inst = ('call', '@%s' % node.expr1.name, target)
         self.current_block.append(inst)
         node.gen_location = target
 
@@ -796,7 +823,7 @@ class GenerateCode(NodeVisitor):
         self.current_block = self.ret_block
 
         final_ret = self.new_temp()
-        self.current_block.append((self.ret_block.label + ':',))
+        self.current_block.append((self.ret_block.label[1:] + ':',))
         if node.type.name[0] != 'void':
             self.current_block.append(('load_%s' % node.type.name[0], ret, final_ret))
             self.current_block.append(('return_%s' % node.type.name[0], final_ret))
@@ -997,15 +1024,16 @@ class GenerateCode(NodeVisitor):
         self.label = label + 1
         return label
 
-    def reaching_definitions(self, cfg):
+    def instruction_analisys(self, cfg):
         block = cfg
         self.code_obj = []
 
-        definition_re = re.compile(r'(load|store|literal|elem|get|add|sub|mul|div|mod|oper|read)_.*|fptosi|sitofp|call')
+        definition_re = re.compile(r'(load|store|literal|elem|get|add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or|not|read|alloc)_.*|fptosi|sitofp|call')
         label_re = re.compile(r'.*:')
 
-        uses_1_re = re.compile(r'(load|store|get|return|param|print)_(?!void).*|fptosi|sitofp|jump|call')
-        uses_2_re = re.compile(r'(elem|add|sub|mul|div|mod|oper)_.*')
+        # uses_1_re = re.compile(r'(load|store|get|return|param|print)_(?!void).*|fptosi|sitofp|jump|call')
+        uses_1_re = re.compile(r'(load|store|get|return|param|print)_(?!void).*|fptosi|sitofp|call')
+        uses_2_re = re.compile(r'(elem|add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or|not)_.*')
         uses_3_re = re.compile(r'cbranch')
 
         while isinstance(block, Block):
@@ -1019,51 +1047,56 @@ class GenerateCode(NodeVisitor):
 
                 if definition_re.match(inst[0]):
                     obj['def'] |= {inst[-1]}
-                elif label_re.match(inst[0]):
-                    obj['def'] |= {'%%%s' % inst[0][0:-1]}
+                # elif label_re.match(inst[0]):
+                #     obj['def'] |= {'%%%s' % inst[0][0:-1]}
 
                 if uses_1_re.match(inst[0]):
                     obj['use'] |= {inst[1]}
                 elif uses_2_re.match(inst[0]):
                     obj['use'] |= {inst[1], inst[2]}
                 elif uses_3_re.match(inst[0]):
-                    obj['use'] |= {inst[1], inst[2], inst[3]}
+                    # obj['use'] |= {inst[1], inst[2], inst[3]}
+                    obj['use'] |= {inst[1]}
 
                 block.code_obj.append(obj)
                 self.code_obj.append(obj)
             block = block.next_block
 
-        table_format = '{:60} {:20} {:20} {:20} {:20}'
-        print(table_format.format('Instruction', 'RD Gen', 'RD Kill', 'Def', 'Use'))
-        print(table_format.format('-----------', '------', '-------', '---', '---'))
+            # Print
+            table_format = '{:60} {:20} {:20} {:20} {:20}'
+            print(table_format.format('Instruction', 'RD Gen', 'RD Kill', 'Def', 'Use'))
+            print(table_format.format('-----------', '------', '-------', '---', '---'))
 
-        for inst in self.code_obj:
-            gen = set()
-            kill = set()
-            _def = set()
-            use = set()
+            for inst in self.code_obj:
+                gen = set()
+                kill = set()
+                _def = set()
+                use = set()
 
-            if inst['def']:
-                gen = {inst['label']}
-                _def = inst['def']
-                kill = set([x['label'] for x in self.code_obj if x['def'] == inst['def']]) - gen
+                if inst['def']:
+                    gen = {inst['label']}
+                    _def = inst['def']
+                    kill = set([x['label'] for x in self.code_obj if x['def'] == inst['def']]) - gen
 
-            if inst['use']:
-                use = inst['use']
+                if inst['use']:
+                    use = inst['use']
 
-            if not gen:
-                gen = ''
-            if not kill:
-                kill = ''
-            if not _def:
-                _def = ''
-            if not use:
-                use = ''
+                if not gen:
+                    gen = ''
+                if not kill:
+                    kill = ''
+                if not _def:
+                    _def = ''
+                if not use:
+                    use = ''
 
-            print(table_format.format('%d: %s' % (inst['label'], inst['inst']), str(gen), str(kill), str(_def), str(use)))
+                print(table_format.format('%d: %s' % (inst['label'], inst['inst']), str(gen), str(kill), str(_def), str(use)))
 
-        nodes = []
+    def reaching_definitions(self, cfg):
         block = cfg
+        nodes = []
+
+        # Gen/Kill do bloco
         while isinstance(block, Block):
             nodes.append(block)
             for inst in block.code_obj:
@@ -1073,26 +1106,27 @@ class GenerateCode(NodeVisitor):
                 gen_n = {inst['label']}
                 kill_n = set([x['label'] for x in self.code_obj if x['def'] == inst['def']])
 
-                new_gen = gen_n | (block.block_gen - kill_n)
-                new_kill = block.block_kill | kill_n
+                new_gen = gen_n | (block.rd_gen - kill_n)
+                new_kill = block.rd_kill | kill_n
 
-                block.block_gen = new_gen
-                block.block_kill = new_kill
+                block.rd_gen = new_gen
+                block.rd_kill = new_kill
             block = block.next_block
 
+        # Reaching Definitions
         while len(nodes) > 0:
             node = nodes.pop(0)
 
-            old = node.block_out
+            old = node.rd_out
 
-            block_in = set()
+            rd_in = set()
             for pred in node.predecessors:
-                block_in |= pred.block_out
+                rd_in |= pred.rd_out
 
-            node.block_in = block_in
-            node.block_out = node.block_gen | (block_in - node.block_kill)
+            node.rd_in = rd_in
+            node.rd_out = node.rd_gen | (rd_in - node.rd_kill)
 
-            if old != node.block_out:
+            if old != node.rd_out:
                 if isinstance(node, ConditionBlock):
                     succ = [node.taken, node.fall_through]
                 else:
@@ -1100,3 +1134,44 @@ class GenerateCode(NodeVisitor):
                 for s in succ:
                     if s and s not in nodes:
                         nodes.append(s)
+
+    def liveness_analisys(self, cfg):
+        block = cfg
+        nodes = []
+
+        # Use/Def do bloco
+        while isinstance(block, Block):
+            nodes.append(block)
+            for inst in reversed(block.code_obj):
+                old_use = block.la_use
+                block.la_use = inst['use'] | (old_use - inst['def'])
+
+                old_def = block.la_def
+                block.la_def = inst['def'] | old_def
+            block = block.next_block
+
+        nodes[-1].la_out = self.global_vars
+
+        # Liveness analisys
+        while len(nodes) > 0:
+            node = nodes.pop(-1)
+
+            if isinstance(node, ConditionBlock):
+                successors = [node.taken, node.fall_through]
+            else:
+                successors = [node.branch]
+
+            node.la_out = set()
+            for successor in successors:
+                if successor:
+                    node.la_out |= successor.la_in
+
+            old_in = node.la_in
+            node.la_in = node.la_use | (node.la_out - node.la_def)
+
+            if old_in != node.la_in:
+                for pred in node.predecessors:
+                    if pred and pred not in nodes:
+                        nodes.insert(0, pred)
+
+

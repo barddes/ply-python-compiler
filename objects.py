@@ -31,6 +31,7 @@ class NodeInfo(dict):
         self['type'] = None
         self['index'] = None
         self['location'] = None
+        self['global'] = False
         super().__init__(init)
 
     def __eq__(self, other):

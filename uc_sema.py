@@ -241,14 +241,27 @@ class Environment(object):
         return [x.value if type(x) != InitList else self.unbox_InitList(x.list) for x in list]
 
     def add_global_array(self, array):
-        self.consts.append(self.unbox_InitList(array.list))
-        return len(self.consts) - 1
+        array = self.unbox_InitList(array.list)
+        self.consts.append(array)
+
+        idx = self.consts.index(array)
+        # self.symtable[] = NodeInfo({
+        #     'location': '.str.%d' % idx,
+        #     'global': True
+        # })
+        return idx
 
     def add_global_str(self, str):
         if str not in self.consts:
             self.consts.append(str)
 
-        return self.consts.index(str)
+        idx = self.consts.index(str)
+        # self.symtable[] = NodeInfo({
+        #     'location': '.str.%d' % idx,
+        #     'global': True
+        # })
+
+        return idx
 
     def add_global_var(self, var):
         self.vars.append(var)
