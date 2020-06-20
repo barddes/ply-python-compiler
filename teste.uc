@@ -1,4 +1,4 @@
-int checkPrime_unoptmized(int n) {
+int checkPrime(int n) {
     int i, isPrime = 1;
     for (i = 2; i <= n/2; ++i) {
         if (n % i == 0) {
@@ -6,17 +6,19 @@ int checkPrime_unoptmized(int n) {
             break;
         }
         else{
-            int a=1, b=2, c=3, d=4;
-            if(a < b){
+            int a=1, b=2, c, d;
+            a = c;
+            b = d;
+            if(c < d){
                 print(a);
             }
 
-            if(a<b && b > c){
+            if(c<d && c > d){
                 print(a);
             }
 
-            if(!(a==d)){
-                print(a);
+            if(!(c==d)){
+                print("str");
             }
 
         }

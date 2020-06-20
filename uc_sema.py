@@ -46,7 +46,7 @@ class uCType(object):
 EmptyType = uCType(None)
 
 AnyType = uCType('any',
-                 unary_ops={"-", "+", "--", "++", "p--", "p++", "*", "&"},
+                 unary_ops={"-", "+", "--", "++", "p--", "p++", "*", "&", "!"},
                  binary_ops={"+", "-", "*", "/", "%"},
                  rel_ops={"==", "!=", "<", ">", "<=", ">=", "&&", "||"},
                  assign_ops={"=", "+=", "-=", "*=", "/=", "%="}
@@ -93,6 +93,7 @@ VoidType = uCType("void",
                   )
 
 BoolType = uCType("bool",
+                  unary_ops={"!"},
                   rel_ops={"==", "!=", "&&", "||"}
                   )
 

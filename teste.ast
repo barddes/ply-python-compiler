@@ -1,0 +1,94 @@
+Program: 
+    FuncDef: 
+        Type: ['int']   @ 1:1
+        Decl: ID(name='checkPrime'  )
+            FuncDecl: 
+                ParamList: 
+                    Decl: ID(name='n'  )
+                        VarDecl: 
+                            Type: ['int']   @ 1:16
+                VarDecl: 
+                    Type: ['int']   @ 1:1
+        Compound:    @ 1:1
+            Decl: ID(name='i'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
+            Decl: ID(name='isPrime'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
+                Constant: int, 1   @ 2:22
+            For:    @ 3:5
+                Assignment: =   @ 3:10
+                    ID: i   @ 3:10
+                    Constant: int, 2   @ 3:14
+                BinaryOp: <=   @ 3:17
+                    ID: i   @ 3:17
+                    BinaryOp: /   @ 3:22
+                        ID: n   @ 3:22
+                        Constant: int, 2   @ 3:24
+                UnaryOp: ++   @ 3:29
+                    ID: i   @ 3:29
+                Compound:    @ 3:1
+                    If:    @ 4:9
+                        BinaryOp: ==   @ 4:13
+                            BinaryOp: %   @ 4:13
+                                ID: n   @ 4:13
+                                ID: i   @ 4:17
+                            Constant: int, 0   @ 4:22
+                        Compound:    @ 4:1
+                            Assignment: =   @ 5:13
+                                ID: isPrime   @ 5:13
+                                Constant: int, 0   @ 5:23
+                            Break: 
+                        Compound:    @ 8:1
+                            Decl: ID(name='a'  )
+                                VarDecl: 
+                                    Type: ['int']   @ 9:13
+                                Constant: int, 1   @ 9:19
+                            Decl: ID(name='b'  )
+                                VarDecl: 
+                                    Type: ['int']   @ 9:13
+                                Constant: int, 2   @ 9:24
+                            Decl: ID(name='c'  )
+                                VarDecl: 
+                                    Type: ['int']   @ 9:13
+                            Decl: ID(name='d'  )
+                                VarDecl: 
+                                    Type: ['int']   @ 9:13
+                            Assignment: =   @ 10:13
+                                ID: a   @ 10:13
+                                ID: c   @ 10:17
+                            Assignment: =   @ 11:13
+                                ID: b   @ 11:13
+                                ID: d   @ 11:17
+                            If:    @ 12:13
+                                BinaryOp: <   @ 12:16
+                                    ID: c   @ 12:16
+                                    ID: d   @ 12:20
+                                Compound:    @ 12:1
+                                    Print:    @ 13:17
+                                        ID: a   @ 13:23
+                            If:    @ 16:13
+                                BinaryOp: &&   @ 16:16
+                                    BinaryOp: <   @ 16:16
+                                        ID: c   @ 16:16
+                                        ID: d   @ 16:18
+                                    BinaryOp: >   @ 16:23
+                                        ID: c   @ 16:23
+                                        ID: d   @ 16:27
+                                Compound:    @ 16:1
+                                    Print:    @ 17:17
+                                        ID: a   @ 17:23
+                            If:    @ 20:13
+                                UnaryOp: !   @ 20:18
+                                    BinaryOp: ==   @ 20:18
+                                        ID: c   @ 20:18
+                                        ID: d   @ 20:21
+                                Compound:    @ 20:1
+                                    Print:    @ 21:17
+                                        Constant: string, "str"   @ 21:23
+            Assignment: =   @ 26:5
+                ID: i   @ 26:5
+                Constant: int, 0   @ 26:9
+            Return:    @ 27:5
+                ID: isPrime   @ 27:12

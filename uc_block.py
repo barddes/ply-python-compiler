@@ -407,6 +407,12 @@ class GenerateCode(NodeVisitor):
             self.current_block.append(('store_%s' % node_t, nt2, var_loc))
             node.gen_location = node.expr1.gen_location
 
+        if node.op == '!':
+            nt = self.new_temp()
+            self.current_block.append(('not_%s' % node_t, node.expr1.gen_location, nt))
+            node.gen_location = nt
+            return
+
     def get_const_type(self, const):
         if type(const) == list:
             return self.get_const_type(const[0])
@@ -462,7 +468,7 @@ class GenerateCode(NodeVisitor):
                 cfg = _decl.cfg
                 self.instruction_analisys(cfg)
                 self.reaching_definitions(cfg)
-                # self.copy_propagation(cfg)
+                self.copy_propagation(cfg)
 
                 # self.instruction_analisys(cfg)
                 self.liveness_analisys(cfg)
@@ -1046,8 +1052,8 @@ class GenerateCode(NodeVisitor):
         label_re = re.compile(r'.*:')
 
         # uses_1_re = re.compile(r'(load|store|get|return|param|print)_(?!void).*|fptosi|sitofp|jump|call')
-        uses_1_re = re.compile(r'(load|store|get|return|param|print)_(?!void).*|fptosi|sitofp|call')
-        uses_2_re = re.compile(r'(elem|add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or|not)_.*')
+        uses_1_re = re.compile(r'(load|store|get|return|param|print|not)_(?!void).*|fptosi|sitofp|call')
+        uses_2_re = re.compile(r'(elem|add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or)_.*')
         uses_3_re = re.compile(r'cbranch')
 
         block = cfg
@@ -1205,27 +1211,27 @@ class GenerateCode(NodeVisitor):
             current_in = block.rd_in.copy()
 
             for inst in block.code_obj:
-                if re.match(r'(load|store)_*', inst['inst'][0]):
-                    param = inst['inst'][1]
-                    defs = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param}}
+                # if re.match(r'(load|store)_*', inst['inst'][0]):
+                #     param = inst['inst'][1]
+                #     defs = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param}}
+                #
+                #     if len(defs) == 1:
+                #         old_inst = inst['inst']
+                #
+                #         new_inst = list(defs.copy().pop())
+                #         new_inst[-1] = list(old_inst)[-1]
+                #         new_inst = tuple(new_inst)
+                #
+                #         print('[Copy Propagation Load/Store] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
+                #
+                #         for i in block.code_obj:
+                #             if i['label'] == inst['label']:
+                #                 idx = block.instructions.index(i['inst'])
+                #                 block.instructions[idx] = new_inst
+                #                 i['inst'] = new_inst
+                #                 break
 
-                    if len(defs) == 1:
-                        old_inst = inst['inst']
-
-                        new_inst = list(defs.copy().pop())
-                        new_inst[-1] = list(old_inst)[-1]
-                        new_inst = tuple(new_inst)
-
-                        print('[Copy Propagation Load/Store] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
-
-                        for i in block.code_obj:
-                            if i['label'] == inst['label']:
-                                idx = block.instructions.index(i['inst'])
-                                block.instructions[idx] = new_inst
-                                i['inst'] = new_inst
-                                break
-
-                if re.match(r'(add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or|not)_*', inst['inst'][0]):
+                if re.match(r'(add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or)_*', inst['inst'][0]):
                     param1 = inst['inst'][1]
                     param2 = inst['inst'][2]
 
