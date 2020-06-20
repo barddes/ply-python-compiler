@@ -1073,35 +1073,35 @@ class GenerateCode(NodeVisitor):
                 self.code_obj.append(obj)
             block = block.next_block
 
-            # Print
-            table_format = '{:60} {:20} {:20} {:20} {:20}'
-            print(table_format.format('Instruction', 'RD Gen', 'RD Kill', 'Def', 'Use'))
-            print(table_format.format('-----------', '------', '-------', '---', '---'))
+        # Print
+        table_format = '{:60} {:20} {:20} {:20} {:20}'
+        print(table_format.format('Instruction', 'RD Gen', 'RD Kill', 'Def', 'Use'))
+        print(table_format.format('-----------', '------', '-------', '---', '---'))
 
-            for inst in self.code_obj:
-                gen = set()
-                kill = set()
-                _def = set()
-                use = set()
+        for inst in self.code_obj:
+            gen = set()
+            kill = set()
+            _def = set()
+            use = set()
 
-                if inst['def']:
-                    gen = {inst['label']}
-                    _def = inst['def']
-                    kill = set([x['label'] for x in self.code_obj if x['def'] == inst['def']]) - gen
+            if inst['def']:
+                gen = {inst['label']}
+                _def = inst['def']
+                kill = set([x['label'] for x in self.code_obj if x['def'] == inst['def']]) - gen
 
-                if inst['use']:
-                    use = inst['use']
+            if inst['use']:
+                use = inst['use']
 
-                if not gen:
-                    gen = ''
-                if not kill:
-                    kill = ''
-                if not _def:
-                    _def = ''
-                if not use:
-                    use = ''
+            if not gen:
+                gen = ''
+            if not kill:
+                kill = ''
+            if not _def:
+                _def = ''
+            if not use:
+                use = ''
 
-                print(table_format.format('%d: %s' % (inst['label'], inst['inst']), str(gen), str(kill), str(_def), str(use)))
+            print(table_format.format('%d: %s' % (inst['label'], inst['inst']), str(gen), str(kill), str(_def), str(use)))
 
     def reaching_definitions(self, cfg):
         block = cfg
