@@ -1211,25 +1211,25 @@ class GenerateCode(NodeVisitor):
             current_in = block.rd_in.copy()
 
             for inst in block.code_obj:
-                # if re.match(r'(load|store)_*', inst['inst'][0]):
-                #     param = inst['inst'][1]
-                #     defs = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param}}
-                #
-                #     if len(defs) == 1:
-                #         old_inst = inst['inst']
-                #
-                #         new_inst = list(defs.copy().pop())
-                #         new_inst[-1] = list(old_inst)[-1]
-                #         new_inst = tuple(new_inst)
-                #
-                #         print('[Copy Propagation Load/Store] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
-                #
-                #         for i in block.code_obj:
-                #             if i['label'] == inst['label']:
-                #                 idx = block.instructions.index(i['inst'])
-                #                 block.instructions[idx] = new_inst
-                #                 i['inst'] = new_inst
-                #                 break
+                if re.match(r'(load|store)_*', inst['inst'][0]):
+                    param = inst['inst'][1]
+                    defs = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param}}
+
+                    if len(defs) == 1:
+                        old_inst = inst['inst']
+
+                        new_inst = list(defs.copy().pop())
+                        new_inst[-1] = list(old_inst)[-1]
+                        new_inst = tuple(new_inst)
+
+                        print('[Copy Propagation - Load/Store] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
+
+                        for i in block.code_obj:
+                            if i['label'] == inst['label']:
+                                idx = block.instructions.index(i['inst'])
+                                block.instructions[idx] = new_inst
+                                i['inst'] = new_inst
+                                break
 
                 if re.match(r'(add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or)_*', inst['inst'][0]):
                     param1 = inst['inst'][1]
@@ -1255,7 +1255,7 @@ class GenerateCode(NodeVisitor):
                     new_inst = tuple(new_inst)
 
                     if new_inst != inst['inst']:
-                        print('[Copy Propagation BinOp] Changing from %d: %s to %s' % (inst['label'], inst['inst'], new_inst))
+                        print('[Copy Propagation - BinOp] Changing from %d: %s to %s' % (inst['label'], inst['inst'], new_inst))
 
                         for i in block.code_obj:
                             if i['label'] == inst['label']:
@@ -1263,6 +1263,27 @@ class GenerateCode(NodeVisitor):
                                 block.instructions[idx] = new_inst
                                 i['inst'] = new_inst
                                 break
+
+                if re.match(r'not_.*',  inst['inst'][0]):
+                    param = inst['inst'][1]
+                    defs = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param}}
+
+                    new_inst =  list(inst['inst'])
+
+                    if len(defs) == 1:
+                        def_inst = list(defs.copy().pop())
+
+                        if re.match(r'(load|store)_.*', def_inst[0]):
+                            new_inst[1] = def_inst[1]
+
+                    new_inst = tuple(new_inst)
+
+                    if new_inst != inst['inst']:
+                        print('[Copy Propagation - Not] Changing from %d: %s to %s' % (inst['label'], inst['inst'], new_inst))
+
+
+
+
 
                 if inst['def']:
                     inst_kill = {x['label'] for x in self.code_obj if x['def'] == inst['def']} - {inst['label']}
