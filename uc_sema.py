@@ -231,35 +231,33 @@ class Environment(object):
     # def scope_level(self):
     #     return len(self.stack)
 
-    def add_global_const(self, const):
+    def add_global_const(self, const, sym_key=None):
         if isinstance(const, str):
-            return self.add_global_str(const)
+            return self.add_global_str(const, sym_key)
         else:
-            return self.add_global_array(const)
+            return self.add_global_array(const, sym_key)
 
     def unbox_InitList(self, list):
         return [x.value if type(x) != InitList else self.unbox_InitList(x.list) for x in list]
 
-    def add_global_array(self, array):
+    def add_global_array(self, array, sym_key):
         array = self.unbox_InitList(array.list)
         self.consts.append(array)
 
         idx = self.consts.index(array)
-        # self.symtable[] = NodeInfo({
-        #     'location': '.str.%d' % idx,
-        #     'global': True
-        # })
+        self.symtable['.str.%d' % idx] = NodeInfo({
+            'global': True
+        })
         return idx
 
-    def add_global_str(self, str):
+    def add_global_str(self, str, sym_key):
         if str not in self.consts:
             self.consts.append(str)
 
         idx = self.consts.index(str)
-        # self.symtable[] = NodeInfo({
-        #     'location': '.str.%d' % idx,
-        #     'global': True
-        # })
+        self.symtable['.str.%d' % idx] = NodeInfo({
+            'global': True
+        })
 
         return idx
 
@@ -542,6 +540,7 @@ class Visitor(NodeVisitor):
 
         node.node_info = node.decl.node_info
         node.node_info['func'] = True
+        node.node_info['global'] = True
         if node.init:
             node.node_info['params'] = node.init.node_info['params']
         else:

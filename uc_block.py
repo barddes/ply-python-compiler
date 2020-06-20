@@ -244,6 +244,7 @@ class GenerateCode(NodeVisitor):
         self.ret_block = None
         self.loop_stack = []
         self.global_vars = set()
+        self.code_obj = []
 
         super(GenerateCode, self).__init__()
 
@@ -427,7 +428,12 @@ class GenerateCode(NodeVisitor):
             else:
                 inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name)
 
-            # self.current_block.append(inst)
+            self.code_obj.append({
+                    'label': self.make_label_instructions(),
+                    'inst': inst,
+                    'def': set(),
+                    'use': set()
+                })
             var.gen_location = '@%s' % var.decl.name.name
             node.lookup_envs(var.decl.name.name)['location'] = '@%s' % var.decl.name.name
 
@@ -436,14 +442,19 @@ class GenerateCode(NodeVisitor):
                 inst = ('global_%s' % self.get_const_type(const) + self.get_const_dim(const), '@.str.%d' % i, const)
             else:
                 inst = ('global_string', '@.str.%d' % i, const)
-            # self.current_block.append(inst)
+            self.code_obj.append({
+                    'label': self.make_label_instructions(),
+                    'inst': inst,
+                    'def': set(),
+                    'use': set()
+                })
 
         for i, d in node.children():
             self.visit(d)
 
         for e in node.global_env.symtable:
             if node.global_env.symtable[e].get('global', None):
-                self.global_vars |= {e}
+                self.global_vars |= {'@%s' % e}
 
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
@@ -1161,7 +1172,7 @@ class GenerateCode(NodeVisitor):
             else:
                 successors = [node.branch]
 
-            node.la_out = set()
+            # node.la_out = set()
             for successor in successors:
                 if successor:
                     node.la_out |= successor.la_in
