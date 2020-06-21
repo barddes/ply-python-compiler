@@ -1288,74 +1288,74 @@ class GenerateCode(NodeVisitor):
                         new_inst[-1] = list(old_inst)[-1]
                         new_inst = tuple(new_inst)
 
-                        if new_inst[0].startswith('load_') and not new_inst[1][1:].isdigit():
+                        if not new_inst[0].startswith('load_') or new_inst[1][1:].isdigit():
 
-                            continue
 
-                        if re.match(r'read_.*', new_inst[0]):
 
-                            old_read = list(defs.copy().pop())
+                            if re.match(r'read_.*', new_inst[0]):
 
-                            print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label']-1, tuple(old_read), new_inst))
+                                old_read = list(defs.copy().pop())
 
-                            for i in block.code_obj:
-                                if i['label'] == inst['label']-1:
-                                    idx = block.instructions.index(i['inst'])
-                                    block.instructions[idx] = new_inst
-                                    i['inst'] = new_inst
-                                    break
+                                print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label']-1, tuple(old_read), new_inst))
 
-                            new_inst = list(old_inst)
-                            temp = new_inst[-1]
-                            new_inst[-1] = new_inst[1]
-                            new_inst[1] = temp
-                            new_inst = tuple(new_inst)
+                                for i in block.code_obj:
+                                    if i['label'] == inst['label']-1:
+                                        idx = block.instructions.index(i['inst'])
+                                        block.instructions[idx] = new_inst
+                                        i['inst'] = new_inst
+                                        break
 
-                            print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
+                                new_inst = list(old_inst)
+                                temp = new_inst[-1]
+                                new_inst[-1] = new_inst[1]
+                                new_inst[1] = temp
+                                new_inst = tuple(new_inst)
 
-                            for i in block.code_obj:
-                                if i['label'] == inst['label']:
-                                    idx = block.instructions.index(i['inst'])
-                                    block.instructions[idx] = new_inst
-                                    i['inst'] = new_inst
-                                    break
+                                print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
 
-                        # if re.match(r'call', new_inst[0]):
-                        #     old_call = list(defs.copy().pop())
-                        #
-                        #     print('[Copy Propagation] Changing from %d: %s to %s' % ((inst['label']-1, tuple(old_call), new_inst)))
-                        #
-                        #     for i in block.code_obj:
-                        #         if i['label'] == inst['label']-1:
-                        #             idx = block.instructions.index(i['inst'])
-                        #             block.instructions[idx] = new_inst
-                        #             i['inst'] = new_inst
-                        #             break
-                        #
-                        #     new_inst = list(old_inst)
-                        #     temp = new_inst[-1]
-                        #     new_inst[-1] = new_inst[1]
-                        #     new_inst[1] = temp
-                        #     new_inst = tuple(new_inst)
-                        #
-                        #     print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
-                        #
-                        #     for i in block.code_obj:
-                        #         if i['label'] == inst['label']:
-                        #             idx = block.instructions.index(i['inst'])
-                        #             block.instructions[idx] = new_inst
-                        #             i['inst'] = new_inst
-                        #             return
+                                for i in block.code_obj:
+                                    if i['label'] == inst['label']:
+                                        idx = block.instructions.index(i['inst'])
+                                        block.instructions[idx] = new_inst
+                                        i['inst'] = new_inst
+                                        break
 
-                        if not re.match(r'(alloc|read|elem)_.*|call', new_inst[0]):
-                            print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
+                            # if re.match(r'call', new_inst[0]):
+                            #     old_call = list(defs.copy().pop())
+                            #
+                            #     print('[Copy Propagation] Changing from %d: %s to %s' % ((inst['label']-1, tuple(old_call), new_inst)))
+                            #
+                            #     for i in block.code_obj:
+                            #         if i['label'] == inst['label']-1:
+                            #             idx = block.instructions.index(i['inst'])
+                            #             block.instructions[idx] = new_inst
+                            #             i['inst'] = new_inst
+                            #             break
+                            #
+                            #     new_inst = list(old_inst)
+                            #     temp = new_inst[-1]
+                            #     new_inst[-1] = new_inst[1]
+                            #     new_inst[1] = temp
+                            #     new_inst = tuple(new_inst)
+                            #
+                            #     print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
+                            #
+                            #     for i in block.code_obj:
+                            #         if i['label'] == inst['label']:
+                            #             idx = block.instructions.index(i['inst'])
+                            #             block.instructions[idx] = new_inst
+                            #             i['inst'] = new_inst
+                            #             return
 
-                            for i in block.code_obj:
-                                if i['label'] == inst['label']:
-                                    idx = block.instructions.index(i['inst'])
-                                    block.instructions[idx] = new_inst
-                                    i['inst'] = new_inst
-                                    break
+                            if not re.match(r'(alloc|read|elem)_.*|call', new_inst[0]):
+                                print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
+
+                                for i in block.code_obj:
+                                    if i['label'] == inst['label']:
+                                        idx = block.instructions.index(i['inst'])
+                                        block.instructions[idx] = new_inst
+                                        i['inst'] = new_inst
+                                        break
 
                 if re.match(r'(add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or)_*', inst['inst'][0]):
                     param1 = inst['inst'][1]
