@@ -9,7 +9,5 @@ digraph g {
 	"%if.then" -> "%exit"
 	"%if.else" [label="{%if.else:\l	10:   literal_int 1 %10 \l	11:   sub_int %0 %10 %11 \l	12:   param_int %11 \l	13:   param_int %p \l	14:   call @f %13 \l	15:   literal_int 2 %15 \l	16:   sub_int %0 %15 %16 \l	17:   param_int %16 \l	18:   param_int %q \l	19:   call @f %18 \l	20:   add_int %13 %18 %2 \l	21:   jump label %exit\l	}"]
 	"%if.else" -> "%exit"
-	"%if.end" [label="{%if.end:\l	23:   jump label %exit\l	}"]
-	"%if.end" -> "%exit"
-	"%exit" [label="{%exit:\l	25:   return_int %2\l	}"]
+	"%exit" [label="{%exit:\l	23:   return_int %2\l	}"]
 }

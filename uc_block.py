@@ -509,24 +509,24 @@ class GenerateCode(NodeVisitor):
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
                 cfg = _decl.cfg
-                self.instruction_analisys(cfg)
-                self.reaching_definitions(cfg)
-                self.copy_propagation(cfg)
-
-                self.instruction_analisys(cfg)
-                self.reaching_definitions(cfg)
-                self.constant_folding(cfg)
-
-                self.instruction_analisys(cfg)
-                self.reaching_definitions(cfg)
-                self.branch_folding(cfg)
-
-                self.instruction_analisys(cfg)
-                self.liveness_analisys(cfg)
-                self.deadcode_elimination(cfg)
-                self.block_removal(cfg)
-                self.merge_basic_blocks(cfg)
-
+                # self.instruction_analisys(cfg)
+                # self.reaching_definitions(cfg)
+                # self.copy_propagation(cfg)
+                #
+                # self.instruction_analisys(cfg)
+                # self.reaching_definitions(cfg)
+                # self.constant_folding(cfg)
+                #
+                # self.instruction_analisys(cfg)
+                # self.reaching_definitions(cfg)
+                # self.branch_folding(cfg)
+                #
+                # self.instruction_analisys(cfg)
+                # self.liveness_analisys(cfg)
+                # self.deadcode_elimination(cfg)
+                # self.block_removal(cfg)
+                # self.merge_basic_blocks(cfg)
+                #
                 self.instruction_analisys(cfg)
 
 
@@ -542,15 +542,21 @@ class GenerateCode(NodeVisitor):
             node.assign_expr.assign_left = node
             self.visit(node.assign_expr)
 
+            if isinstance(node.assign_expr, ArrayRef):
+                nt = self.new_temp()
+                self.current_block.append(('load_%s_*' % node.assign_expr.node_info['type'], node.assign_expr.gen_location, nt))
+                node.assign_expr.gen_location= nt
+
         if isinstance(node.name, ArrayRef):
             self.visit(node.name)
-            index = node.name.expr.gen_location
-            nt = self.new_temp()
-            self.current_block.append(('load_int', index, nt))
-            source = node.lookup_envs(node.name.post_expr.name)
-            nt2 = self.new_temp()
-            self.current_block.append(('elem_%s' % source['type'], source['location'], nt, nt2))
-            left_target = nt2
+            left_target = node.name.gen_location
+            # index = node.name.expr.gen_location
+            # nt = self.new_temp()
+            # self.current_block.append(('load_int', index, nt))
+            # source = node.lookup_envs(node.name.post_expr.name)
+            # nt2 = self.new_temp()
+            # self.current_block.append(('elem_%s' % source['type'], source['location'], nt, nt2))
+            # left_target = nt2
         else:
             left_target = node.lookup_envs(node.name.name)['location']
 
@@ -559,18 +565,10 @@ class GenerateCode(NodeVisitor):
 
         if node.op == '=':
             if not isinstance(node.assign_expr, UnaryOp) or node.assign_expr.op != '&':
-                if isinstance(node.assign_expr, ArrayRef):
-                    nt = self.new_temp()
-                    self.current_block.append(
-                        ('load_%s_*' % node.assign_expr.node_info['type'], node.assign_expr.gen_location, nt))
-                    right_target = nt
-
                 if isinstance(node.name, ArrayRef):
-                    custom_type = '_*'
+                    self.current_block.append(('store_%s_*' % node.assign_expr.node_info['type'], node.assign_expr.gen_location, left_target))
                 else:
-                    custom_type = ''
-                self.current_block.append(
-                    ('store_%s' % (node.name.node_info['type'].typename + custom_type), right_target, left_target))
+                    self.current_block.append(('store_%s' % node.name.node_info['type'].typename, right_target, left_target))
 
         if node.op in ('+=', '-=', '*=', '/=', '%/'):
             nt = self.new_temp()
