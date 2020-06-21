@@ -25,5 +25,7 @@ Program:
                         BinaryOp: +   @ 6:17
                             ID: y   @ 6:17
                             ID: y   @ 6:21
-            Return:    @ 9:5
-                Constant: int, 0   @ 9:12
+                    Print:    @ 7:9
+                        ID: x   @ 7:15
+            Return:    @ 10:5
+                Constant: int, 0   @ 10:12
