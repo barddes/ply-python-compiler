@@ -1693,6 +1693,7 @@ class GenerateCode(NodeVisitor):
                 next_block.prev_block = prev_block
 
                 block.branch.instructions = block.instructions + block.branch.instructions
+                block.branch.label = block.label
 
                 for pred in block.predecessors:
                     if isinstance(pred, BasicBlock):
