@@ -138,11 +138,11 @@ class CFG(object):
             # _label += 'IN   ' + str(block.rd_in).replace('{', '').replace('}', '') + '\l\t'
             # _label += 'OUT  ' + str(block.rd_out).replace('{', '').replace('}', '') + '\l\t'
             #
-            # _label += 'LA:\l\t'
-            # _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
-            # _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
-            # _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
-            # _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'LA:\l\t'
+            _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
+            _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
 
             # _label += "\l\t"
             # for _pred in block.predecessors:
@@ -173,11 +173,11 @@ class CFG(object):
         # _label += 'IN   ' + str(block.rd_in).replace('{', '').replace('}', '') + '\l\t'
         # _label += 'OUT  ' + str(block.rd_out).replace('{', '').replace('}', '') + '\l\t'
         #
-        # _label += 'LA:\l\t'
-        # _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
-        # _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
-        # _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
-        # _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'LA:\l\t'
+        _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
+        _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
         # _label += "\l\t"
         # for _pred in block.predecessors:
         #     _label += "pred %s \l\t" % _pred.label
@@ -508,12 +508,12 @@ class GenerateCode(NodeVisitor):
 
                 self.instruction_analisys(cfg)
                 self.reaching_definitions(cfg)
-                # self.branch_folding(cfg)
+                self.branch_folding(cfg)
 
                 self.instruction_analisys(cfg)
                 self.reaching_definitions(cfg)
                 self.liveness_analisys(cfg)
-                # self.deadcode_elimination(cfg)
+                self.deadcode_elimination(cfg)
 
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
@@ -1105,7 +1105,8 @@ class GenerateCode(NodeVisitor):
                     'label': self.make_label_instructions(),
                     'inst': inst,
                     'def': set(),
-                    'use': set()
+                    'use': set(),
+                    'alive': True
                 }
 
                 if definition_re.match(inst[0]):
@@ -1521,10 +1522,38 @@ class GenerateCode(NodeVisitor):
 
                 if inst['def']:
                     inst_kill = {x['label'] for x in self.code_obj if x['def'] == inst['def']} - {inst['label']}
-                    current_in -= inst_kill
-                    current_in |= {inst['label']}
+                    current_in = {inst['label']} | (current_in - inst_kill)
 
             block = block.next_block
+
+    def deadcode_elimination(self, cfg):
+        block = cfg
+
+        may_kill_re = re.compile(r'(alloc|load|store|literal|elem|get|add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or|not)_.*|fptosi|sitofp')
+
+        while isinstance(block, Block):
+            current_out = block.la_out.copy()
+            used_vars = set()
+
+            for inst in reversed(block.code_obj):
+                if may_kill_re.match(inst['inst'][0]):
+                    _def = inst['def']
+                    if not _def & current_out:
+                        inst['alive'] = False
+
+                        if re.match(r'alloc_.*', inst['inst'][0]) and inst['def'] & used_vars:
+                            inst['alive'] = True
+
+                if inst['alive']:
+                    current_out = inst['use'] | (current_out - inst['def'])
+                    if inst['def'] and not re.match(r'%[0-9]+', list(inst['def'])[0]):
+                        used_vars |= inst['def']
+
+            block.instructions = [inst['inst'] for inst in block.code_obj if inst['alive']]
+            block.code_obj = [inst for inst in block.code_obj if inst['alive']]
+            block = block.next_block
+
+        self.code_obj = [inst for inst in self.code_obj if inst['alive']]
 
 
 

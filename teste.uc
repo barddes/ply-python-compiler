@@ -1,11 +1,9 @@
-int main_un() {
-    int a = 1, b = 1, c = 2;
-    if(a == b){
-        print(a);
-    }
+int main () {
+    int x, y;
+    read(x);
 
-    if(a == c){
-        print(c);
+    if(x==y){
+        int a = y + y;
     }
 
     return 0;
