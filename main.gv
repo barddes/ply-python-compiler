@@ -2,28 +2,17 @@ digraph g {
 	node [shape=record]
 	main [shape=ellipse]
 	main -> "%entry"
-	"%entry" [label="{%entry:\l	1:   alloc_int %i \l	2:   literal_int 3 %i \l	3:   alloc_int %k \l	4:   literal_int 1 %k \l	}"]
-	"%entry" -> "%for.cond"
-	"%for.cond" [label="{%for.cond:\l	6:   literal_int 6 %6 \l	7:   lt_int %k %6 %7 \l	8:   cbranch %7 label %for.body label %for.end\l	|{<f0>T|<f1>F}}"]
-	"%for.cond":f0 -> "%for.body"
-	"%for.cond":f1 -> "%for.end"
-	"%for.body" [label="{%for.body:\l	10:   literal_int 6 %9 \l	11:   ge_int %i %9 %10 \l	12:   cbranch %10 label %if.then label %if.else\l	|{<f0>T|<f1>F}}"]
-	"%for.body":f0 -> "%if.then"
-	"%for.body":f1 -> "%if.else"
-	"%if.then" [label="{%if.then:\l	14:   jump label %for.end\l	}"]
-	"%if.then" -> "%for.end"
-	"%if.else" [label="{%if.else:\l	16:   literal_int 1 %12 \l	17:   add_int %i %12 %i \l	18:   jump label %if.end\l	}"]
-	"%if.else" -> "%if.end"
-	"%if.end" [label="{%if.end:\l	20:   jump label %for.inc\l	}"]
-	"%if.end" -> "%for.inc"
-	"%for.inc" [label="{%for.inc:\l	22:   literal_int 1 %15 \l	23:   add_int %k %15 %k \l	24:   jump label %for.cond\l	}"]
-	"%for.inc" -> "%for.cond"
-	"%for.end" [label="{%for.end:\l	26:   literal_int 6 %18 \l	27:   eq_int %i %18 %19 \l	28:   cbranch %19 label %assert.true label %assert.false\l	|{<f0>T|<f1>F}}"]
-	"%for.end":f0 -> "%assert.true"
-	"%for.end":f1 -> "%assert.false"
-	"%assert.false" [label="{%assert.false:\l	30:   print_string @.str.0 \l	31:   jump label %exit\l	}"]
-	"%assert.false" -> "%exit"
-	"%assert.true" [label="{%assert.true:\l	33:   jump label %exit\l	}"]
-	"%assert.true" -> "%exit"
-	"%exit" [label="{%exit:\l	35:   literal_int 0 %21 \l	36:   return_int %21\l	}"]
+	"%entry" [label="{%entry:\l	1:   alloc_int %x \l	2:   literal_int 1 %x \l	3:   literal_int 1 %4 \l	4:   print_int %4 \l	5:   jump label %if.end\l	}"]
+	"%entry" -> "%if.end"
+	"%if.then" [label="{%if.then:\l	7:   jump label %if.else.1\l	}"]
+	"%if.then" -> "%if.else.1"
+	"%if.then.1" [label="{%if.then.1:\l	9:   jump label %if.end.1\l	}"]
+	"%if.then.1" -> "%if.end.1"
+	"%if.else.1" [label="{%if.else.1:\l	11:   jump label %if.end.1\l	}"]
+	"%if.else.1" -> "%if.end.1"
+	"%if.end.1" [label="{%if.end.1:\l	13:   literal_int 5 %x \l	14:   jump label %if.end\l	}"]
+	"%if.end.1" -> "%if.end"
+	"%if.end" [label="{%if.end:\l	16:   load_int %x %15 \l	17:   print_int %15 \l	18:   jump label %exit\l	}"]
+	"%if.end" -> "%exit"
+	"%exit" [label="{%exit:\l	20:   literal_int 0 %17 \l	21:   return_int %17\l	}"]
 }

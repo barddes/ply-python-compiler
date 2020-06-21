@@ -1637,6 +1637,7 @@ class GenerateCode(NodeVisitor):
         nodes = [cfg]
         while len(nodes) > 0:
             node = nodes.pop(0)
+            node.visited = True
             if isinstance(node, BasicBlock):
                 if node.branch and node.branch not in nodes and not node.branch.visited:
                     nodes.append(node.branch)
