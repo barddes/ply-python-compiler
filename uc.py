@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # ============================================================
-# uc.py -- uC (a.k.a. micro C) language compiler
+# uc -- uC (a.k.a. micro C) language compiler
 #
 # This is the main program for the uc compiler, which just
 # parses command-line options, figures out which source files
@@ -12,7 +12,8 @@ import sys
 from contextlib import contextmanager
 from uc_parser import UCParser
 from uc_sema import Visitor
-from uc_block import GenerateCode
+from uc_code import CodeGenerator
+from uc_analysis import DataFlow
 from uc_interpreter import Interpreter
 
 """
@@ -114,7 +115,7 @@ def subscribe_errors(handler):
 
 class Compiler:
     """ This object encapsulates the compiler and serves as a
-        facade interface for the compiler itself.
+        facade interface to the 'meat' of the compiler underneath.
     """
 
     def __init__(self):
@@ -123,7 +124,6 @@ class Compiler:
 
     def _parse(self, susy, ast_file, debug):
         """ Parses the source code. If ast_file != None,
-            or running at susy machine,
             prints out the abstract syntax tree.
         """
         self.parser = UCParser()
@@ -131,7 +131,6 @@ class Compiler:
 
     def _sema(self, susy, ast_file):
         """ Decorate AST with semantic actions. If ast_file != None,
-            or running at susy machine,
             prints out the abstract syntax tree. """
         try:
             self.sema = Visitor()
@@ -141,35 +140,47 @@ class Compiler:
         except AssertionError as e:
             error(None, e)
 
-    def _gencode(self, susy, ir_file):
-        """ Generate uCIR Code for the decorated AST. """
-        self.gen = GenerateCode()
+    def _codegen(self, susy, ir_file, cfg):
+        self.gen = CodeGenerator(cfg)
         self.gen.visit(self.ast)
         self.gencode = self.gen.code
-        _str = ''
         if not susy and ir_file is not None:
-            for _code in self.gencode:
-                _str += f"{_code}\n"
-            ir_file.write(_str)
+            self.gen.show(buf=ir_file)
 
-    def _do_compile(self, susy, ast_file, ir_file, debug):
+    def _opt(self, susy, opt_file, cfg, debug):
+        self.opt = DataFlow(cfg, debug)
+        self.opt.visit(self.ast)
+        self.optcode = self.opt.code
+        if not susy and opt_file is not None:
+            self.opt.show(buf=opt_file)
+
+    def _do_compile(self, susy, ast_file, ir_file, opt_file, cfg, opt, debug):
         """ Compiles the code to the given file object. """
-        self._parse(susy, ast_file, debug)
+        self._parse(susy, ast_file, False)
         if not errors_reported():
             self._sema(susy, ast_file)
         if not errors_reported():
-            self._gencode(susy, ir_file)
+            self._codegen(susy, ir_file, cfg)
+            if opt:
+                self._opt(susy, opt_file, cfg, debug)
 
-    def compile(self, code, susy, ast_file, ir_file, run_ir, debug):
+    def compile(self, code, susy, ast_file, ir_file, opt_file, opt, run_ir, cfg, debug):
         """ Compiles the given code string """
         self.code = code
-        with subscribe_errors(lambda msg: sys.stderr.write(msg + "\n")):
-            self._do_compile(susy, ast_file, ir_file, debug)
+        with subscribe_errors(lambda msg: sys.stderr.write(msg+"\n")):
+            self._do_compile(susy, ast_file, ir_file, opt_file, cfg, opt, debug)
             if errors_reported():
                 sys.stderr.write("{} error(s) encountered.".format(errors_reported()))
-            elif run_ir:
-                self.vm = Interpreter()
-                self.vm.run(self.gencode)
+            else:
+                if opt:
+                    self.speedup = len(self.gencode) / len(self.optcode)
+                    sys.stderr.write("original = %d, otimizado = %d, speedup = %.2f\n" % (len(self.gencode), len(self.optcode), self.speedup)
+                if run_ir and not cfg:
+                    self.vm = Interpreter()
+                    if opt:
+                        self.vm.run(self.optcode)
+                    else:
+                        self.vm.run(self.gencode)
         return 0
 
 
@@ -177,13 +188,15 @@ def run_compiler():
     """ Runs the command-line compiler. """
 
     if len(sys.argv) < 2:
-        print("Usage: ./uc <source-file> [-at-susy] [-no-ast] [-no-ir] [-no-run] [-debug]")
+        print("Usage: ./uc <source-file> [-at-susy] [-no-ast] [-no-ir] [-no-run] [-cfg] [-opt] [-debug]")
         sys.exit(1)
 
     emit_ast = True
     emit_ir = True
     run_ir = True
     susy = False
+    cfg = False
+    opt = False
     debug = False
 
     params = sys.argv[1:]
@@ -199,6 +212,10 @@ def run_compiler():
                 susy = True
             elif param == '-no-run':
                 run_ir = False
+            elif param == '-cfg':
+                cfg = True
+            elif param == '-opt':
+                opt = True
             elif param == '-debug':
                 debug = True
             else:
@@ -228,11 +245,18 @@ def run_compiler():
             ir_file = open(ir_filename, 'w')
             open_files.append(ir_file)
 
+        opt_file = None
+        if opt and not susy:
+            opt_filename = source_filename[:-3] + '.opt'
+            print("Outputting the optimized uCIR to %s." % opt_filename)
+            opt_file = open(opt_filename, 'w')
+            open_files.append(opt_file)
+
         source = open(source_filename, 'r')
         code = source.read()
         source.close()
 
-        retval = Compiler().compile(code, susy, ast_file, ir_file, run_ir, debug)
+        retval = Compiler().compile(code, susy, ast_file, ir_file, opt_file, opt, run_ir, cfg, debug)
         for f in open_files:
             f.close()
         if retval != 0:
