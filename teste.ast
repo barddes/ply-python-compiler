@@ -40,5 +40,5 @@ Program:
             Assert:    @ 6:5
                 BinaryOp: ==   @ 6:12
                     ID: sum   @ 6:12
-                    Constant: int, 10   @ 6:19
+                    Constant: int, 11   @ 6:19
             Return:    @ 7:5
