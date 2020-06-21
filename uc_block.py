@@ -524,8 +524,8 @@ class GenerateCode(NodeVisitor):
                 self.instruction_analisys(cfg)
                 self.liveness_analisys(cfg)
                 self.deadcode_elimination(cfg)
-
                 self.block_removal(cfg)
+                self.merge_basic_blocks(cfg)
 
                 self.instruction_analisys(cfg)
 
@@ -1662,5 +1662,17 @@ class GenerateCode(NodeVisitor):
                 old_block = block
             block = block.next_block
 
+    def merge_basic_blocks(self, cfg):
+        block = cfg
+        while isinstance(block, Block):
+            next_block = block.next_block
+            if isinstance(block, BasicBlock) and block.label:
+                if block.branch and isinstance(block.branch, BasicBlock):
+                    for inst in block.branch.instructions:
+                        block.append(inst)
 
+                    block._next_block = block.branch.branch
+                    block.branch = block.branch.branch
+                    next_block = block
+            block = next_block
 

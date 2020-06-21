@@ -2,9 +2,5 @@ digraph g {
 	node [shape=record]
 	main [shape=ellipse]
 	main -> "%entry"
-	"%entry" [label="{%entry:\l	1:   alloc_int %x \l	2:   literal_int 1 %x \l	3:   literal_int 1 %4 \l	4:   print_int %4 \l	5:   jump label %if.end\l	}"]
-	"%entry" -> "%if.end"
-	"%if.end" [label="{%if.end:\l	7:   load_int %x %15 \l	8:   print_int %15 \l	9:   jump label %exit\l	}"]
-	"%if.end" -> "%exit"
-	"%exit" [label="{%exit:\l	11:   literal_int 0 %17 \l	12:   return_int %17\l	}"]
+	"%entry" [label="{%entry:\l	1:   alloc_int %x \l	2:   literal_int 1 %x \l	3:   literal_int 1 %4 \l	4:   print_int %4 \l	5:   jump label %if.end\l	6: if.end:\l	7:   load_int %x %15 \l	8:   print_int %15 \l	9:   jump label %exit\l	10: exit:\l	11:   literal_int 0 %17 \l	12:   return_int %17\l	}"]
 }
