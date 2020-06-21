@@ -508,21 +508,21 @@ class GenerateCode(NodeVisitor):
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
                 cfg = _decl.cfg
-                self.instruction_analisys(cfg)
-                self.reaching_definitions(cfg)
-                self.copy_propagation(cfg)
-
-                self.instruction_analisys(cfg)
-                self.reaching_definitions(cfg)
-                self.constant_folding(cfg)
-
-                self.instruction_analisys(cfg)
-                self.reaching_definitions(cfg)
-                self.branch_folding(cfg)
-
-                self.instruction_analisys(cfg)
-                self.liveness_analisys(cfg)
-                self.deadcode_elimination(cfg)
+                # self.instruction_analisys(cfg)
+                # self.reaching_definitions(cfg)
+                # self.copy_propagation(cfg)
+                #
+                # self.instruction_analisys(cfg)
+                # self.reaching_definitions(cfg)
+                # self.constant_folding(cfg)
+                #
+                # self.instruction_analisys(cfg)
+                # self.reaching_definitions(cfg)
+                # self.branch_folding(cfg)
+                #
+                # self.instruction_analisys(cfg)
+                # self.liveness_analisys(cfg)
+                # self.deadcode_elimination(cfg)
 
                 self.instruction_analisys(cfg)
 
@@ -1459,6 +1459,8 @@ class GenerateCode(NodeVisitor):
                         op = 'truediv'
                     elif (op, type) == ('div', 'int'):
                         op = 'floordiv'
+                    elif op == 'and':
+                        op = 'and_'
 
                     param1 = inst['inst'][1]
                     param2 = inst['inst'][2]
