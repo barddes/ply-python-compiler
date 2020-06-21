@@ -2,12 +2,12 @@ digraph g {
 	node [shape=record]
 	main [shape=ellipse]
 	main -> "%entry"
-	"%entry" [label="{%entry:\l	1:   alloc_int_5 %v \l	2:   store_int_5 @.str.0 %v \l	3:   alloc_char_4 %c \l	4:   store_char_4 @.str.1 %c \l	5:   alloc_char_4 %w \l	6:   alloc_int %i \l	7:   literal_int 2 %2 \l	8:   literal_int 2 %i \l	9:   alloc_int %j \l	10:   literal_int 3 %3 \l	11:   literal_int 3 %j \l	12:   alloc_int %k \l	13:   literal_int 4 %4 \l	14:   literal_int 4 %k \l	15:   literal_int 1 %5 \l	16:   elem_char %c %5 %6 \l	17:   load_char_* %6 %7 \l	18:   literal_int 2 %8 \l	19:   elem_char %w %8 %9 \l	20:   store_char_* %7 %9 \l	21:   literal_int 2 %10 \l	22:   literal_int 3 %11 \l	23:   add_int %10 %11 %12 \l	24:   literal_int 4 %13 \l	25:   add_int %12 %13 %14 \l	26:   literal_int 2 %15 \l	27:   elem_int %v %15 %16 \l	28:   store_int_* %14 %16 \l	29:   literal_int 3 %17 \l	30:   literal_int 2 %18 \l	31:   sub_int %17 %18 %19 \l	32:   sub_int %17 %18 %j \l	33:   literal_int 2 %20 \l	34:   elem_char %w %20 %21 \l	35:   sub_int %17 %18 %22 \l	36:   elem_char %c %22 %23 \l	37:   load_char_* %21 %24 \l	38:   load_char_* %23 %25 \l	39:   eq_char %24 %25 %26 \l	40:   literal_int 2 %27 \l	41:   elem_int %v %27 %28 \l	42:   literal_int 9 %29 \l	43:   load_int_* %28 %30 \l	44:   eq_int %30 %29 %31 \l	45:   and_bool %26 %31 %32 \l	46:   cbranch %32 label %assert.true label %assert.false\l	|{<f0>T|<f1>F}}"]
+	"%entry" [label="{%entry:\l	1:   alloc_int_5 %v \l	2:   store_int_5 @.str.0 %v \l	3:   alloc_char_4 %c \l	4:   store_char_4 @.str.1 %c \l	5:   alloc_char_4 %w \l	6:   literal_int 1 %5 \l	7:   elem_char %c %5 %6 \l	8:   load_char_* %6 %7 \l	9:   literal_int 2 %8 \l	10:   elem_char %w %8 %9 \l	11:   store_char_* %7 %9 \l	12:   literal_int 9 %14 \l	13:   literal_int 2 %15 \l	14:   elem_int %v %15 %16 \l	15:   store_int_* %14 %16 \l	16:   literal_int 2 %20 \l	17:   elem_char %w %20 %21 \l	18:   literal_int 1 %22 \l	19:   elem_char %c %22 %23 \l	20:   load_char_* %21 %24 \l	21:   load_char_* %23 %25 \l	22:   eq_char %24 %25 %26 \l	23:   literal_int 2 %27 \l	24:   elem_int %v %27 %28 \l	25:   literal_int 9 %29 \l	26:   load_int_* %28 %30 \l	27:   eq_int %30 %29 %31 \l	28:   and_bool %26 %31 %32 \l	29:   cbranch %32 label %assert.true label %assert.false\l	|{<f0>T|<f1>F}}"]
 	"%entry":f0 -> "%assert.true"
 	"%entry":f1 -> "%assert.false"
-	"%assert.false" [label="{%assert.false:\l	48:   print_string @.str.2 \l	49:   jump label %exit\l	}"]
+	"%assert.false" [label="{%assert.false:\l	31:   print_string @.str.2 \l	32:   jump label %exit\l	}"]
 	"%assert.false" -> "%exit"
-	"%assert.true" [label="{%assert.true:\l	51:   literal_int 0 %33 \l	52:   literal_int 0 %0 \l	53:   jump label %exit\l	}"]
+	"%assert.true" [label="{%assert.true:\l	34:   jump label %exit\l	}"]
 	"%assert.true" -> "%exit"
-	"%exit" [label="{%exit:\l	55:   literal_int 0 %34 \l	56:   return_int %34\l	}"]
+	"%exit" [label="{%exit:\l	36:   literal_int 0 %34 \l	37:   return_int %34\l	}"]
 }

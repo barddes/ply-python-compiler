@@ -513,22 +513,21 @@ class GenerateCode(NodeVisitor):
                 self.reaching_definitions(cfg)
                 self.copy_propagation(cfg)
 
-                # self.instruction_analisys(cfg)
-                # self.reaching_definitions(cfg)
-                # self.constant_folding(cfg)
-                #
-                # self.instruction_analisys(cfg)
-                # self.reaching_definitions(cfg)
-                # self.branch_folding(cfg)
-                #
-                # self.instruction_analisys(cfg)
-                # self.liveness_analisys(cfg)
-                # # self.deadcode_elimination(cfg)
-                # self.block_removal(cfg)
-                # self.merge_basic_blocks(cfg)
+                self.instruction_analisys(cfg)
+                self.reaching_definitions(cfg)
+                self.constant_folding(cfg)
 
                 self.instruction_analisys(cfg)
+                self.reaching_definitions(cfg)
+                self.branch_folding(cfg)
 
+                self.instruction_analisys(cfg)
+                self.liveness_analisys(cfg)
+                self.deadcode_elimination(cfg)
+                self.block_removal(cfg)
+                self.merge_basic_blocks(cfg)
+
+                self.instruction_analisys(cfg)
 
                 self.code += [inst['inst'] for inst in self.code_obj]
 
@@ -1137,6 +1136,9 @@ class GenerateCode(NodeVisitor):
                     # obj['use'] |= {inst[1], inst[2], inst[3]}
                     obj['use'] |= {inst[1]}
 
+                if re.match(r'store_.+_*', inst[0]):
+                    obj['use'] |= obj['def']
+
                 block.code_obj.append(obj)
                 self.code_obj.append(obj)
             block = block.next_block
@@ -1595,7 +1597,7 @@ class GenerateCode(NodeVisitor):
             nodes.append(block)
             block = block.next_block
 
-        may_kill_re = re.compile(r'(alloc|load|store|literal|elem|get|add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or|not)_.*|fptosi|sitofp')
+        may_kill_re = re.compile(r'(alloc|load|store|literal|elem|get|add|sub|mul|div|mod|lt|le|ge|gt|eq|ne|and|or|not)_[^_]+$|fptosi|sitofp')
 
         while len(nodes) > 0:
             block = nodes.pop(-1)
