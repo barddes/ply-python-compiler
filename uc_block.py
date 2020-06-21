@@ -509,10 +509,10 @@ class GenerateCode(NodeVisitor):
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
                 cfg = _decl.cfg
-                # self.instruction_analisys(cfg)
-                # self.reaching_definitions(cfg)
-                # self.copy_propagation(cfg)
-                #
+                self.instruction_analisys(cfg)
+                self.reaching_definitions(cfg)
+                self.copy_propagation(cfg)
+
                 # self.instruction_analisys(cfg)
                 # self.reaching_definitions(cfg)
                 # self.constant_folding(cfg)
@@ -523,10 +523,10 @@ class GenerateCode(NodeVisitor):
                 #
                 # self.instruction_analisys(cfg)
                 # self.liveness_analisys(cfg)
-                # self.deadcode_elimination(cfg)
+                # # self.deadcode_elimination(cfg)
                 # self.block_removal(cfg)
                 # self.merge_basic_blocks(cfg)
-                #
+
                 self.instruction_analisys(cfg)
 
 
@@ -1278,7 +1278,7 @@ class GenerateCode(NodeVisitor):
             current_in = block.rd_in.copy()
 
             for inst in block.code_obj:
-                if re.match(r'(load|store)_[^_]+', inst['inst'][0]):
+                if re.match(r'(load|store)_[^_]+$', inst['inst'][0]):
                     param = inst['inst'][1]
                     defs = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param}}
 
