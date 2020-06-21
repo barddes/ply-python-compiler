@@ -2,14 +2,12 @@ digraph g {
 	node [shape=record]
 	gcd [shape=ellipse]
 	gcd -> "%entry"
-	"%entry" [label="{%entry:\l	1:   alloc_int %x \l	2:   alloc_int %y \l	3:   store_int %0 %x \l	4:   store_int %1 %y \l	5:   alloc_int %g \l	6:   load_int %1 %g \l	}"]
+	"%entry" [label="{%entry:\l	  alloc_int %x \l	  alloc_int %y \l	  store_int %0 %x \l	  store_int %1 %y \l	  alloc_int %g \l	  load_int %1 %g \l	}"]
 	"%entry" -> "%while.cond"
-	"%while.cond" [label="{%while.cond:\l	8:   literal_int 0 %6 \l	9:   gt_int %x %6 %7 \l	10:   cbranch %7 label %while.body label %while.end\l	|{<f0>T|<f1>F}}"]
+	"%while.cond" [label="{%while.cond:\l	  literal_int 0 %6 \l	  gt_int %x %6 %7 \l	  cbranch %7 label %while.body label %while.end\l	|{<f0>T|<f1>F}}"]
 	"%while.cond":f0 -> "%while.body"
 	"%while.cond":f1 -> "%while.end"
-	"%while.body" [label="{%while.body:\l	12:   load_int %x %8 \l	13:   store_int %8 %g \l	14:   div_int %y %x %12 \l	15:   mul_int %12 %x %14 \l	16:   sub_int %y %14 %x \l	17:   load_int %8 %y \l	18:   jump label %while.cond\l	}"]
+	"%while.body" [label="{%while.body:\l	  load_int %x %8 \l	  store_int %8 %g \l	  div_int %y %x %12 \l	  mul_int %12 %x %14 \l	  sub_int %y %14 %x \l	  load_int %8 %y \l	  jump label %while.cond\l	}"]
 	"%while.body" -> "%while.cond"
-	"%while.end" [label="{%while.end:\l	20:   load_int %g %17 \l	21:   jump label %exit\l	}"]
-	"%while.end" -> "%exit"
-	"%exit" [label="{%exit:\l	23:   return_int %17\l	}"]
+	"%while.end" [label="{%while.end:\l	  load_int %g %17 \l	  return_int %17\l	}"]
 }

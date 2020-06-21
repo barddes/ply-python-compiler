@@ -127,11 +127,11 @@ class CFG(object):
         if _name:
             # get the formatted instructions as node label
             _label = "{" + _name + ":\l\t"
-            # for _inst in block.instructions[1:]:
-            #     _label += format_instruction(_inst) + "\l\t"
+            for _inst in block.instructions[1:]:
+                _label += format_instruction(_inst) + "\l\t"
             #
-            for _inst in block.code_obj[1:]:
-                _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
+            # for _inst in block.code_obj[1:]:
+            #     _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
 
             # _label += 'RD:\l\t'
             # _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
@@ -162,11 +162,11 @@ class CFG(object):
         _name = block.label
         # get the formatted instructions as node label
         _label = "{" + _name + ":\l\t"
-        # for _inst in block.instructions[1:]:
-        #     _label += format_instruction(_inst) + "\l\t"
+        for _inst in block.instructions[1:]:
+            _label += format_instruction(_inst) + "\l\t"
 
-        for _inst in block.code_obj[1:]:
-            _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
+        # for _inst in block.code_obj[1:]:
+        #     _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
 
         # _label += 'RD:\l\t'
         # _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
@@ -1658,6 +1658,14 @@ class GenerateCode(NodeVisitor):
 
                 if old_block:
                     old_block._next_block = block.next_block
+
+                if isinstance(block, BasicBlock) and block.branch:
+                    block.branch.predecessors.remove(block)
+                else:
+                    if block.taken:
+                        block.taken.predecessors.remove(block)
+                    else:
+                        block.fall_through.predecessors.remove(block)
             else:
                 old_block = block
             block = block.next_block

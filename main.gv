@@ -2,12 +2,5 @@ digraph g {
 	node [shape=record]
 	main [shape=ellipse]
 	main -> "%entry"
-	"%entry" [label="{%entry:\l	1:   alloc_int_5 %v \l	2:   store_int_5 @.str.0 %v \l	3:   alloc_char_4 %c \l	4:   store_char_4 @.str.1 %c \l	5:   alloc_char_4 %w \l	6:   literal_int 1 %5 \l	7:   elem_char %c %5 %6 \l	8:   load_char_* %6 %7 \l	9:   literal_int 2 %8 \l	10:   elem_char %w %8 %9 \l	11:   store_char_* %7 %9 \l	12:   literal_int 9 %14 \l	13:   literal_int 2 %15 \l	14:   elem_int %v %15 %16 \l	15:   store_int_* %14 %16 \l	16:   literal_int 2 %20 \l	17:   elem_char %w %20 %21 \l	18:   literal_int 1 %22 \l	19:   elem_char %c %22 %23 \l	20:   load_char_* %21 %24 \l	21:   load_char_* %23 %25 \l	22:   eq_char %24 %25 %26 \l	23:   literal_int 2 %27 \l	24:   elem_int %v %27 %28 \l	25:   literal_int 9 %29 \l	26:   load_int_* %28 %30 \l	27:   eq_int %30 %29 %31 \l	28:   and_bool %26 %31 %32 \l	29:   cbranch %32 label %assert.true label %assert.false\l	|{<f0>T|<f1>F}}"]
-	"%entry":f0 -> "%assert.true"
-	"%entry":f1 -> "%assert.false"
-	"%assert.false" [label="{%assert.false:\l	31:   print_string @.str.2 \l	32:   jump label %exit\l	}"]
-	"%assert.false" -> "%exit"
-	"%assert.true" [label="{%assert.true:\l	34:   jump label %exit\l	}"]
-	"%assert.true" -> "%exit"
-	"%exit" [label="{%exit:\l	36:   literal_int 0 %34 \l	37:   return_int %34\l	}"]
+	"%entry" [label="{%entry:\l	  alloc_int %x \l	  literal_int 1 %x \l	  literal_int 1 %4 \l	  print_int %4 \l	  load_int %x %9 \l	  print_int %9 \l	  literal_int 0 %11 \l	  return_int %11\l	}"]
 }
