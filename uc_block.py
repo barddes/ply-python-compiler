@@ -126,11 +126,11 @@ class CFG(object):
         if _name:
             # get the formatted instructions as node label
             _label = "{" + _name + ":\l\t"
-            # for _inst in block.instructions[1:]:
-            #     _label += format_instruction(_inst) + "\l\t"
-
-            for _inst in block.code_obj[1:]:
-                _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
+            for _inst in block.instructions[1:]:
+                _label += format_instruction(_inst) + "\l\t"
+            #
+            # for _inst in block.code_obj[1:]:
+            #     _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
 
             # _label += 'RD:\l\t'
             # _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
@@ -138,11 +138,11 @@ class CFG(object):
             # _label += 'IN   ' + str(block.rd_in).replace('{', '').replace('}', '') + '\l\t'
             # _label += 'OUT  ' + str(block.rd_out).replace('{', '').replace('}', '') + '\l\t'
             #
-            _label += 'LA:\l\t'
-            _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
-            _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'LA:\l\t'
+            # _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
+            # _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
 
             # _label += "\l\t"
             # for _pred in block.predecessors:
@@ -161,11 +161,11 @@ class CFG(object):
         _name = block.label
         # get the formatted instructions as node label
         _label = "{" + _name + ":\l\t"
-        # for _inst in block.instructions[1:]:
-        #     _label += format_instruction(_inst) + "\l\t"
+        for _inst in block.instructions[1:]:
+            _label += format_instruction(_inst) + "\l\t"
 
-        for _inst in block.code_obj[1:]:
-            _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
+        # for _inst in block.code_obj[1:]:
+        #     _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
 
         # _label += 'RD:\l\t'
         # _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
@@ -173,11 +173,11 @@ class CFG(object):
         # _label += 'IN   ' + str(block.rd_in).replace('{', '').replace('}', '') + '\l\t'
         # _label += 'OUT  ' + str(block.rd_out).replace('{', '').replace('}', '') + '\l\t'
         #
-        _label += 'LA:\l\t'
-        _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
-        _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'LA:\l\t'
+        # _label += 'USE  ' + str(block.la_use).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'DEF  ' + str(block.la_def).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'IN   ' + str(block.la_in).replace('{', '').replace('}', '') + '\l\t'
+        # _label += 'OUT  ' + str(block.la_out).replace('{', '').replace('}', '') + '\l\t'
         # _label += "\l\t"
         # for _pred in block.predecessors:
         #     _label += "pred %s \l\t" % _pred.label
@@ -194,7 +194,10 @@ class CFG(object):
             block = block.next_block
         # You can use the next stmt to see the dot file
         # print(self.g.source)
-        self.g.view()
+        try:
+            self.g.view()
+        except:
+            pass
 
 
 class GenerateCode(NodeVisitor):
@@ -459,9 +462,10 @@ class GenerateCode(NodeVisitor):
         for var in node.global_env.vars:
             if var.init:
                 if isinstance(var.init, InitList):
-                    inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name, node.env.unbox_InitList(var.init.list))
+                    inst = ('global_%s_%s' % (var.decl.type.name[0], '_'.join([str(x) for x in self.array_get_dim(node.env.unbox_InitList(var.init.list))])), '@%s' % var.decl.name.name, node.env.unbox_InitList(var.init.list))
                     if node.env.unbox_InitList(var.init.list) in node.global_env.consts:
-                        node.global_env.consts.remove(node.env.unbox_InitList(var.init.list))
+                        idx = node.global_env.consts.index(node.env.unbox_InitList(var.init.list))
+                        node.global_env.consts[idx] = None
                 else:
                     inst = ('global_%s' % var.decl.type.name[0], '@%s' % var.decl.name.name, var.init.value)
             else:
@@ -471,22 +475,26 @@ class GenerateCode(NodeVisitor):
                     'label': self.make_label_instructions(),
                     'inst': inst,
                     'def': set(),
-                    'use': set()
+                    'use': set(),
+                    'alive': True
                 })
             var.gen_location = '@%s' % var.decl.name.name
             node.lookup_envs(var.decl.name.name)['location'] = '@%s' % var.decl.name.name
 
         for i, const in enumerate(node.global_env.consts):
+            if not const:
+                continue
             if type(const) == list:
                 inst = ('global_%s' % self.get_const_type(const) + self.get_const_dim(const), '@.str.%d' % i, const)
             else:
                 inst = ('global_string', '@.str.%d' % i, const)
             self.global_code_obj.append({
-                    'label': self.make_label_instructions(),
-                    'inst': inst,
-                    'def': set(),
-                    'use': set()
-                })
+                'label': self.make_label_instructions(),
+                'inst': inst,
+                'def': set(),
+                'use': set(),
+                'alive': True
+            })
 
         for i, d in node.children():
             self.visit(d)
@@ -511,9 +519,12 @@ class GenerateCode(NodeVisitor):
                 self.branch_folding(cfg)
 
                 self.instruction_analisys(cfg)
-                self.reaching_definitions(cfg)
                 self.liveness_analisys(cfg)
                 self.deadcode_elimination(cfg)
+
+                self.instruction_analisys(cfg)
+
+                self.code = [inst['inst'] for inst in self.code_obj]
 
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
@@ -675,7 +686,7 @@ class GenerateCode(NodeVisitor):
         node.gen_location = target
 
     def visit_DeclList(self, node: DeclList):
-        for i, c in node.children():
+        for ix, c in node.children():
             self.visit(c)
 
     def array_get_dim(self, l, default=None):
@@ -773,7 +784,7 @@ class GenerateCode(NodeVisitor):
         self.current_block.branch = inc_block
         inc_block.predecessors.append(self.current_block)
         self.current_block = inc_block
-        self.current_block.append((inc_label,))
+        self.current_block.append((str(inc_label[1:]) + ':',))
         if node.p3:
             self.visit(node.p3)
         self.current_block.append(('jump', cond_label))
@@ -1247,8 +1258,14 @@ class GenerateCode(NodeVisitor):
         block = cfg
         while isinstance(block, Block):
             block.code_obj = []
-            block.rd_gen = block.rd_kill = block.rd_in = block.rd_out = set()
-            block.la_def = block.la_use = block.la_in = block.la_out = set()
+            block.rd_gen = set()
+            block.rd_kill = set()
+            block.rd_in = set()
+            block.rd_out = set()
+            block.la_def = set()
+            block.la_use = set()
+            block.la_in = set()
+            block.la_out = set()
             block = block.next_block
 
     def copy_propagation(self, cfg):
@@ -1257,7 +1274,7 @@ class GenerateCode(NodeVisitor):
             current_in = block.rd_in.copy()
 
             for inst in block.code_obj:
-                if re.match(r'(load|store)_*', inst['inst'][0]):
+                if re.match(r'(load|store)_[^_]+', inst['inst'][0]):
                     param = inst['inst'][1]
                     defs = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param}}
 
@@ -1268,33 +1285,34 @@ class GenerateCode(NodeVisitor):
                         new_inst[-1] = list(old_inst)[-1]
                         new_inst = tuple(new_inst)
 
-                        # if re.match(r'read_.*', new_inst[0]):
-                        #
-                        #     old_read = list(defs.copy().pop())
-                        #
-                        #     print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label']-1, tuple(old_read), new_inst))
-                        #
-                        #     for i in block.code_obj:
-                        #         if i['label'] == inst['label']-1:
-                        #             idx = block.instructions.index(i['inst'])
-                        #             block.instructions[idx] = new_inst
-                        #             i['inst'] = new_inst
+                        if re.match(r'read_.*', new_inst[0]):
+
+                            old_read = list(defs.copy().pop())
+
+                            print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label']-1, tuple(old_read), new_inst))
+
+                            for i in block.code_obj:
+                                if i['label'] == inst['label']-1:
+                                    idx = block.instructions.index(i['inst'])
+                                    block.instructions[idx] = new_inst
+                                    i['inst'] = new_inst
+                                    break
+
+                            new_inst = list(old_inst)
+                            temp = new_inst[-1]
+                            new_inst[-1] = new_inst[1]
+                            new_inst[1] = temp
+                            new_inst = tuple(new_inst)
+
+                            print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
+
+                            for i in block.code_obj:
+                                if i['label'] == inst['label']:
+                                    idx = block.instructions.index(i['inst'])
+                                    block.instructions[idx] = new_inst
+                                    i['inst'] = new_inst
                         #             break
-                        #
-                        #     new_inst = list(old_inst)
-                        #     temp = new_inst[-1]
-                        #     new_inst[-1] = new_inst[1]
-                        #     new_inst[1] = temp
-                        #     new_inst = tuple(new_inst)
-                        #
-                        #     print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
-                        #
-                        #     for i in block.code_obj:
-                        #         if i['label'] == inst['label']:
-                        #             idx = block.instructions.index(i['inst'])
-                        #             block.instructions[idx] = new_inst
-                        #             i['inst'] = new_inst
-                        #             break
+
                         if re.match(r'call', new_inst[0]):
                             old_call = list(defs.copy().pop())
 
@@ -1321,7 +1339,7 @@ class GenerateCode(NodeVisitor):
                                     block.instructions[idx] = new_inst
                                     i['inst'] = new_inst
                                     break
-                        elif not re.match(r'read_.*', new_inst[0]):
+                        elif not re.match(r'(read|alloc|elem)_.*', new_inst[0]):
                             print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
 
                             for i in block.code_obj:
@@ -1343,13 +1361,13 @@ class GenerateCode(NodeVisitor):
                     if len(defs1) == 1:
                         def_inst = list(defs1.copy().pop())
 
-                        if re.match(r'(load|store)_.*', def_inst[0]):
+                        if re.match(r'(load|store)_[^_]+$', def_inst[0]):
                             new_inst[1] = def_inst[1]
 
                     if len(defs2) == 1:
                         def_inst = list(defs2.copy().pop())
 
-                        if re.match(r'(load|store)_.*', def_inst[0]):
+                        if re.match(r'(load|store)_[^_]+$', def_inst[0]):
                             new_inst[2] = def_inst[1]
 
                     new_inst = tuple(new_inst)
@@ -1364,7 +1382,7 @@ class GenerateCode(NodeVisitor):
                                 i['inst'] = new_inst
                                 break
 
-                if re.match(r'(not|return)_(?!void).*|fptosi|sitofp|param', inst['inst'][0]):
+                if re.match(r'(not|return)_(?!void).*$|fptosi|sitofp|param', inst['inst'][0]):
                     param = inst['inst'][1]
                     defs = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param}}
 
@@ -1373,7 +1391,7 @@ class GenerateCode(NodeVisitor):
                     if len(defs) == 1:
                         def_inst = list(defs.copy().pop())
 
-                        if re.match(r'(load|store)_.*', def_inst[0]):
+                        if re.match(r'(load|store)_[^_]*$', def_inst[0]):
                             new_inst[1] = def_inst[1]
 
                     new_inst = tuple(new_inst)
@@ -1387,6 +1405,31 @@ class GenerateCode(NodeVisitor):
                                 block.instructions[idx] = new_inst
                                 i['inst'] = new_inst
                                 break
+
+                if re.match(r'elem_.*', inst['inst'][0]):
+                    param = inst['inst'][2]
+                    defs = {x['inst'] for x in self.code_obj if x['label'] in current_in and x['def'] == {param}}
+
+                    new_inst = list(inst['inst'])
+
+                    if len(defs) == 1:
+                        def_inst = list(defs.copy().pop())
+
+                        if re.match(r'(load|store)_[^_]*$', def_inst[0]):
+                            new_inst[2] = def_inst[1]
+
+                    new_inst = tuple(new_inst)
+
+                    if new_inst != inst['inst']:
+                        print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], inst['inst'], new_inst))
+
+                        for i in block.code_obj:
+                            if i['label'] == inst['label']:
+                                idx = block.instructions.index(i['inst'])
+                                block.instructions[idx] = new_inst
+                                i['inst'] = new_inst
+                                break
+
 
                 if inst['def']:
                     inst_kill = {x['label'] for x in self.code_obj if x['def'] == inst['def']} - {inst['label']}
@@ -1545,19 +1588,23 @@ class GenerateCode(NodeVisitor):
                         if re.match(r'alloc_.*', inst['inst'][0]) and inst['def'] & used_vars:
                             inst['alive'] = True
 
-                        if not inst['alive']:
-                            print('[Dead code elimination] Removind %d: %s' % (inst['label'], inst['inst']))
-
                 if inst['alive']:
                     current_out = inst['use'] | (current_out - inst['def'])
                     if inst['def'] and not re.match(r'%[0-9]+', list(inst['def'])[0]):
                         used_vars |= inst['def']
 
+            for inst in self.code_obj.copy():
+                if not inst['alive']:
+                    print('[Dead code elimination] Removing %d: %s' % (inst['label'], inst['inst']))
+                    block.code_obj.remove(inst)
+                    self.code_obj.remove(inst)
+
+
             block.instructions = [inst['inst'] for inst in block.code_obj if inst['alive']]
-            block.code_obj = [inst for inst in block.code_obj if inst['alive']]
+            # block.code_obj = [inst for inst in block.code_obj if inst['alive']]
             block = block.next_block
 
-        self.code_obj = [inst for inst in self.code_obj if inst['alive']]
+        # self.code_obj = [inst for inst in self.code_obj if inst['alive']]
 
 
 
