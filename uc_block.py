@@ -1637,7 +1637,9 @@ class GenerateCode(NodeVisitor):
         nodes = [cfg]
         while len(nodes) > 0:
             node = nodes.pop(0)
+
             node.visited = True
+
             if isinstance(node, BasicBlock):
                 if node.branch and node.branch not in nodes and not node.branch.visited:
                     nodes.append(node.branch)
@@ -1648,19 +1650,17 @@ class GenerateCode(NodeVisitor):
                     nodes.append(node.fall_through)
 
         block = cfg
+        old_block = None
         while isinstance(block, Block):
             if block and not block.visited:
                 for inst in block.code_obj:
                     self.code_obj.remove(inst)
-                prev_block = block.prev_block
-                if prev_block:
-                    prev_block.next_block = block.next_block
 
-
-
-
+                if old_block:
+                    old_block._next_block = block.next_block
+            else:
+                old_block = block
             block = block.next_block
-
 
 
 

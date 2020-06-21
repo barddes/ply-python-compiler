@@ -4,15 +4,7 @@ digraph g {
 	main -> "%entry"
 	"%entry" [label="{%entry:\l	1:   alloc_int %x \l	2:   literal_int 1 %x \l	3:   literal_int 1 %4 \l	4:   print_int %4 \l	5:   jump label %if.end\l	}"]
 	"%entry" -> "%if.end"
-	"%if.then" [label="{%if.then:\l	7:   jump label %if.else.1\l	}"]
-	"%if.then" -> "%if.else.1"
-	"%if.then.1" [label="{%if.then.1:\l	9:   jump label %if.end.1\l	}"]
-	"%if.then.1" -> "%if.end.1"
-	"%if.else.1" [label="{%if.else.1:\l	11:   jump label %if.end.1\l	}"]
-	"%if.else.1" -> "%if.end.1"
-	"%if.end.1" [label="{%if.end.1:\l	13:   literal_int 5 %x \l	14:   jump label %if.end\l	}"]
-	"%if.end.1" -> "%if.end"
-	"%if.end" [label="{%if.end:\l	16:   load_int %x %15 \l	17:   print_int %15 \l	18:   jump label %exit\l	}"]
+	"%if.end" [label="{%if.end:\l	7:   load_int %x %15 \l	8:   print_int %15 \l	9:   jump label %exit\l	}"]
 	"%if.end" -> "%exit"
-	"%exit" [label="{%exit:\l	20:   literal_int 0 %17 \l	21:   return_int %17\l	}"]
+	"%exit" [label="{%exit:\l	11:   literal_int 0 %17 \l	12:   return_int %17\l	}"]
 }
