@@ -1,4 +1,4 @@
-int checkPrime(int n) {
+int checkPrime_un(int n) {
     int i, isPrime = 1;
     for (i = 2; i <= n/2; ++i) {
         if (n % i == 0) {

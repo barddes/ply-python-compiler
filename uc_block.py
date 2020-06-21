@@ -1633,7 +1633,7 @@ class GenerateCode(NodeVisitor):
                     if pred and pred not in nodes:
                         nodes = [pred] + nodes
 
-    def block_removal (self, cfg):
+    def block_removal(self, cfg):
         nodes = [cfg]
         while len(nodes) > 0:
             node = nodes.pop(0)
@@ -1714,7 +1714,29 @@ class GenerateCode(NodeVisitor):
                 if block.fall_through and block.fall_through not in new_blocks and not block.fall_through.visited:
                     new_blocks.append(block.fall_through)
 
+        self.instruction_analisys(cfg)
 
+        nodes = []
+        block = cfg
+        while isinstance(block, Block):
+            nodes.append(block)
+            block = block.next_block
+
+        for block in nodes:
+            for i, inst in enumerate(block.code_obj):
+                if i == 0 or i == len(block.code_obj)-1:
+                    continue
+
+                if len(inst['inst']) == 1:
+                    block.code_obj[i]['alive'] = False
+                    block.code_obj[i-1]['alive'] = False
+
+            to_remove = [inst for inst in block.code_obj if not inst['alive']]
+
+            for inst in to_remove:
+                self.code_obj.remove(inst)
+                block.code_obj.remove(inst)
+                block.instructions.remove(inst['inst'])
 
 
 

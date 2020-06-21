@@ -1,12 +1,12 @@
 Program: 
     FuncDef: 
         Type: ['int']   @ 1:1
-        Decl: ID(name='checkPrime'  )
+        Decl: ID(name='checkPrime_un'  )
             FuncDecl: 
                 ParamList: 
                     Decl: ID(name='n'  )
                         VarDecl: 
-                            Type: ['int']   @ 1:16
+                            Type: ['int']   @ 1:19
                 VarDecl: 
                     Type: ['int']   @ 1:1
         Compound:    @ 1:1
