@@ -12,7 +12,7 @@ import sys
 from contextlib import contextmanager
 from uc_parser import UCParser
 from uc_sema import Visitor
-from uc_code import CodeGenerator
+from uc_code import GenerateCode
 from uc_analysis import DataFlow
 from uc_interpreter import Interpreter
 
@@ -129,6 +129,9 @@ class Compiler:
         self.parser = UCParser()
         self.ast = self.parser.parse(self.code, '', debug)
 
+        self.parser2 = UCParser()
+        self.ast2 = self.parser.parse(self.code, '', debug)
+
     def _sema(self, susy, ast_file):
         """ Decorate AST with semantic actions. If ast_file != None,
             prints out the abstract syntax tree. """
@@ -141,7 +144,7 @@ class Compiler:
             error(None, e)
 
     def _codegen(self, susy, ir_file, cfg):
-        self.gen = CodeGenerator(cfg)
+        self.gen = GenerateCode(cfg)
         self.gen.visit(self.ast)
         self.gencode = self.gen.code
         if not susy and ir_file is not None:
@@ -149,7 +152,7 @@ class Compiler:
 
     def _opt(self, susy, opt_file, cfg, debug):
         self.opt = DataFlow(cfg, debug)
-        self.opt.visit(self.ast)
+        self.opt.visit(self.ast2)
         self.optcode = self.opt.code
         if not susy and opt_file is not None:
             self.opt.show(buf=opt_file)
@@ -162,6 +165,8 @@ class Compiler:
         if not errors_reported():
             self._codegen(susy, ir_file, cfg)
             if opt:
+                self.ast = self.ast2
+                self._sema(susy, ast_file)
                 self._opt(susy, opt_file, cfg, debug)
 
     def compile(self, code, susy, ast_file, ir_file, opt_file, opt, run_ir, cfg, debug):
@@ -174,7 +179,7 @@ class Compiler:
             else:
                 if opt:
                     self.speedup = len(self.gencode) / len(self.optcode)
-                    sys.stderr.write("original = %d, otimizado = %d, speedup = %.2f\n" % (len(self.gencode), len(self.optcode), self.speedup)
+                    sys.stderr.write("original = %d, otimizado = %d, speedup = %.2f\n" % (len(self.gencode), len(self.optcode), self.speedup))
                 if run_ir and not cfg:
                     self.vm = Interpreter()
                     if opt:

@@ -201,7 +201,7 @@ class CFG(object):
             pass
 
 
-class GenerateCode(NodeVisitor):
+class DataFlow(NodeVisitor):
     unary_ops = {
         '+': '',
         '-': 'sub',
@@ -231,6 +231,10 @@ class GenerateCode(NodeVisitor):
 
     labels = {}
 
+    def show(self, buf=None):
+        for d, cfg in self.dot:
+            d.view(cfg)
+
     def make_label(self, name):
         value = self.labels.get(name, 0)
         self.labels[name] = value + 1
@@ -244,15 +248,16 @@ class GenerateCode(NodeVisitor):
     Node visitor class that creates 3-address encoded instruction sequences.
     '''
 
-    def __init__(self):
+    def __init__(self, cfg=None, degub=None):
         self.current_block = None
         self.ret_block = None
         self.loop_stack = []
         self.global_vars = set()
         self.code_obj = []
         self.global_code_obj = []
+        self.dot = []
 
-        super(GenerateCode, self).__init__()
+        super(DataFlow, self).__init__()
 
         # version dictionary for temporaries
         self.fname = 'main'  # We use the function name as a key
@@ -533,8 +538,8 @@ class GenerateCode(NodeVisitor):
 
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
-                dot = CFG(_decl.decl.name.name)
-                dot.view(_decl.cfg)  # _decl.cfg contains the CFG for the function
+                dot = CFG(_decl.decl.name.name,)
+                self.dot.append([dot, _decl.cfg])
 
     def visit_Assignment(self, node: Assignment):
         if node.assign_expr:
@@ -1146,6 +1151,7 @@ class GenerateCode(NodeVisitor):
         self.print_analisys_table()
 
     def print_analisys_table(self):
+        return
         table_format = '{:60} {:20} {:20} {:20} {:20}'
         print(table_format.format('Instruction', 'RD Gen', 'RD Kill', 'Def', 'Use'))
         print(table_format.format('-----------', '------', '-------', '---', '---'))

@@ -2,5 +2,5 @@ digraph g {
 	node [shape=record]
 	main [shape=ellipse]
 	main -> "%entry"
-	"%entry" [label="{%entry:\l	  alloc_int %x \l	  literal_int 1 %x \l	  literal_int 1 %4 \l	  print_int %4 \l	  load_int %x %9 \l	  print_int %9 \l	  literal_int 0 %11 \l	  return_int %11\l	}"]
+	"%entry" [label="{%entry:\l	  literal_int 0 %17 \l	  return_int %17\l	}"]
 }

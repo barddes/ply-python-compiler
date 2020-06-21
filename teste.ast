@@ -9,26 +9,64 @@ Program:
             Decl: ID(name='x'  )
                 VarDecl: 
                     Type: ['int']   @ 2:5
+                Constant: int, 2   @ 2:12
             Decl: ID(name='y'  )
                 VarDecl: 
                     Type: ['int']   @ 2:5
+            Decl: ID(name='z'  )
+                VarDecl: 
+                    Type: ['int']   @ 2:5
             Assignment: =   @ 3:5
-                ID: x   @ 3:5
-                Constant: int, 1   @ 3:9
+                ID: y   @ 3:5
+                UnaryOp: ++   @ 3:11
+                    ID: x   @ 3:11
             Assignment: =   @ 4:5
-                ID: y   @ 4:5
-                Constant: int, 1   @ 4:9
-            Print:    @ 5:5
-                ID: x   @ 5:11
-            If:    @ 6:5
-                BinaryOp: >   @ 6:9
-                    ID: y   @ 6:9
-                    Constant: int, 1   @ 6:13
-                Compound:    @ 6:1
-                    Assignment: =   @ 7:9
-                        ID: x   @ 7:9
-                        Constant: int, 2   @ 7:13
-            Print:    @ 9:5
-                ID: x   @ 9:11
-            Return:    @ 10:5
-                Constant: int, 0   @ 10:12
+                ID: z   @ 4:5
+                UnaryOp: p++   @ 4:9
+                    ID: x   @ 4:9
+            Assert:    @ 5:5
+                BinaryOp: &&   @ 5:12
+                    BinaryOp: ==   @ 5:12
+                        ID: y   @ 5:12
+                        Constant: int, 3   @ 5:17
+                    BinaryOp: ==   @ 5:22
+                        ID: z   @ 5:22
+                        Constant: int, 3   @ 5:27
+            Return:    @ 6:5
+                Constant: int, 0   @ 6:12
+Program: 
+    FuncDef: 
+        Type: ['int']   @ 8:1
+        Decl: ID(name='main'  )
+            FuncDecl: 
+                VarDecl: 
+                    Type: ['int']   @ 8:1
+        Compound:    @ 8:1
+            Decl: ID(name='x'  )
+                VarDecl: 
+                    Type: ['int']   @ 9:5
+                Constant: int, 2   @ 9:12
+            Decl: ID(name='y'  )
+                VarDecl: 
+                    Type: ['int']   @ 9:5
+            Decl: ID(name='z'  )
+                VarDecl: 
+                    Type: ['int']   @ 9:5
+            Assignment: =   @ 10:5
+                ID: y   @ 10:5
+                UnaryOp: ++   @ 10:11
+                    ID: x   @ 10:11
+            Assignment: =   @ 11:5
+                ID: z   @ 11:5
+                UnaryOp: p++   @ 11:9
+                    ID: x   @ 11:9
+            Assert:    @ 12:5
+                BinaryOp: &&   @ 12:12
+                    BinaryOp: ==   @ 12:12
+                        ID: y   @ 12:12
+                        Constant: int, 3   @ 12:17
+                    BinaryOp: ==   @ 12:22
+                        ID: z   @ 12:22
+                        Constant: int, 3   @ 12:27
+            Return:    @ 13:5
+                Constant: int, 0   @ 13:12
