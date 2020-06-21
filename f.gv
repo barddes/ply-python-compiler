@@ -1,0 +1,15 @@
+digraph g {
+	node [shape=record]
+	f [shape=ellipse]
+	f -> "%entry"
+	"%entry" [label="{%entry:\l	  alloc_int %n \l	  alloc_int %k \l	  store_int %0 %n \l	  store_int %1 %k \l	  alloc_int %p \l	  alloc_int %q \l	  alloc_int %t \l	  load_int %n %4 \l	  literal_int 2 %5 \l	  lt_int %4 %5 %6 \l	  cbranch %6 label %if.then label %if.else\l	\l	pred None \l	|{<f0>T|<f1>F}}"]
+	"%entry":f0 -> "%if.then"
+	"%entry":f1 -> "%if.else"
+	"%if.then" [label="{%if.then:\l	  literal_int 0 %7 \l	  store_int %7 %k \l	  load_int %n %8 \l	  store_int %8 %2 \l	  jump label %exit\l	\l	pred %entry \l	}"]
+	"%if.then" -> "%exit"
+	"%if.else" [label="{%if.else:\l	  load_int %n %9 \l	  literal_int 1 %10 \l	  sub_int %9 %10 %11 \l	  param_int %11 \l	  load_int %p %12 \l	  param_int %12 \l	  call @f %13 \l	  load_int %n %14 \l	  literal_int 2 %15 \l	  sub_int %14 %15 %16 \l	  param_int %16 \l	  load_int %q %17 \l	  param_int %17 \l	  call @f %18 \l	  add_int %13 %18 %19 \l	  store_int %19 %t \l	  load_int %p %20 \l	  load_int %q %21 \l	  add_int %20 %21 %22 \l	  literal_int 1 %23 \l	  add_int %22 %23 %24 \l	  store_int %24 %k \l	  load_int %t %25 \l	  store_int %25 %2 \l	  jump label %exit\l	\l	pred %entry \l	}"]
+	"%if.else" -> "%exit"
+	"%if.end" [label="{%if.end:\l	  jump label %exit\l	\l	}"]
+	"%if.end" -> "%exit"
+	"%exit" [label="{%exit:\l	  load_int %2 %26 \l	  return_int %26\l	\l	pred %if.then \l	pred %if.else \l	pred %if.end \l	}"]
+}

@@ -126,11 +126,11 @@ class CFG(object):
         if _name:
             # get the formatted instructions as node label
             _label = "{" + _name + ":\l\t"
-            for _inst in block.instructions[1:]:
-                _label += format_instruction(_inst) + "\l\t"
+            # for _inst in block.instructions[1:]:
+            #     _label += format_instruction(_inst) + "\l\t"
             #
-            # for _inst in block.code_obj[1:]:
-            #     _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
+            for _inst in block.code_obj[1:]:
+                _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
 
             # _label += 'RD:\l\t'
             # _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
@@ -161,11 +161,11 @@ class CFG(object):
         _name = block.label
         # get the formatted instructions as node label
         _label = "{" + _name + ":\l\t"
-        for _inst in block.instructions[1:]:
-            _label += format_instruction(_inst) + "\l\t"
+        # for _inst in block.instructions[1:]:
+        #     _label += format_instruction(_inst) + "\l\t"
 
-        # for _inst in block.code_obj[1:]:
-        #     _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
+        for _inst in block.code_obj[1:]:
+            _label += ('%d: ' % _inst['label']) + format_instruction(_inst['inst']) + '\l\t'
 
         # _label += 'RD:\l\t'
         # _label += 'GEN ' + str(block.rd_gen).replace('{', '').replace('}', '') + '\l\t'
@@ -508,9 +508,9 @@ class GenerateCode(NodeVisitor):
         for _decl in node.decl_list:
             if isinstance(_decl, FuncDef):
                 cfg = _decl.cfg
-                # self.instruction_analisys(cfg)
-                # self.reaching_definitions(cfg)
-                # self.copy_propagation(cfg)
+                self.instruction_analisys(cfg)
+                self.reaching_definitions(cfg)
+                self.copy_propagation(cfg)
                 #
                 # self.instruction_analisys(cfg)
                 # self.reaching_definitions(cfg)
@@ -1288,6 +1288,9 @@ class GenerateCode(NodeVisitor):
                         new_inst[-1] = list(old_inst)[-1]
                         new_inst = tuple(new_inst)
 
+                        if new_inst[0].startswith('load_') and not new_inst[1][1:].isdigit():
+
+                            continue
 
                         if re.match(r'read_.*', new_inst[0]):
 
@@ -1315,7 +1318,7 @@ class GenerateCode(NodeVisitor):
                                     idx = block.instructions.index(i['inst'])
                                     block.instructions[idx] = new_inst
                                     i['inst'] = new_inst
-                                    return
+                                    break
 
                         # if re.match(r'call', new_inst[0]):
                         #     old_call = list(defs.copy().pop())
@@ -1344,7 +1347,7 @@ class GenerateCode(NodeVisitor):
                         #             i['inst'] = new_inst
                         #             return
 
-                        if not re.match(r'(alloc|elem)_.|call*', new_inst[0]):
+                        if not re.match(r'(alloc|read|elem)_.*|call', new_inst[0]):
                             print('[Copy Propagation] Changing from %d: %s to %s' % (inst['label'], old_inst, new_inst))
 
                             for i in block.code_obj:
@@ -1374,6 +1377,12 @@ class GenerateCode(NodeVisitor):
 
                         if re.match(r'(load|store)_[^_]+$', def_inst[0]):
                             new_inst[2] = def_inst[1]
+                    # add %1 %2 %3
+                    # store %3 %x
+                    # load %g %16
+
+                    # add %1 %2 %x
+                    # load %x %16
 
                     new_inst = tuple(new_inst)
 

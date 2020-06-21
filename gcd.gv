@@ -1,0 +1,15 @@
+digraph g {
+	node [shape=record]
+	gcd [shape=ellipse]
+	gcd -> "%entry"
+	"%entry" [label="{%entry:\l	1:   alloc_int %x \l	2:   alloc_int %y \l	3:   store_int %0 %x \l	4:   store_int %1 %y \l	5:   alloc_int %g \l	6:   load_int %1 %4 \l	7:   load_int %1 %g \l	}"]
+	"%entry" -> "%while.cond"
+	"%while.cond" [label="{%while.cond:\l	9:   load_int %x %5 \l	10:   literal_int 0 %6 \l	11:   gt_int %x %6 %7 \l	12:   cbranch %7 label %while.body label %while.end\l	|{<f0>T|<f1>F}}"]
+	"%while.cond":f0 -> "%while.body"
+	"%while.cond":f1 -> "%while.end"
+	"%while.body" [label="{%while.body:\l	14:   load_int %x %8 \l	15:   load_int %x %g \l	16:   load_int %y %9 \l	17:   load_int %y %10 \l	18:   load_int %x %11 \l	19:   div_int %y %x %12 \l	20:   load_int %x %13 \l	21:   mul_int %12 %x %14 \l	22:   sub_int %y %14 %15 \l	23:   sub_int %y %14 %x \l	24:   load_int %x %16 \l	25:   load_int %x %y \l	26:   jump label %while.cond\l	}"]
+	"%while.body" -> "%while.cond"
+	"%while.end" [label="{%while.end:\l	28:   load_int %g %17 \l	29:   load_int %g %2 \l	30:   jump label %exit\l	}"]
+	"%while.end" -> "%exit"
+	"%exit" [label="{%exit:\l	32:   load_int %g %18 \l	33:   return_int %g\l	}"]
+}

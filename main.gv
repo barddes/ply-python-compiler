@@ -1,0 +1,13 @@
+digraph g {
+	node [shape=record]
+	main [shape=ellipse]
+	main -> "%entry.1"
+	"%entry.1" [label="{%entry.1:\l	1:   alloc_int %a \l	2:   literal_int 198 %2 \l	3:   literal_int 198 %a \l	4:   alloc_int %b \l	5:   literal_int 36 %3 \l	6:   literal_int 36 %b \l	7:   literal_int 198 %4 \l	8:   param_int %4 \l	9:   literal_int 36 %5 \l	10:   param_int %5 \l	11:   call @gcd %6 \l	12:   literal_int 18 %7 \l	13:   eq_int %6 %7 %8 \l	14:   cbranch %8 label %assert.true label %assert.false\l	|{<f0>T|<f1>F}}"]
+	"%entry.1":f0 -> "%assert.true"
+	"%entry.1":f1 -> "%assert.false"
+	"%assert.false" [label="{%assert.false:\l	16:   print_string @.str.0 \l	17:   jump label %exit.1\l	}"]
+	"%assert.false" -> "%exit.1"
+	"%assert.true" [label="{%assert.true:\l	19:   jump label %exit.1\l	}"]
+	"%assert.true" -> "%exit.1"
+	"%exit.1" [label="{%exit.1:\l	21:   return_void\l	}"]
+}
