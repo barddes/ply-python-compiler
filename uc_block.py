@@ -1663,16 +1663,66 @@ class GenerateCode(NodeVisitor):
             block = block.next_block
 
     def merge_basic_blocks(self, cfg):
+        new_blocks = []
         block = cfg
         while isinstance(block, Block):
-            next_block = block.next_block
-            if isinstance(block, BasicBlock) and block.label:
-                if block.branch and isinstance(block.branch, BasicBlock):
-                    for inst in block.branch.instructions:
-                        block.append(inst)
+            new_blocks.append(block)
+            block = block.next_block
 
-                    block._next_block = block.branch.branch
-                    block.branch = block.branch.branch
-                    next_block = block
-            block = next_block
+        for i, b in enumerate(new_blocks):
+            b.visited = False
+
+            if i > 0:
+                new_blocks[i-1]._next_block = new_blocks[i]
+            if i < len(new_blocks)-1:
+                new_blocks[i+1].prev_block = new_blocks[i]
+
+        new_blocks[0].prev_block = None
+        new_blocks[-1].next_block = None
+
+        new_blocks = [cfg.branch]
+        while len(new_blocks) > 0:
+            block = new_blocks.pop(0)
+            block.visited = True
+
+            if isinstance(block, BasicBlock) and block.branch and len(block.branch.predecessors) == 1:
+                prev_block = block.prev_block
+                next_block = block.next_block
+
+                prev_block._next_block = next_block
+                next_block.prev_block = prev_block
+
+                block.branch.instructions = block.instructions + block.branch.instructions
+
+                for pred in block.predecessors:
+                    if isinstance(pred, BasicBlock):
+                        pred.branch = block.branch
+                    else:
+                        if pred.taken == block:
+                            pred.taken = block.branch
+                        else:
+                            pred.fall_through = block.branch
+                block.branch.predecessors = block.predecessors
+
+            if isinstance(block, BasicBlock):
+                if block.branch and block.branch not in new_blocks and not block.branch.visited:
+                    new_blocks.append(block.branch)
+            else:
+                if block.taken and block.taken not in new_blocks and not block.taken.visited:
+                    new_blocks.append(block.taken)
+                if block.fall_through and block.fall_through not in new_blocks and not block.fall_through.visited:
+                    new_blocks.append(block.fall_through)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
