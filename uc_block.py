@@ -19,6 +19,7 @@ class Block(object):
         self._next_block = None  # Link to the next block
         self.nodes = []
         self.prev_block = None
+        self.visited = False
 
         self.code_obj = []
 
@@ -511,20 +512,23 @@ class GenerateCode(NodeVisitor):
                 self.instruction_analisys(cfg)
                 self.reaching_definitions(cfg)
                 self.copy_propagation(cfg)
-                #
-                # self.instruction_analisys(cfg)
-                # self.reaching_definitions(cfg)
-                # self.constant_folding(cfg)
-                #
-                # self.instruction_analisys(cfg)
-                # self.reaching_definitions(cfg)
-                # self.branch_folding(cfg)
-                #
-                # self.instruction_analisys(cfg)
-                # self.liveness_analisys(cfg)
-                # self.deadcode_elimination(cfg)
 
                 self.instruction_analisys(cfg)
+                self.reaching_definitions(cfg)
+                self.constant_folding(cfg)
+
+                self.instruction_analisys(cfg)
+                self.reaching_definitions(cfg)
+                self.branch_folding(cfg)
+
+                self.instruction_analisys(cfg)
+                self.liveness_analisys(cfg)
+                self.deadcode_elimination(cfg)
+
+                self.block_removal(cfg)
+
+                self.instruction_analisys(cfg)
+
 
                 self.code += [inst['inst'] for inst in self.code_obj]
 
@@ -1628,3 +1632,34 @@ class GenerateCode(NodeVisitor):
                 for pred in block.predecessors:
                     if pred and pred not in nodes:
                         nodes = [pred] + nodes
+
+    def block_removal (self, cfg):
+        nodes = [cfg]
+        while len(nodes) > 0:
+            node = nodes.pop(0)
+            if isinstance(node, BasicBlock):
+                if node.branch and node.branch not in nodes and not node.branch.visited:
+                    nodes.append(node.branch)
+            else:
+                if node.taken and node.taken not in nodes and not node.taken.visited:
+                    nodes.append(node.taken)
+                if node.fall_through and node.fall_through not in nodes and not node.fall_through.visited:
+                    nodes.append(node.fall_through)
+
+        block = cfg
+        while isinstance(block, Block):
+            if block and not block.visited:
+                for inst in block.code_obj:
+                    self.code_obj.remove(inst)
+                prev_block = block.prev_block
+                if prev_block:
+                    prev_block.next_block = block.next_block
+
+
+
+
+            block = block.next_block
+
+
+
+

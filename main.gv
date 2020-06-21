@@ -1,13 +1,29 @@
 digraph g {
 	node [shape=record]
 	main [shape=ellipse]
-	main -> "%entry.1"
-	"%entry.1" [label="{%entry.1:\l	1:   alloc_int %a \l	2:   literal_int 198 %2 \l	3:   literal_int 198 %a \l	4:   alloc_int %b \l	5:   literal_int 36 %3 \l	6:   literal_int 36 %b \l	7:   literal_int 198 %4 \l	8:   param_int %4 \l	9:   literal_int 36 %5 \l	10:   param_int %5 \l	11:   call @gcd %6 \l	12:   literal_int 18 %7 \l	13:   eq_int %6 %7 %8 \l	14:   cbranch %8 label %assert.true label %assert.false\l	|{<f0>T|<f1>F}}"]
-	"%entry.1":f0 -> "%assert.true"
-	"%entry.1":f1 -> "%assert.false"
-	"%assert.false" [label="{%assert.false:\l	16:   print_string @.str.0 \l	17:   jump label %exit.1\l	}"]
-	"%assert.false" -> "%exit.1"
-	"%assert.true" [label="{%assert.true:\l	19:   jump label %exit.1\l	}"]
-	"%assert.true" -> "%exit.1"
-	"%exit.1" [label="{%exit.1:\l	21:   return_void\l	}"]
+	main -> "%entry"
+	"%entry" [label="{%entry:\l	1:   alloc_int %i \l	2:   literal_int 3 %i \l	3:   alloc_int %k \l	4:   literal_int 1 %k \l	}"]
+	"%entry" -> "%for.cond"
+	"%for.cond" [label="{%for.cond:\l	6:   literal_int 6 %6 \l	7:   lt_int %k %6 %7 \l	8:   cbranch %7 label %for.body label %for.end\l	|{<f0>T|<f1>F}}"]
+	"%for.cond":f0 -> "%for.body"
+	"%for.cond":f1 -> "%for.end"
+	"%for.body" [label="{%for.body:\l	10:   literal_int 6 %9 \l	11:   ge_int %i %9 %10 \l	12:   cbranch %10 label %if.then label %if.else\l	|{<f0>T|<f1>F}}"]
+	"%for.body":f0 -> "%if.then"
+	"%for.body":f1 -> "%if.else"
+	"%if.then" [label="{%if.then:\l	14:   jump label %for.end\l	}"]
+	"%if.then" -> "%for.end"
+	"%if.else" [label="{%if.else:\l	16:   literal_int 1 %12 \l	17:   add_int %i %12 %i \l	18:   jump label %if.end\l	}"]
+	"%if.else" -> "%if.end"
+	"%if.end" [label="{%if.end:\l	20:   jump label %for.inc\l	}"]
+	"%if.end" -> "%for.inc"
+	"%for.inc" [label="{%for.inc:\l	22:   literal_int 1 %15 \l	23:   add_int %k %15 %k \l	24:   jump label %for.cond\l	}"]
+	"%for.inc" -> "%for.cond"
+	"%for.end" [label="{%for.end:\l	26:   literal_int 6 %18 \l	27:   eq_int %i %18 %19 \l	28:   cbranch %19 label %assert.true label %assert.false\l	|{<f0>T|<f1>F}}"]
+	"%for.end":f0 -> "%assert.true"
+	"%for.end":f1 -> "%assert.false"
+	"%assert.false" [label="{%assert.false:\l	30:   print_string @.str.0 \l	31:   jump label %exit\l	}"]
+	"%assert.false" -> "%exit"
+	"%assert.true" [label="{%assert.true:\l	33:   jump label %exit\l	}"]
+	"%assert.true" -> "%exit"
+	"%exit" [label="{%exit:\l	35:   literal_int 0 %21 \l	36:   return_int %21\l	}"]
 }

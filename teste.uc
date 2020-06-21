@@ -1,18 +1,13 @@
-/* Compute GCD of two integers */
-
-int gcd (int x, int y) {
-    int g = y;
-    while (x > 0) {
-        g = x;
-	    x = y - (y/x) * x;
-	    y = g;
+int main() {
+    int i = 3, n = 6;
+    for (int k = 1; k < n; k++) {
+        if (i >= n) {
+            break;
+        }
+        else {
+            i++;
+        }
     }
-    return g;
-}
-
-void main() {
-    int a = 198, b;
-    b = 36;
-    assert gcd(a, b) == 18;
-    return;
+    assert i == n;
+    return 0;
 }
