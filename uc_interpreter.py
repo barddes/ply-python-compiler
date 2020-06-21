@@ -104,7 +104,7 @@ class Interpreter(object):
                 op = ircode[self.pc]
             except IndexError:
                 break
-            if not op[0].isdigit():
+            if len(op) > 1:
                 opcode, modifier = self._extract_operation(op[0])
                 if opcode.startswith('global'):
                     self.globals[op[1]] = self.offset
