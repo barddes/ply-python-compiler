@@ -201,7 +201,7 @@ class CFG(object):
             pass
 
 
-class GenerateCode(NodeVisitor):
+class CodeGenerator(NodeVisitor):
     unary_ops = {
         '+': '',
         '-': 'sub',
